@@ -19,7 +19,7 @@ import {
   RiHomeLine,
   RiCloseLine
 } from '@remixicon/react'
-import shopOSLogo from '../assets/Shop OS logo.svg'
+import shopOSLogo from '../assets/shop-os-logo.svg'
 
 // Custom SVG Icons
 const SectionIcon = ({ size = 20 }: { size?: number }) => (
@@ -51,20 +51,13 @@ const DARK_PALETTE = {
   light: '#9CA3AF'       // Very light gray
 }
 
-const taskCards: TaskCard[] = [
+const DEFAULT_TASKS: TaskCard[] = [
   {
     id: 'store-health',
     title: 'Store Health Check',
-    subtitle: 'Connect your Shopify store for an instant AI diagnostic',
+    subtitle: 'Connect your Shopify store for an instant AI diagnostic and optimization recommendations',
     icon: RiHealthBookLine,
     iconBg: DARK_PALETTE.primary
-  },
-  {
-    id: 'seo-optimizer', 
-    title: 'SEO Optimizer',
-    subtitle: 'AI-powered SEO analysis and optimization',
-    icon: RiSearchEyeLine,
-    iconBg: DARK_PALETTE.secondary
   }
 ]
 
@@ -95,6 +88,75 @@ interface SystemFeedback {
 }
 
 export default function CanvasLanding() {
+  const [taskCards, setTaskCards] = useState<TaskCard[]>(() => {
+    try {
+      const saved = localStorage.getItem('aggo_tasks')
+      if (saved) {
+        const parsed: TaskCard[] = JSON.parse(saved)
+        // Ensure defaults always exist at the start
+        const defaultsFirst = DEFAULT_TASKS.filter(d => !parsed.find(p => p.id === d.id))
+        return [...DEFAULT_TASKS, ...parsed.filter(p => !DEFAULT_TASKS.find(d => d.id === p.id)), ...defaultsFirst]
+      }
+    } catch {
+      // ignore corrupt localStorage
+    }
+    return DEFAULT_TASKS
+  })
+  const [showAddTask, setShowAddTask] = useState(false)
+  const [newTaskName, setNewTaskName] = useState('')
+  const [newTaskDesc, setNewTaskDesc] = useState('')
+  const [showTemplates, setShowTemplates] = useState(false)
+
+  useEffect(() => {
+    try {
+      // Do not persist built-ins redundantly; only custom tasks
+      const custom = taskCards.filter(t => !DEFAULT_TASKS.find(d => d.id === t.id))
+      localStorage.setItem('aggo_tasks', JSON.stringify(custom))
+    } catch {
+      // ignore persistence errors
+    }
+  }, [taskCards])
+
+  const TEMPLATES: Array<{ id: string; title: string; subtitle: string; icon: TaskCard['icon']; iconBg: string }> = [
+    { id: 'abandoned-cart', title: 'Abandoned Cart Recovery', subtitle: 'Automated outreach and incentives', icon: RiNotification3Line, iconBg: DARK_PALETTE.tertiary },
+    { id: 'price-optimizer', title: 'Price Optimizer', subtitle: 'AI-driven price testing', icon: RiSettings3Line, iconBg: DARK_PALETTE.tertiary },
+    { id: 'inventory-mentor', title: 'Inventory Mentor', subtitle: 'Forecasts and restock alerts', icon: RiUser3Line, iconBg: DARK_PALETTE.tertiary }
+  ]
+
+  const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+
+  const addCustomTask = (title: string, subtitle: string) => {
+    if (!title.trim()) return
+    let idBase = slugify(title)
+    if (!idBase) idBase = `task-${Date.now()}`
+    let id = idBase
+    let tries = 1
+    while (taskCards.find(t => t.id === id)) {
+      id = `${idBase}-${tries++}`
+    }
+    const newTask: TaskCard = {
+      id,
+      title,
+      subtitle,
+      icon: RiStarFill,
+      iconBg: DARK_PALETTE.tertiary
+    }
+    setTaskCards(prev => [...prev, newTask])
+    setShowAddTask(false)
+    setNewTaskName('')
+    setNewTaskDesc('')
+  }
+
+  const addTemplateTask = (templateId: string) => {
+    const tpl = TEMPLATES.find(t => t.id === templateId)
+    if (!tpl) return
+    let id = templateId
+    let tries = 1
+    while (taskCards.find(t => t.id === id)) id = `${templateId}-${tries++}`
+    setTaskCards(prev => [...prev, { id, title: tpl.title, subtitle: tpl.subtitle, icon: tpl.icon, iconBg: tpl.iconBg }])
+    setShowAddTask(false)
+    setShowTemplates(false)
+  }
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
@@ -196,7 +258,7 @@ export default function CanvasLanding() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [sectionMode])
 
 
 
@@ -336,11 +398,6 @@ export default function CanvasLanding() {
         setCurrentStep(0)
         setStoreUrl('')
       }
-    } else if (taskId === 'seo-optimizer') {
-      if (!expandedCards.includes(taskId)) {
-        setExpandedCards(prev => [...prev, taskId])
-        setStoreUrl('')
-      }
     } else {
       alert(`${taskCards.find(t => t.id === taskId)?.title} - Coming Soon!`)
     }
@@ -348,12 +405,9 @@ export default function CanvasLanding() {
 
   // Reset view
   const resetView = () => {
+    // Only normalize zoom/pan; keep all canvas state (open projects, sections, selections)
     setZoom(1)
     setPan({ x: 0, y: 0 })
-    setExpandedCards([])
-    setSectionMode(false)
-    setSelectedProjects([])
-    setProjectSections({})
   }
 
   // Handle section mode
@@ -419,12 +473,12 @@ export default function CanvasLanding() {
       {/* Canvas Container */}
       <div
         ref={canvasRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing"
-        onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        className={`w-full h-full ${!showAddTask ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}
+        onWheel={!showAddTask ? handleWheel : undefined}
+        onMouseDown={!showAddTask ? handleMouseDown : undefined}
+        onMouseMove={!showAddTask ? handleMouseMove : undefined}
+        onMouseUp={!showAddTask ? handleMouseUp : undefined}
+        onMouseLeave={!showAddTask ? handleMouseUp : undefined}
       >
         {/* Transformable Content */}
         <div
@@ -451,51 +505,53 @@ export default function CanvasLanding() {
           </div>
 
           {/* Task Cards Grid */}
-          <div className="flex gap-8 justify-center w-full">
+          <div className="flex gap-6 justify-center w-full">
             {/* Task Cards */}
             {taskCards.map((task) => {
               const IconComponent = task.icon
               return (
                 <div
                   key={task.id}
-                  className="rounded-3xl p-8 shadow-2xl cursor-pointer border border-white/40 backdrop-blur-xl overflow-hidden relative"
+                  className="rounded-2xl p-6 shadow-lg cursor-pointer border border-white/30 backdrop-blur-xl overflow-hidden relative group hover:shadow-xl transition-all duration-300"
                   onClick={() => handleTaskClick(task.id)}
                   style={{ 
-                    width: '420px', 
-                    height: '260px',
-                    background: `rgba(255, 255, 255, 0.9)`,
-                    backdropFilter: 'blur(10px)',
-                    boxShadow: `0 4px 16px rgba(0, 0, 0, 0.1)`
+                    width: '360px', 
+                    height: '240px',
+                    background: `rgba(255, 255, 255, 0.95)`,
+                    backdropFilter: 'blur(15px)',
+                    boxShadow: `0 8px 32px rgba(0, 0, 0, 0.08)`
                   }}
                 >
-
-                  
                   <div className="flex flex-col h-full relative z-10">
-                    <div className="flex items-start gap-4 mb-6">
+                    {/* Icon and Title Section */}
+                    <div className="flex items-center gap-4 mb-4">
                       <div 
-                        className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                        className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm"
                         style={{ 
-                          color: DARK_PALETTE.primary
+                          backgroundColor: '#F9FAFB',
+                          color: '#4B5563'
                         }}
                       >
-                        <IconComponent size={28} />
+                        <IconComponent size={24} />
                       </div>
-                      <div className="flex-1 text-left">
-                        <h3 className="text-xl font-bold mb-2 text-left text-gray-900">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900 leading-tight">
                           {task.title}
                         </h3>
-                        <div className="w-12 h-0.5 rounded-full bg-gray-300" />
                       </div>
                     </div>
                     
-                    <p className="text-gray-600 text-sm leading-relaxed flex-1 mb-6 text-left">
+                    {/* Subtitle */}
+                    <p className="text-gray-600 text-sm leading-relaxed flex-1 mb-5">
                       {task.subtitle}
                     </p>
                     
+                    {/* Action indicator */}
                     <div className="flex items-center justify-between">
-                      <div className="text-sm font-medium flex items-center gap-2 text-gray-500">
-                        <span>Click to open</span>
+                      <div className="text-xs font-medium text-gray-500 opacity-70 group-hover:opacity-100 transition-opacity">
+                        Click to launch →
                       </div>
+                      <div className="w-8 h-1 bg-gradient-to-r from-gray-300 to-gray-400 rounded-full opacity-30"></div>
                     </div>
                   </div>
                 </div>
@@ -504,34 +560,37 @@ export default function CanvasLanding() {
 
             {/* Add New Task Card */}
             <div
-              className="rounded-3xl p-8 shadow-2xl cursor-pointer border-2 border-dashed backdrop-blur-xl"
-              onClick={() => alert('Add new AI agent task - Coming Soon!')}
+              className="rounded-2xl p-6 shadow-lg cursor-pointer border-2 border-dashed backdrop-blur-xl group hover:shadow-xl hover:border-gray-400 transition-all duration-300"
+              onClick={() => {
+                // Reset canvas to 100% zoom and center
+                setZoom(1)
+                setPan({ x: 0, y: 0 })
+                setShowAddTask(true)
+              }}
               style={{ 
-                width: '420px', 
-                height: '260px',
-                borderColor: DARK_PALETTE.tertiary,
-                background: `rgba(255, 255, 255, 0.2)`,
-                backdropFilter: 'blur(20px)',
-                boxShadow: `
-                  0 8px 32px rgba(0, 0, 0, 0.1),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.4),
-                  inset 0 -1px 0 rgba(255, 255, 255, 0.1)
-                `
+                width: '360px', 
+                height: '240px',
+                borderColor: DARK_PALETTE.accent,
+                background: `rgba(255, 255, 255, 0.3)`,
+                backdropFilter: 'blur(15px)',
+                boxShadow: `0 8px 32px rgba(0, 0, 0, 0.05)`
               }}
             >
-              <div className="flex flex-col items-center justify-center h-full transition-colors" style={{ color: DARK_PALETTE.tertiary }}>
-                <div className="w-16 h-16 border-2 border-current rounded-2xl flex items-center justify-center mb-6">
-                  <RiAddLine size={28} />
+              <div className="flex flex-col items-center justify-center h-full transition-all duration-300 group-hover:scale-105">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-colors shadow-sm" style={{ backgroundColor: '#F9FAFB', color: '#6B7280' }}>
+                  <RiAddLine size={24} />
                 </div>
-                <h3 className="text-xl font-bold mb-2">
+                <h3 className="text-lg font-semibold mb-2 text-gray-800">
                   Add New Task
                 </h3>
-                <p className="text-sm text-center text-gray-600">
-                  Create a new AI agent for your store
+                <p className="text-sm text-center text-gray-600 leading-relaxed px-2">
+                  Create a custom AI agent for your store
                 </p>
               </div>
             </div>
           </div>
+
+
 
           {/* Section Headers */}
           {Object.entries(projectSections).map(([sectionId, sectionData]) => {
@@ -663,9 +722,9 @@ export default function CanvasLanding() {
                             <div className="flex items-center gap-3">
                               <div 
                                 className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                style={{ backgroundColor: DARK_PALETTE.primary }}
+                                style={{ backgroundColor: '#F9FAFB' }}
                               >
-                                <RiStarFill size={16} className="text-white" />
+                                <RiStarFill size={16} style={{ color: '#6B7280' }} />
                               </div>
                               <div>
                                 <div className="text-sm font-medium text-gray-900">AI Agent: Store Health Analyzer</div>
@@ -707,8 +766,8 @@ export default function CanvasLanding() {
                               >
                                 <div className="flex items-center gap-3 mb-6">
                                   <div 
-                                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
-                                    style={{ backgroundColor: DARK_PALETTE.secondary }}
+                                    className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                                    style={{ backgroundColor: '#F9FAFB', color: '#6B7280' }}
                                   >
                                     <RiStore2Line size={20} />
                                   </div>
@@ -780,9 +839,9 @@ export default function CanvasLanding() {
                                   <div className="flex items-center gap-3">
                                     <div 
                                       className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                      style={{ backgroundColor: DARK_PALETTE.primary }}
+                                      style={{ backgroundColor: '#F9FAFB' }}
                                     >
-                                      <RiStarFill size={16} className="text-white" />
+                                      <RiStarFill size={16} style={{ color: '#6B7280' }} />
                                     </div>
                                     <div>
                                       <h3 className="font-medium text-sm text-gray-900">
@@ -880,275 +939,7 @@ export default function CanvasLanding() {
                           </div>
                         </div>
                       )}
-                      {projectId === 'seo-optimizer' && expandedCards.includes('seo-optimizer') && (
-                        <div 
-                          className={`transition-all duration-300 ${
-                            sectionMode ? 'cursor-pointer' : ''
-                          } ${
-                            selectedProjects.includes('seo-optimizer') ? 'border-2 border-dashed border-gray-600' : ''
-                          }`}
-                          style={{ 
-                            width: '1400px',
-                            minWidth: '1400px',
-                            flexShrink: 0
-                          }}
-                          onClick={() => handleProjectSelection('seo-optimizer')}
-                        >
-                          {/* SEO Optimizer Full Interface */}
-                          <div className="text-left mb-6 relative">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h1 className="text-3xl font-bold mb-2 text-gray-900">
-                                  SEO Optimizer
-                                </h1>
-                                <p className="text-lg text-gray-600">
-                                  AI-powered SEO analysis and optimization for better search rankings
-                                </p>
-                              </div>
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setExpandedCards(prev => prev.filter(id => id !== 'seo-optimizer'))
-                                }}
-                                className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
-                              >
-                                <RiCloseLine size={24} />
-                              </button>
-                            </div>
-                          </div>
-                          
-                          {/* Notification Banner */}
-                          <div 
-                            className="mb-8 p-4 rounded-2xl border flex items-center gap-4"
-                            style={{
-                              background: 'rgba(255, 255, 255, 0.8)',
-                              borderColor: '#E5E7EB',
-                              backdropFilter: 'blur(10px)'
-                            }}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div 
-                                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                style={{ backgroundColor: DARK_PALETTE.secondary }}
-                              >
-                                <RiSearchEyeLine size={16} className="text-white" />
-                              </div>
-                              <div>
-                                <div className="text-sm font-medium text-gray-900">AI Agent: SEO Analyzer</div>
-                                <div className="text-xs text-gray-600">Ready to optimize your search rankings</div>
-                              </div>
-                            </div>
-                            <div className="ml-auto flex items-center gap-2">
-                              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                              <span className="text-xs text-gray-500">Active</span>
-                            </div>
-                          </div>
 
-                          {/* Two Section Layout */}
-                          <div 
-                            className="rounded-3xl shadow-2xl border border-white/40 backdrop-blur-xl overflow-hidden"
-                            style={{ 
-                              background: 'rgba(255, 255, 255, 0.1)',
-                              backdropFilter: 'blur(25px)',
-                              boxShadow: `
-                                0 12px 40px rgba(0, 0, 0, 0.15),
-                                inset 0 1px 0 rgba(255, 255, 255, 0.6),
-                                inset 0 -1px 0 rgba(255, 255, 255, 0.3)
-                              `
-                            }}
-                          >
-                            <div className="flex gap-6 p-6">
-                              {/* Left Section - SEO Analysis (70%) */}
-                              <div 
-                                className="w-[70%] rounded-2xl p-8"
-                                style={{
-                                  background: 'rgba(255, 255, 255, 0.8)',
-                                  minHeight: 'auto'
-                                }}
-                              >
-                                {/* SEO Analysis Header */}
-                                <div className="flex items-center gap-4 mb-8">
-                                  <div 
-                                    className="w-12 h-12 rounded-xl flex items-center justify-center"
-                                    style={{ backgroundColor: DARK_PALETTE.secondary }}
-                                  >
-                                    <RiSearchEyeLine size={24} className="text-white" />
-                                  </div>
-                                  <div>
-                                    <h2 className="text-2xl font-bold text-gray-900">SEO Analysis</h2>
-                                    <p className="text-gray-600">Comprehensive SEO audit and optimization recommendations</p>
-                                  </div>
-                                </div>
-
-                                {/* URL Input Section */}
-                                <div className="space-y-6">
-                                  <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                      Website URL
-                                    </label>
-                                    <div className="flex gap-3">
-                                      <input
-                                        type="url"
-                                        value={storeUrl}
-                                        onChange={(e) => setStoreUrl(e.target.value)}
-                                        placeholder="https://your-website.com"
-                                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                                      />
-                                      <button
-                                        onClick={() => alert('SEO Analysis - Coming Soon!')}
-                                        className="px-6 py-3 text-white font-medium rounded-lg transition-all duration-300 hover:opacity-90"
-                                        style={{ backgroundColor: DARK_PALETTE.secondary }}
-                                      >
-                                        Analyze SEO
-                                      </button>
-                                    </div>
-                                  </div>
-
-                                  {/* SEO Metrics Preview */}
-                                  <div className="grid grid-cols-3 gap-4">
-                                    <div className="p-4 bg-gray-50 rounded-lg">
-                                      <div className="text-2xl font-bold text-blue-600">85</div>
-                                      <div className="text-sm text-gray-600">SEO Score</div>
-                                    </div>
-                                    <div className="p-4 bg-gray-50 rounded-lg">
-                                      <div className="text-2xl font-bold text-green-600">12</div>
-                                      <div className="text-sm text-gray-600">Keywords Ranking</div>
-                                    </div>
-                                    <div className="p-4 bg-gray-50 rounded-lg">
-                                      <div className="text-2xl font-bold text-orange-600">3</div>
-                                      <div className="text-sm text-gray-600">Issues Found</div>
-                                    </div>
-                                  </div>
-
-                                  {/* SEO Recommendations */}
-                                  <div className="space-y-3">
-                                    <h3 className="text-lg font-semibold text-gray-900">Top Recommendations</h3>
-                                    <div className="space-y-2">
-                                      {[
-                                        'Optimize meta descriptions for better CTR',
-                                        'Add alt text to 8 images',
-                                        'Improve page loading speed',
-                                        'Fix broken internal links'
-                                      ].map((recommendation, index) => (
-                                        <div key={index} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                                          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                                            <span className="text-xs font-medium text-blue-600">{index + 1}</span>
-                                          </div>
-                                          <span className="text-sm text-gray-700">{recommendation}</span>
-                                          <button className="ml-auto text-xs text-blue-600 hover:text-blue-800">
-                                            Fix Now
-                                          </button>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Right Section - AI SEO Assistant (30%) */}
-                              <div 
-                                className="w-[30%] rounded-2xl flex flex-col border"
-                                style={{
-                                  background: 'rgba(255, 255, 255, 0.8)',
-                                  borderColor: '#E5E7EB',
-                                  minHeight: 'auto'
-                                }}
-                              >
-                                {/* SEO Chat Header */}
-                                <div className="p-4 border-b" style={{ borderColor: '#E5E7EB' }}>
-                                  <div className="flex items-center gap-3">
-                                    <div 
-                                      className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                      style={{ backgroundColor: DARK_PALETTE.secondary }}
-                                    >
-                                      <RiSearchEyeLine size={16} className="text-white" />
-                                    </div>
-                                    <div>
-                                      <h3 className="font-medium text-sm text-gray-900">
-                                        SEO Assistant
-                                      </h3>
-                                      <p className="text-xs text-gray-600">AI-powered SEO guidance</p>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* SEO Chat Messages */}
-                                <div className="flex-1 p-4 space-y-3">
-                                  <div className="flex justify-start">
-                                    <div className="max-w-[85%] mr-8">
-                                      <div
-                                        className="px-4 py-3 rounded-lg text-sm"
-                                        style={{
-                                          backgroundColor: '#E5E7EB',
-                                          color: '#374151'
-                                        }}
-                                      >
-                                        <div>Hi! I'm your SEO assistant. I can help you optimize your website for search engines. What would you like to improve?</div>
-                                        <div className="text-xs mt-2 text-gray-500">
-                                          {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* SEO Chat Input */}
-                                <div 
-                                  className="border-t p-4"
-                                  style={{ borderColor: '#E5E7EB' }}
-                                >
-                                  <div className="mb-3">
-                                    <textarea
-                                      placeholder="Ask about SEO best practices..."
-                                      rows={2}
-                                      className="w-full resize-none outline-none text-sm p-3 rounded-lg border"
-                                      style={{
-                                        backgroundColor: '#FFFFFF',
-                                        borderColor: '#E5E7EB',
-                                        color: '#374151',
-                                        fontFamily: 'Inter, sans-serif'
-                                      }}
-                                    />
-                                  </div>
-                                  
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                      <button 
-                                        className="p-2 rounded-lg transition-colors"
-                                        style={{ 
-                                          color: '#6B7280',
-                                          backgroundColor: 'transparent'
-                                        }}
-                                      >
-                                        <RiAttachmentLine size={18} />
-                                      </button>
-                                      <button 
-                                        className="p-2 rounded-lg transition-colors"
-                                        style={{ 
-                                          color: '#6B7280',
-                                          backgroundColor: 'transparent'
-                                        }}
-                                      >
-                                        <RiMicLine size={18} />
-                                      </button>
-                                    </div>
-                                    
-                                    <button 
-                                      className="p-2 rounded-lg transition-all duration-300"
-                                      style={{
-                                        backgroundColor: DARK_PALETTE.secondary,
-                                        color: '#FFFFFF'
-                                      }}
-                                    >
-                                      <RiArrowUpSLine size={18} />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -1380,20 +1171,20 @@ export default function CanvasLanding() {
                   >
                     {/* Enterprise Chat Header */}
                     <div className="p-4 border-b" style={{ borderColor: '#E5E7EB' }}>
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: DARK_PALETTE.primary }}
-                        >
-                          <RiStarFill size={16} className="text-white" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-sm text-gray-900">
-                            Shopping Assistant
-                          </h3>
-                          <p className="text-xs text-gray-600">Enterprise AI</p>
-                        </div>
-                      </div>
+                                                            <div className="flex items-center gap-3">
+                                        <div 
+                                          className="w-8 h-8 rounded-lg flex items-center justify-center"
+                                          style={{ backgroundColor: '#F9FAFB' }}
+                                        >
+                                          <RiStarFill size={16} style={{ color: '#6B7280' }} />
+                                        </div>
+                                        <div>
+                                          <h3 className="font-medium text-sm text-gray-900">
+                                            Shopping Assistant
+                                          </h3>
+                                          <p className="text-xs text-gray-600">Enterprise AI</p>
+                                        </div>
+                                      </div>
                     </div>
 
                     {/* Enterprise Chat History */}
@@ -1876,8 +1667,8 @@ export default function CanvasLanding() {
           >
             <RiSettings3Line size={18} style={{ color: DARK_PALETTE.tertiary }} />
           </button>
-          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: DARK_PALETTE.primary }}>
-            <RiUser3Line size={18} className="text-white" />
+          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F9FAFB' }}>
+            <RiUser3Line size={18} style={{ color: '#6B7280' }} />
           </div>
         </div>
 
@@ -2001,6 +1792,84 @@ export default function CanvasLanding() {
         <div className="fixed bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg text-sm text-gray-600 max-w-xs">
           <div className="text-gray-700 font-medium">
             • Click projects to group them
+          </div>
+        </div>
+      )}
+
+      {/* Add Task Modal - Full Viewport Overlay */}
+      {showAddTask && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="absolute inset-0" onClick={() => setShowAddTask(false)} />
+          <div className="relative w-full max-w-xl mx-4 rounded-2xl border border-white/40 backdrop-blur-2xl p-6 shadow-2xl" style={{ background: 'rgba(255,255,255,0.95)' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Create Task</h3>
+              <button className="p-1 rounded-lg hover:bg-gray-100 text-gray-500" onClick={() => setShowAddTask(false)}>
+                <RiCloseLine size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Task name</label>
+                <input
+                  value={newTaskName}
+                  onChange={(e) => setNewTaskName(e.target.value)}
+                  placeholder="e.g., Conversion Uplift Assistant"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2"
+                  style={{ '--tw-ring-color': '#A5D6A7' } as React.CSSProperties}
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Description</label>
+                <textarea
+                  value={newTaskDesc}
+                  onChange={(e) => setNewTaskDesc(e.target.value)}
+                  rows={3}
+                  placeholder="What should this agent do?"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2"
+                  style={{ '--tw-ring-color': '#A5D6A7' } as React.CSSProperties}
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  className="px-4 py-2 rounded-lg text-white"
+                  style={{ backgroundColor: DARK_PALETTE.primary }}
+                  onClick={() => addCustomTask(newTaskName, newTaskDesc || 'Custom AI task')}
+                  disabled={!newTaskName.trim()}
+                >
+                  Save Task
+                </button>
+                <button
+                  className="px-4 py-2 rounded-lg text-gray-700 border"
+                  style={{ borderColor: '#E5E7EB', background: '#FFFFFF' }}
+                  onClick={() => setShowTemplates(v => !v)}
+                >
+                  {showTemplates ? 'Hide Templates' : 'Choose from Templates'}
+                </button>
+              </div>
+
+              {showTemplates && (
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {TEMPLATES.map(t => (
+                    <button
+                      key={t.id}
+                      className="text-left rounded-xl border p-3 hover:shadow transition bg-white"
+                      style={{ borderColor: '#E5E7EB' }}
+                      onClick={() => addTemplateTask(t.id)}
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white" style={{ backgroundColor: t.iconBg }}>
+                          {(() => { const I = t.icon; return <I size={16} /> })()}
+                        </div>
+                        <div className="font-medium text-gray-900">{t.title}</div>
+                      </div>
+                      <div className="text-xs text-gray-600">{t.subtitle}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
