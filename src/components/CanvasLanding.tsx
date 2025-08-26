@@ -9,13 +9,16 @@ import {
   RiSearchLine, 
   RiMicLine, 
   RiAttachmentLine, 
-  RiSendPlaneLine, 
+
   RiCheckboxCircleLine, 
   RiStore2Line, 
   RiStarFill,
   RiFocus3Line,
   RiCheckLine,
-  RiArrowUpSLine
+  RiArrowUpSLine,
+  RiHomeLine,
+  RiRobotLine,
+  RiCloseLine
 } from '@remixicon/react'
 import shopOSLogo from '../assets/Shop OS logo.svg'
 
@@ -107,6 +110,8 @@ export default function CanvasLanding() {
     state: 'waiting',
     subtasks: []
   })
+  const [showAiSearch, setShowAiSearch] = useState(false)
+  const [projectStatus, setProjectStatus] = useState('Ready to analyze your store')
   const canvasRef = useRef<HTMLDivElement>(null)
 
   const scanningSteps = [
@@ -263,6 +268,7 @@ export default function CanvasLanding() {
     }
     setChatMessages(prev => [...prev, analysisMessage])
     
+    setProjectStatus(`Analyzing ${storeUrl}...`)
     setScanProgress(0)
     setCurrentStep(0)
     
@@ -282,6 +288,7 @@ export default function CanvasLanding() {
               icon: 'RiStarFill'
             }
             setChatMessages(prev => [...prev, completionMessage])
+            setProjectStatus('Analysis complete - 78% health score')
           }, 1000)
           return prev
         }
@@ -362,13 +369,9 @@ export default function CanvasLanding() {
                   style={{ 
                     width: '420px', 
                     height: '260px',
-                    background: `rgba(255, 255, 255, 0.25)`,
-                    backdropFilter: 'blur(20px)',
-                    boxShadow: `
-                      0 8px 32px rgba(0, 0, 0, 0.1),
-                      inset 0 1px 0 rgba(255, 255, 255, 0.5),
-                      inset 0 -1px 0 rgba(255, 255, 255, 0.2)
-                    `
+                    background: `rgba(255, 255, 255, 0.9)`,
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: `0 4px 16px rgba(0, 0, 0, 0.1)`
                   }}
                 >
 
@@ -376,10 +379,9 @@ export default function CanvasLanding() {
                   <div className="flex flex-col h-full relative z-10">
                     <div className="flex items-start gap-4 mb-6">
                       <div 
-                        className="w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-xl"
+                        className="w-16 h-16 rounded-2xl flex items-center justify-center"
                         style={{ 
-                          background: `linear-gradient(135deg, ${task.iconBg} 0%, ${task.iconBg}dd 50%, ${task.iconBg}bb 100%)`,
-                          boxShadow: `0 12px 40px ${task.iconBg}50`
+                          color: DARK_PALETTE.primary
                         }}
                       >
                         <IconComponent size={28} />
@@ -441,13 +443,40 @@ export default function CanvasLanding() {
           {expandedCard === 'store-health' && (
             <div className="mt-20 w-full max-w-7xl">
               {/* Main Heading */}
-              <div className="text-left mb-8">
+              <div className="text-left mb-6">
                 <h1 className="text-3xl font-bold mb-2 text-gray-900">
                   Store Health Check
                 </h1>
                 <p className="text-lg text-gray-600">
                   AI-powered diagnostic and optimization workspace
                 </p>
+              </div>
+              
+              {/* Notification Banner */}
+              <div 
+                className="mb-8 p-4 rounded-2xl border flex items-center gap-4"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  borderColor: '#E5E7EB',
+                  backdropFilter: 'blur(10px)'
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: DARK_PALETTE.primary }}
+                  >
+                    <RiStarFill size={16} className="text-white" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">AI Agent: Store Health Analyzer</div>
+                    <div className="text-xs text-gray-600">{projectStatus}</div>
+                  </div>
+                </div>
+                <div className="ml-auto flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-gray-500">Active</span>
+                </div>
               </div>
 
               {/* Two Section Layout - Fully Transparent Glassmorphism */}
@@ -602,25 +631,25 @@ export default function CanvasLanding() {
                   <div 
                     className="w-[30%] rounded-2xl flex flex-col border"
                     style={{
-                      background: '#121212',
-                      borderColor: '#333333',
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      borderColor: '#E5E7EB',
                       minHeight: '600px'
                     }}
                   >
                     {/* Enterprise Chat Header */}
-                    <div className="p-4 border-b" style={{ borderColor: '#333333' }}>
+                    <div className="p-4 border-b" style={{ borderColor: '#E5E7EB' }}>
                       <div className="flex items-center gap-3">
                         <div 
                           className="w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: '#1E1E1E' }}
+                          style={{ backgroundColor: DARK_PALETTE.primary }}
                         >
                           <RiStarFill size={16} className="text-white" />
                         </div>
                         <div>
-                          <h3 className="font-medium text-sm" style={{ color: '#EAEAEA' }}>
+                          <h3 className="font-medium text-sm text-gray-900">
                             Shopping Assistant
                           </h3>
-                          <p className="text-xs" style={{ color: '#888888' }}>Enterprise AI</p>
+                          <p className="text-xs text-gray-600">Enterprise AI</p>
                         </div>
                       </div>
                     </div>
@@ -637,14 +666,14 @@ export default function CanvasLanding() {
                             <div
                               className="px-4 py-3 rounded-lg text-sm"
                               style={{
-                                backgroundColor: message.role === 'user' ? '#2A2A2A' : '#1E1E1E',
-                                color: '#EAEAEA'
+                                backgroundColor: message.role === 'user' ? '#F3F4F6' : '#E5E7EB',
+                                color: '#374151'
                               }}
                             >
                               <div>{message.content}</div>
                               
                               {/* Timestamp */}
-                              <div className="text-xs mt-2" style={{ color: '#888888' }}>
+                              <div className="text-xs mt-2 text-gray-500">
                                 {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </div>
                             </div>
@@ -658,8 +687,8 @@ export default function CanvasLanding() {
                           <div 
                             className="p-4 rounded-lg border"
                             style={{ 
-                              backgroundColor: '#252525',
-                              borderColor: '#333333'
+                              backgroundColor: '#F9FAFB',
+                              borderColor: '#E5E7EB'
                             }}
                           >
                             {systemFeedback.state === 'running' ? (
@@ -670,10 +699,10 @@ export default function CanvasLanding() {
                                     className="text-white animate-spin" 
                                     style={{ 
                                       animation: 'spin 2s linear infinite',
-                                      color: '#4D9FFF'
+                                      color: DARK_PALETTE.light
                                     }} 
                                   />
-                                  <span className="text-sm font-medium" style={{ color: '#EAEAEA' }}>
+                                  <span className="text-sm font-medium text-gray-900">
                                     Running...
                                   </span>
                                 </div>
@@ -683,15 +712,12 @@ export default function CanvasLanding() {
                                   {systemFeedback.subtasks.map((task) => (
                                     <div key={task.id} className="flex items-center gap-2">
                                       {task.completed ? (
-                                        <RiCheckLine size={14} style={{ color: '#4D9FFF' }} />
+                                        <RiCheckLine size={14} style={{ color: DARK_PALETTE.light }} />
                                       ) : (
                                         <div className="w-3.5 h-3.5 border border-gray-500 rounded-sm" />
                                       )}
                                       <span 
-                                        className="text-xs"
-                                        style={{ 
-                                          color: task.completed ? '#EAEAEA' : '#888888'
-                                        }}
+                                        className={`text-xs ${task.completed ? 'text-gray-900' : 'text-gray-500'}`}
                                       >
                                         {task.text}
                                       </span>
@@ -700,7 +726,7 @@ export default function CanvasLanding() {
                                 </div>
                               </div>
                             ) : (
-                              <div className="text-xs" style={{ color: '#888888' }}>
+                              <div className="text-xs text-gray-500">
                                 Assistant is waiting for your response...
                               </div>
                             )}
@@ -712,7 +738,7 @@ export default function CanvasLanding() {
                     {/* Enterprise Input Area - Fixed to Bottom */}
                     <div 
                       className="border-t p-4"
-                      style={{ borderColor: '#333333' }}
+                      style={{ borderColor: '#E5E7EB' }}
                     >
                       {/* Multi-line Text Input */}
                       <div className="mb-3">
@@ -730,9 +756,9 @@ export default function CanvasLanding() {
                           rows={2}
                           className="w-full resize-none outline-none text-sm p-3 rounded-lg border"
                           style={{
-                            backgroundColor: '#1E1E1E',
-                            borderColor: '#333333',
-                            color: '#EAEAEA',
+                            backgroundColor: '#FFFFFF',
+                            borderColor: '#E5E7EB',
+                            color: '#374151',
                             fontFamily: 'Inter, sans-serif'
                           }}
                         />
@@ -746,11 +772,11 @@ export default function CanvasLanding() {
                             className="p-2 rounded-lg transition-colors"
                             onClick={() => alert('File attachment - Coming Soon!')}
                             style={{ 
-                              color: '#888888',
+                              color: '#6B7280',
                               backgroundColor: 'transparent'
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.color = '#4D9FFF'}
-                            onMouseLeave={(e) => e.currentTarget.style.color = '#888888'}
+                            onMouseEnter={(e) => e.currentTarget.style.color = DARK_PALETTE.primary}
+                            onMouseLeave={(e) => e.currentTarget.style.color = '#6B7280'}
                           >
                             <RiAttachmentLine size={18} />
                           </button>
@@ -762,11 +788,11 @@ export default function CanvasLanding() {
                             }`}
                             onClick={toggleRecording}
                             style={{ 
-                              color: isRecording ? '#FF4444' : '#888888',
+                              color: isRecording ? '#FF4444' : '#6B7280',
                               backgroundColor: 'transparent'
                             }}
-                            onMouseEnter={(e) => !isRecording && (e.currentTarget.style.color = '#4D9FFF')}
-                            onMouseLeave={(e) => !isRecording && (e.currentTarget.style.color = '#888888')}
+                            onMouseEnter={(e) => !isRecording && (e.currentTarget.style.color = DARK_PALETTE.primary)}
+                            onMouseLeave={(e) => !isRecording && (e.currentTarget.style.color = '#6B7280')}
                           >
                             <RiMicLine size={18} />
                           </button>
@@ -778,8 +804,8 @@ export default function CanvasLanding() {
                           disabled={!chatInput.trim() || isAiThinking}
                           className="p-2 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                           style={{
-                            backgroundColor: chatInput.trim() && !isAiThinking ? '#4D9FFF' : '#333333',
-                            color: '#FFFFFF'
+                            backgroundColor: chatInput.trim() && !isAiThinking ? DARK_PALETTE.primary : '#E5E7EB',
+                            color: chatInput.trim() && !isAiThinking ? '#FFFFFF' : '#6B7280'
                           }}
                         >
                           <RiArrowUpSLine size={18} />
@@ -805,6 +831,252 @@ export default function CanvasLanding() {
                   >
                     ×
                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SEO Optimizer Expandable Interface */}
+          {expandedCard === 'seo-optimizer' && (
+            <div className="mt-20 w-full max-w-7xl">
+              {/* Main Heading */}
+              <div className="text-left mb-6">
+                <h1 className="text-3xl font-bold mb-2 text-gray-900">
+                  SEO Optimizer
+                </h1>
+                <p className="text-lg text-gray-600">
+                  AI-powered SEO analysis and optimization for better search rankings
+                </p>
+              </div>
+              
+              {/* Notification Banner */}
+              <div 
+                className="mb-8 p-4 rounded-2xl border flex items-center gap-4"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  borderColor: '#E5E7EB',
+                  backdropFilter: 'blur(10px)'
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: DARK_PALETTE.secondary }}
+                  >
+                    <RiSearchEyeLine size={16} className="text-white" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">AI Agent: SEO Analyzer</div>
+                    <div className="text-xs text-gray-600">Ready to optimize your search rankings</div>
+                  </div>
+                </div>
+                <div className="ml-auto flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-gray-500">Active</span>
+                </div>
+              </div>
+
+              {/* Two Section Layout - Fully Transparent Glassmorphism */}
+              <div 
+                className="rounded-3xl shadow-2xl border border-white/40 backdrop-blur-xl overflow-hidden"
+                style={{ 
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(25px)',
+                  boxShadow: `
+                    0 12px 40px rgba(0, 0, 0, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+                    inset 0 -1px 0 rgba(255, 255, 255, 0.3)
+                  `
+                }}
+              >
+                <div className="flex gap-6 p-6">
+                  {/* Left Section - SEO Analysis (70%) */}
+                  <div 
+                    className="w-[70%] rounded-2xl p-8"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      minHeight: '600px'
+                    }}
+                  >
+                    {/* SEO Analysis Header */}
+                    <div className="flex items-center gap-4 mb-8">
+                      <div 
+                        className="w-12 h-12 rounded-xl flex items-center justify-center"
+                        style={{ backgroundColor: DARK_PALETTE.secondary }}
+                      >
+                        <RiSearchEyeLine size={24} className="text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900">SEO Analysis</h2>
+                        <p className="text-gray-600">Comprehensive SEO audit and optimization recommendations</p>
+                      </div>
+                    </div>
+
+                    {/* URL Input Section */}
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Website URL
+                        </label>
+                        <div className="flex gap-3">
+                          <input
+                            type="url"
+                            value={storeUrl}
+                            onChange={(e) => setStoreUrl(e.target.value)}
+                            placeholder="https://your-website.com"
+                            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                          />
+                          <button
+                            onClick={() => alert('SEO Analysis - Coming Soon!')}
+                            className="px-6 py-3 text-white font-medium rounded-lg transition-all duration-300 hover:opacity-90"
+                            style={{ backgroundColor: DARK_PALETTE.secondary }}
+                          >
+                            Analyze SEO
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* SEO Metrics Preview */}
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <div className="text-2xl font-bold text-blue-600">85</div>
+                          <div className="text-sm text-gray-600">SEO Score</div>
+                        </div>
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <div className="text-2xl font-bold text-green-600">12</div>
+                          <div className="text-sm text-gray-600">Keywords Ranking</div>
+                        </div>
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <div className="text-2xl font-bold text-orange-600">3</div>
+                          <div className="text-sm text-gray-600">Issues Found</div>
+                        </div>
+                      </div>
+
+                      {/* SEO Recommendations */}
+                      <div className="space-y-3">
+                        <h3 className="text-lg font-semibold text-gray-900">Top Recommendations</h3>
+                        <div className="space-y-2">
+                          {[
+                            'Optimize meta descriptions for better CTR',
+                            'Add alt text to 8 images',
+                            'Improve page loading speed',
+                            'Fix broken internal links'
+                          ].map((recommendation, index) => (
+                            <div key={index} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span className="text-xs font-medium text-blue-600">{index + 1}</span>
+                              </div>
+                              <span className="text-sm text-gray-700">{recommendation}</span>
+                              <button className="ml-auto text-xs text-blue-600 hover:text-blue-800">
+                                Fix Now
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Section - AI SEO Assistant (30%) */}
+                  <div 
+                    className="w-[30%] rounded-2xl flex flex-col border"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      borderColor: '#E5E7EB',
+                      minHeight: '600px'
+                    }}
+                  >
+                    {/* SEO Chat Header */}
+                    <div className="p-4 border-b" style={{ borderColor: '#E5E7EB' }}>
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-8 h-8 rounded-lg flex items-center justify-center"
+                          style={{ backgroundColor: DARK_PALETTE.secondary }}
+                        >
+                          <RiSearchEyeLine size={16} className="text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-sm text-gray-900">
+                            SEO Assistant
+                          </h3>
+                          <p className="text-xs text-gray-600">AI-powered SEO guidance</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* SEO Chat Messages */}
+                    <div className="flex-1 p-4 overflow-y-auto space-y-3" style={{ maxHeight: '400px' }}>
+                      <div className="flex justify-start">
+                        <div className="max-w-[85%] mr-8">
+                          <div
+                            className="px-4 py-3 rounded-lg text-sm"
+                            style={{
+                              backgroundColor: '#E5E7EB',
+                              color: '#374151'
+                            }}
+                          >
+                            <div>Hi! I'm your SEO assistant. I can help you optimize your website for search engines. What would you like to improve?</div>
+                            <div className="text-xs mt-2 text-gray-500">
+                              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* SEO Chat Input */}
+                    <div 
+                      className="border-t p-4"
+                      style={{ borderColor: '#E5E7EB' }}
+                    >
+                      <div className="mb-3">
+                        <textarea
+                          placeholder="Ask about SEO best practices..."
+                          rows={2}
+                          className="w-full resize-none outline-none text-sm p-3 rounded-lg border"
+                          style={{
+                            backgroundColor: '#FFFFFF',
+                            borderColor: '#E5E7EB',
+                            color: '#374151',
+                            fontFamily: 'Inter, sans-serif'
+                          }}
+                        />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <button 
+                            className="p-2 rounded-lg transition-colors"
+                            style={{ 
+                              color: '#6B7280',
+                              backgroundColor: 'transparent'
+                            }}
+                          >
+                            <RiAttachmentLine size={18} />
+                          </button>
+                          <button 
+                            className="p-2 rounded-lg transition-colors"
+                            style={{ 
+                              color: '#6B7280',
+                              backgroundColor: 'transparent'
+                            }}
+                          >
+                            <RiMicLine size={18} />
+                          </button>
+                        </div>
+                        
+                        <button 
+                          className="p-2 rounded-lg transition-all duration-300"
+                          style={{
+                            backgroundColor: DARK_PALETTE.secondary,
+                            color: '#FFFFFF'
+                          }}
+                        >
+                          <RiArrowUpSLine size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -858,10 +1130,10 @@ export default function CanvasLanding() {
         </div>
       </div>
 
-      {/* Universal Search */}
+      {/* Navigation Toggle */}
       <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2">
         <div 
-          className="rounded-full shadow-xl border border-white/40 px-6 py-3 flex items-center gap-4 min-w-96 backdrop-blur-xl"
+          className="rounded-full shadow-xl border border-white/40 p-2 flex items-center gap-2 backdrop-blur-xl"
           style={{ 
             background: 'rgba(255, 255, 255, 0.3)',
             backdropFilter: 'blur(20px)',
@@ -872,28 +1144,62 @@ export default function CanvasLanding() {
             `
           }}
         >
-          <RiSearchLine size={20} style={{ color: DARK_PALETTE.tertiary }} />
-          <input
-            type="text"
-            placeholder="Ask anything..."
-            className="flex-1 outline-none text-gray-700 placeholder-gray-400 bg-transparent"
-          />
-          <div className="flex items-center gap-2">
-            <button className="p-1 hover:bg-gray-100 rounded-full transition-colors">
-              <RiAttachmentLine size={18} className="text-gray-400" />
-            </button>
-            <button className="p-1 hover:bg-gray-100 rounded-full transition-colors">
-              <RiMicLine size={18} className="text-gray-400" />
-            </button>
-            <button 
-              className="p-2 rounded-full text-white transition-colors hover:opacity-90"
-              style={{ backgroundColor: DARK_PALETTE.primary }}
-            >
-              <RiSendPlaneLine size={16} />
-            </button>
-          </div>
+          {!showAiSearch ? (
+            <>
+              {/* Home Button */}
+              <button 
+                className="p-3 rounded-full transition-all duration-300 text-white"
+                style={{ backgroundColor: DARK_PALETTE.primary }}
+                onClick={() => resetView()}
+              >
+                <RiHomeLine size={20} />
+              </button>
+              
+              {/* AI Search Button */}
+              <button 
+                className="p-3 rounded-full transition-all duration-300 text-gray-600 hover:text-gray-800"
+                style={{ backgroundColor: 'transparent' }}
+                onClick={() => setShowAiSearch(true)}
+              >
+                <RiRobotLine size={20} />
+              </button>
+            </>
+          ) : (
+            /* Expanded AI Search Bar */
+            <div className="flex items-center gap-4 px-4 py-2 min-w-96">
+              <RiSearchLine size={20} style={{ color: DARK_PALETTE.tertiary }} />
+              <input
+                type="text"
+                placeholder="Ask AI anything..."
+                className="flex-1 outline-none text-gray-700 placeholder-gray-400 bg-transparent"
+                autoFocus
+              />
+              <div className="flex items-center gap-2">
+                <button className="p-1 hover:bg-gray-100 rounded-full transition-colors">
+                  <RiAttachmentLine size={18} className="text-gray-400" />
+                </button>
+                <button className="p-1 hover:bg-gray-100 rounded-full transition-colors">
+                  <RiMicLine size={18} className="text-gray-400" />
+                </button>
+                <button 
+                  className="p-2 rounded-full text-white transition-colors hover:opacity-90"
+                  style={{ backgroundColor: DARK_PALETTE.primary }}
+                >
+                  <RiArrowUpSLine size={16} />
+                </button>
+                <button 
+                  className="p-2 rounded-full text-gray-600 hover:text-gray-800 transition-colors"
+                  onClick={() => setShowAiSearch(false)}
+                >
+                  <RiCloseLine size={16} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+
 
       {/* Instructions */}
       <div className="fixed bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg text-sm text-gray-600 max-w-xs">
