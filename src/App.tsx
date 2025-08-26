@@ -7,18 +7,41 @@ import FixPage from './pages/FixPage'
 import ConfirmationPage from './pages/ConfirmationPage'
 
 function App() {
+
   return (
-    <MainLayout>
-      <div className="max-w-4xl mx-auto my-10 px-4">
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/diagnostics/scanning" element={<ScanningPage />} />
-          <Route path="/diagnostics/report" element={<HealthReportPage />} />
-          <Route path="/diagnostics/fix/:issueId" element={<FixPage />} />
-          <Route path="/diagnostics/confirmed" element={<ConfirmationPage />} />
-        </Routes>
-      </div>
-    </MainLayout>
+    <>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/diagnostics/scanning" element={
+          <MainLayout>
+            <div className="max-w-4xl mx-auto my-10 px-4">
+              <ScanningPage />
+            </div>
+          </MainLayout>
+        } />
+        <Route path="/diagnostics/report" element={
+          <MainLayout>
+            <div className="max-w-4xl mx-auto my-10 px-4">
+              <HealthReportPage />
+            </div>
+          </MainLayout>
+        } />
+        <Route path="/diagnostics/fix/:issueId" element={
+          <MainLayout>
+            <div className="max-w-4xl mx-auto my-10 px-4">
+              <FixPage />
+            </div>
+          </MainLayout>
+        } />
+        <Route path="/diagnostics/confirmed" element={
+          <MainLayout>
+            <div className="max-w-4xl mx-auto my-10 px-4">
+              <ConfirmationPage />
+            </div>
+          </MainLayout>
+        } />
+      </Routes>
+    </>
   )
 }
 
