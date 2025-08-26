@@ -1,12 +1,24 @@
 import type { ButtonHTMLAttributes } from 'react'
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement>
+type ButtonVariant = 'primary' | 'secondary' | 'destructive' | 'success'
 
-export default function Button(props: ButtonProps) {
-  const { className = '', ...rest } = props
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant
+}
+
+export default function Button({ variant = 'primary', className = '', ...rest }: ButtonProps) {
+  const baseClasses = 'inline-flex items-center justify-center rounded-polaris px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:shadow-polaris-button-focus'
+  
+  const variantClasses = {
+    primary: 'bg-polaris-interactive text-white hover:bg-polaris-blue',
+    secondary: 'bg-polaris-surface border border-polaris-border text-polaris-text hover:bg-polaris-surface-subdued',
+    destructive: 'bg-polaris-red text-white hover:bg-red-700',
+    success: 'bg-polaris-green text-white hover:bg-green-700'
+  }
+
   return (
     <button
-      className={`inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${className}`}
+      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
       {...rest}
     />
   )
