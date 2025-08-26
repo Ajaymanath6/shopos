@@ -17,10 +17,22 @@ import {
   RiCheckLine,
   RiArrowUpSLine,
   RiHomeLine,
-  RiRobotLine,
   RiCloseLine
 } from '@remixicon/react'
 import shopOSLogo from '../assets/Shop OS logo.svg'
+
+// Custom SVG Icons
+const SectionIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM20 10H4V19H20V10ZM15 6V8H19V6H15Z" />
+  </svg>
+)
+
+const StarIcon = ({ size = 20 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 0.5L16 8L23.5 12L16 16L12 23.5L8 16L0.5 12L8 8L12 0.5Z" />
+  </svg>
+)
 
 interface TaskCard {
   id: string
@@ -87,7 +99,7 @@ export default function CanvasLanding() {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  const [expandedCard, setExpandedCard] = useState<string | null>(null)
+  const [expandedCards, setExpandedCards] = useState<string[]>([])
   const [scanProgress, setScanProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
   const [storeUrl, setStoreUrl] = useState('')
@@ -112,6 +124,14 @@ export default function CanvasLanding() {
   })
   const [showAiSearch, setShowAiSearch] = useState(false)
   const [projectStatus, setProjectStatus] = useState('Ready to analyze your store')
+  const [sectionMode, setSectionMode] = useState(false)
+  const [selectedProjects, setSelectedProjects] = useState<string[]>([])
+  const [projectSections, setProjectSections] = useState<{[key: string]: {
+    projects: string[]
+    name: string
+    description?: string
+  }}>({}) // sectionId -> section data
+  const [editingSection, setEditingSection] = useState<string | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
 
   const scanningSteps = [
@@ -159,9 +179,14 @@ export default function CanvasLanding() {
         e.preventDefault()
         setZoom(prev => Math.max(prev - 0.1, 0.3))
       } else if (e.key === 'Escape') {
-        setExpandedCard(null)
-        setScanProgress(0)
-        setCurrentStep(0)
+        if (sectionMode) {
+          setSectionMode(false)
+          setSelectedProjects([])
+        } else {
+          setExpandedCards([])
+          setScanProgress(0)
+          setCurrentStep(0)
+        }
       }
     }
 
@@ -301,10 +326,17 @@ export default function CanvasLanding() {
   // Handle task card click
   const handleTaskClick = (taskId: string) => {
     if (taskId === 'store-health') {
-      setExpandedCard(taskId)
-      setScanProgress(0)
-      setCurrentStep(0)
-      setStoreUrl('')
+      if (!expandedCards.includes(taskId)) {
+        setExpandedCards(prev => [...prev, taskId])
+        setScanProgress(0)
+        setCurrentStep(0)
+        setStoreUrl('')
+      }
+    } else if (taskId === 'seo-optimizer') {
+      if (!expandedCards.includes(taskId)) {
+        setExpandedCards(prev => [...prev, taskId])
+        setStoreUrl('')
+      }
     } else {
       alert(`${taskCards.find(t => t.id === taskId)?.title} - Coming Soon!`)
     }
@@ -314,6 +346,63 @@ export default function CanvasLanding() {
   const resetView = () => {
     setZoom(1)
     setPan({ x: 0, y: 0 })
+    setExpandedCards([])
+    setSectionMode(false)
+    setSelectedProjects([])
+    setProjectSections({})
+  }
+
+  // Handle section mode
+  const handleSectionClick = () => {
+    if (sectionMode && selectedProjects.length > 0) {
+      // Create section from selected projects
+      const sectionId = `section-${Date.now()}`
+      setProjectSections(prev => ({
+        ...prev,
+        [sectionId]: {
+          projects: [...selectedProjects],
+          name: `Section ${Object.keys(prev).length + 1}`,
+          description: `${selectedProjects.length} projects grouped together`
+        }
+      }))
+      setSelectedProjects([])
+      setSectionMode(false)
+      setEditingSection(sectionId) // Auto-edit new section name
+    } else {
+      // Toggle section mode
+      setSectionMode(!sectionMode)
+      setSelectedProjects([])
+    }
+  }
+
+  // Handle project selection in section mode
+  const handleProjectSelection = (projectId: string) => {
+    if (sectionMode) {
+      setSelectedProjects(prev => 
+        prev.includes(projectId) 
+          ? prev.filter(id => id !== projectId)
+          : [...prev, projectId]
+      )
+    }
+  }
+
+  // Get section for project
+  const getProjectSection = (projectId: string) => {
+    return Object.entries(projectSections).find(([_, sectionData]) => 
+      sectionData.projects.includes(projectId)
+    )?.[0]
+  }
+
+  // Update section name
+  const updateSectionName = (sectionId: string, name: string, description?: string) => {
+    setProjectSections(prev => ({
+      ...prev,
+      [sectionId]: {
+        ...prev[sectionId],
+        name,
+        description
+      }
+    }))
   }
 
   return (
@@ -439,17 +528,101 @@ export default function CanvasLanding() {
             </div>
           </div>
 
-          {/* Expandable Interface */}
-          {expandedCard === 'store-health' && (
-            <div className="mt-20 w-full max-w-7xl">
+          {/* Section Headers */}
+          {Object.entries(projectSections).map(([sectionId, sectionData]) => {
+            const sectionProjects = sectionData.projects.filter(projectId => expandedCards.includes(projectId))
+            if (sectionProjects.length === 0) return null
+            
+            return (
+              <div key={sectionId} className="mt-16 w-full max-w-7xl">
+                {/* Section Header */}
+                <div className="mb-6 p-4 rounded-2xl border bg-gradient-to-r from-green-100/50 to-yellow-100/50 border-green-200/40">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      {editingSection === sectionId ? (
+                        <div className="space-y-2">
+                          <input
+                            type="text"
+                            value={sectionData.name}
+                            onChange={(e) => updateSectionName(sectionId, e.target.value, sectionData.description)}
+                            onBlur={() => setEditingSection(null)}
+                            onKeyPress={(e) => e.key === 'Enter' && setEditingSection(null)}
+                            className="text-xl font-bold bg-transparent border-b-2 border-green-300 focus:border-green-500 outline-none text-gray-900"
+                            autoFocus
+                          />
+                          <input
+                            type="text"
+                            value={sectionData.description || ''}
+                            onChange={(e) => updateSectionName(sectionId, sectionData.name, e.target.value)}
+                            placeholder="Add description..."
+                            className="text-sm bg-transparent border-b border-green-200 focus:border-green-400 outline-none text-gray-600 w-full"
+                          />
+                        </div>
+                      ) : (
+                        <div onClick={() => setEditingSection(sectionId)} className="cursor-pointer">
+                          <h2 className="text-xl font-bold text-gray-900 hover:text-green-700 transition-colors">
+                            {sectionData.name}
+                          </h2>
+                          {sectionData.description && (
+                            <p className="text-sm text-gray-600 mt-1">{sectionData.description}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-500 bg-white/60 px-2 py-1 rounded-full">
+                        {sectionProjects.length} project{sectionProjects.length > 1 ? 's' : ''}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setProjectSections(prev => {
+                            const newSections = { ...prev }
+                            delete newSections[sectionId]
+                            return newSections
+                          })
+                        }}
+                        className="p-1 hover:bg-red-100 rounded-full transition-colors text-gray-400 hover:text-red-600"
+                        title="Remove section"
+                      >
+                        <RiCloseLine size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+
+          {/* Store Health Check Expandable Interface */}
+          {expandedCards.includes('store-health') && (
+            <div 
+              className={`mt-20 w-full max-w-7xl transition-all duration-300 ${
+                sectionMode ? 'cursor-pointer' : ''
+              } ${
+                selectedProjects.includes('store-health') ? 'ring-2 ring-green-400 ring-opacity-60' : ''
+              } ${
+                getProjectSection('store-health') ? 'bg-gradient-to-br from-green-50/40 to-yellow-50/40 rounded-3xl p-6 border border-green-200/30' : ''
+              }`}
+              onClick={() => handleProjectSelection('store-health')}
+            >
               {/* Main Heading */}
-              <div className="text-left mb-6">
-                <h1 className="text-3xl font-bold mb-2 text-gray-900">
-                  Store Health Check
-                </h1>
-                <p className="text-lg text-gray-600">
-                  AI-powered diagnostic and optimization workspace
-                </p>
+              <div className="text-left mb-6 relative">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold mb-2 text-gray-900">
+                      Store Health Check
+                    </h1>
+                    <p className="text-lg text-gray-600">
+                      AI-powered diagnostic and optimization workspace
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => setExpandedCards(prev => prev.filter(id => id !== 'store-health'))}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
+                  >
+                    <RiCloseLine size={24} />
+                  </button>
+                </div>
               </div>
               
               {/* Notification Banner */}
@@ -826,7 +999,7 @@ export default function CanvasLanding() {
                 {/* Close Button */}
                 <div className="absolute top-4 right-4">
                   <button
-                    onClick={() => setExpandedCard(null)}
+                    onClick={() => setExpandedCards([])}
                     className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors"
                   >
                     ×
@@ -837,16 +1010,35 @@ export default function CanvasLanding() {
           )}
 
           {/* SEO Optimizer Expandable Interface */}
-          {expandedCard === 'seo-optimizer' && (
-            <div className="mt-20 w-full max-w-7xl">
+          {expandedCards.includes('seo-optimizer') && (
+            <div 
+              className={`mt-20 w-full max-w-7xl transition-all duration-300 ${
+                sectionMode ? 'cursor-pointer' : ''
+              } ${
+                selectedProjects.includes('seo-optimizer') ? 'ring-2 ring-green-400 ring-opacity-60' : ''
+              } ${
+                getProjectSection('seo-optimizer') ? 'bg-gradient-to-br from-green-50/40 to-yellow-50/40 rounded-3xl p-6 border border-green-200/30' : ''
+              }`}
+              onClick={() => handleProjectSelection('seo-optimizer')}
+            >
               {/* Main Heading */}
-              <div className="text-left mb-6">
-                <h1 className="text-3xl font-bold mb-2 text-gray-900">
-                  SEO Optimizer
-                </h1>
-                <p className="text-lg text-gray-600">
-                  AI-powered SEO analysis and optimization for better search rankings
-                </p>
+              <div className="text-left mb-6 relative">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold mb-2 text-gray-900">
+                      SEO Optimizer
+                    </h1>
+                    <p className="text-lg text-gray-600">
+                      AI-powered SEO analysis and optimization for better search rankings
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => setExpandedCards(prev => prev.filter(id => id !== 'seo-optimizer'))}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
+                  >
+                    <RiCloseLine size={24} />
+                  </button>
+                </div>
               </div>
               
               {/* Notification Banner */}
@@ -1146,6 +1338,21 @@ export default function CanvasLanding() {
         >
           {!showAiSearch ? (
             <>
+              {/* Section Button */}
+              <button 
+                className={`p-3 rounded-full transition-all duration-300 ${
+                  sectionMode ? 'text-white' : 'text-gray-600 hover:text-gray-800'
+                }`}
+                style={{ 
+                  backgroundColor: sectionMode ? DARK_PALETTE.tertiary : 'transparent',
+                  cursor: sectionMode ? 'pointer' : 'default'
+                }}
+                onClick={handleSectionClick}
+                title={sectionMode && selectedProjects.length > 0 ? 'Create Section' : 'Section Mode'}
+              >
+                <SectionIcon size={20} />
+              </button>
+              
               {/* Home Button */}
               <button 
                 className="p-3 rounded-full transition-all duration-300 text-white"
@@ -1161,7 +1368,7 @@ export default function CanvasLanding() {
                 style={{ backgroundColor: 'transparent' }}
                 onClick={() => setShowAiSearch(true)}
               >
-                <RiRobotLine size={20} />
+                <StarIcon size={20} />
               </button>
             </>
           ) : (
@@ -1201,6 +1408,21 @@ export default function CanvasLanding() {
 
 
 
+      {/* Section Mode Indicator */}
+      {sectionMode && (
+        <div className="fixed top-4 left-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg px-4 py-2 shadow-lg text-sm font-medium">
+          <div className="flex items-center gap-2">
+            <SectionIcon size={16} />
+            <span>
+              {selectedProjects.length === 0 
+                ? 'Click projects to select them for sectioning'
+                : `${selectedProjects.length} project${selectedProjects.length > 1 ? 's' : ''} selected`
+              }
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Instructions */}
       <div className="fixed bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg text-sm text-gray-600 max-w-xs">
         <div className="font-medium mb-1">Canvas Controls:</div>
@@ -1208,6 +1430,11 @@ export default function CanvasLanding() {
         <div>• Drag to pan around</div>
         <div>• Click cards to start tasks</div>
         <div>• ESC to close expanded view</div>
+        {sectionMode && (
+          <div className="text-green-600 font-medium mt-2">
+            • Click projects to group them
+          </div>
+        )}
       </div>
     </div>
   )
