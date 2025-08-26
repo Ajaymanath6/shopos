@@ -1,10 +1,23 @@
+import { Routes, Route } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout'
-import Home from './pages/Home'
+import LandingPage from './pages/LandingPage'
+import ScanningPage from './pages/ScanningPage'
+import HealthReportPage from './pages/HealthReportPage'
+import FixPage from './pages/FixPage'
+import ConfirmationPage from './pages/ConfirmationPage'
 
 function App() {
   return (
     <MainLayout>
-      <Home />
+      <div className="max-w-4xl mx-auto my-10 px-4">
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/diagnostics/scanning" element={<ScanningPage />} />
+          <Route path="/diagnostics/report" element={<HealthReportPage />} />
+          <Route path="/diagnostics/fix/:issueId" element={<FixPage />} />
+          <Route path="/diagnostics/confirmed" element={<ConfirmationPage />} />
+        </Routes>
+      </div>
     </MainLayout>
   )
 }
