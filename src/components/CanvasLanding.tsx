@@ -1,5 +1,4 @@
-import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useRef, useEffect } from 'react'
 import { 
   RiHealthBookLine,
   RiSearchEyeLine,
@@ -9,7 +8,9 @@ import {
   RiUser3Line,
   RiSearchLine,
   RiMicLine,
-  RiAttachmentLine
+  RiAttachmentLine,
+  RiSendPlaneLine,
+  RiCheckboxCircleLine
 } from '@remixicon/react'
 import shopOSLogo from '../assets/Shop OS logo.svg'
 
@@ -43,8 +44,19 @@ export default function CanvasLanding() {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const [expandedCard, setExpandedCard] = useState<string | null>(null)
+  const [scanProgress, setScanProgress] = useState(0)
+  const [currentStep, setCurrentStep] = useState(0)
   const canvasRef = useRef<HTMLDivElement>(null)
-  const navigate = useNavigate()
+
+  const scanningSteps = [
+    { progress: 15, message: "Connecting to your store..." },
+    { progress: 30, message: "Analyzing page load speeds..." },
+    { progress: 50, message: "Checking SEO optimization..." },
+    { progress: 70, message: "Reviewing conversion funnels..." },
+    { progress: 85, message: "Scanning for accessibility issues..." },
+    { progress: 100, message: "Calculating revenue impact..." }
+  ]
 
   // Handle mouse wheel zoom
   const handleWheel = (e: React.WheelEvent) => {
@@ -72,15 +84,46 @@ export default function CanvasLanding() {
     setIsDragging(false)
   }
 
+  // Keyboard shortcuts for zoom
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '=' || e.key === '+') {
+        e.preventDefault()
+        setZoom(prev => Math.min(prev + 0.1, 3))
+      } else if (e.key === '-') {
+        e.preventDefault()
+        setZoom(prev => Math.max(prev - 0.1, 0.3))
+      } else if (e.key === 'Escape') {
+        setExpandedCard(null)
+        setScanProgress(0)
+        setCurrentStep(0)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   // Handle task card click
   const handleTaskClick = (taskId: string) => {
     if (taskId === 'store-health') {
-      // Navigate to the existing store health check flow
-      navigate('/diagnostics/scanning', { 
-        state: { storeUrl: 'demo-store.myshopify.com' } 
-      })
+      setExpandedCard(taskId)
+      // Start scanning simulation
+      setScanProgress(0)
+      setCurrentStep(0)
+      
+      const interval = setInterval(() => {
+        setCurrentStep(prev => {
+          const nextStep = prev + 1
+          if (nextStep >= scanningSteps.length) {
+            clearInterval(interval)
+            return prev
+          }
+          setScanProgress(scanningSteps[nextStep].progress)
+          return nextStep
+        })
+      }, 2000)
     } else {
-      // For other tasks, show coming soon
       alert(`${taskCards.find(t => t.id === taskId)?.title} - Coming Soon!`)
     }
   }
@@ -134,21 +177,27 @@ export default function CanvasLanding() {
               return (
                 <div
                   key={task.id}
-                  className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 border border-gray-200"
+                  className="group rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 border border-white/20 backdrop-blur-sm"
                   onClick={() => handleTaskClick(task.id)}
-                  style={{ width: '380px', height: '220px' }}
+                  style={{ 
+                    width: '380px', 
+                    height: '220px',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)'
+                  }}
                 >
                   <div className="flex flex-col h-full">
                     <div 
-                      className="w-14 h-14 rounded-xl flex items-center justify-center text-white mb-4"
-                      style={{ backgroundColor: task.iconBg }}
+                      className="w-14 h-14 rounded-xl flex items-center justify-center text-white mb-4 shadow-md"
+                      style={{ 
+                        background: `linear-gradient(135deg, ${task.iconBg} 0%, ${task.iconBg}dd 100%)` 
+                      }}
                     >
                       <IconComponent size={24} />
                     </div>
                     <h3 className="text-xl font-semibold mb-2 group-hover:opacity-80 transition-opacity" style={{ color: '#9F7E4C' }}>
                       {task.title}
                     </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed flex-1">
+                    <p className="text-gray-700 text-sm leading-relaxed flex-1">
                       {task.subtitle}
                     </p>
                     <div className="mt-4 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#9F7E4C' }}>
@@ -161,15 +210,16 @@ export default function CanvasLanding() {
 
             {/* Add New Task Card */}
             <div
-              className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 border-2 border-dashed hover:border-opacity-60"
+              className="group rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 border-2 border-dashed backdrop-blur-sm"
               onClick={() => alert('Add new AI agent task - Coming Soon!')}
               style={{ 
                 width: '380px', 
                 height: '220px',
-                borderColor: '#9F7E4C'
+                borderColor: '#9F7E4C',
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.4) 100%)'
               }}
             >
-              <div className="flex flex-col items-center justify-center h-full text-gray-500 transition-colors" style={{ color: '#9F7E4C' }}>
+              <div className="flex flex-col items-center justify-center h-full transition-colors" style={{ color: '#9F7E4C' }}>
                 <div className="w-14 h-14 border-2 border-current rounded-xl flex items-center justify-center mb-4 group-hover:bg-opacity-10 group-hover:bg-current transition-colors">
                   <RiAddLine size={24} />
                 </div>
@@ -182,50 +232,130 @@ export default function CanvasLanding() {
               </div>
             </div>
           </div>
+
+          {/* Expandable Interface */}
+          {expandedCard === 'store-health' && (
+            <div className="mt-16 max-w-4xl">
+              <div 
+                className="rounded-2xl p-8 shadow-xl border border-white/20 backdrop-blur-sm"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%)'
+                }}
+              >
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-semibold mb-2" style={{ color: '#9F7E4C' }}>
+                    Analyzing demo-store.myshopify.com
+                  </h2>
+                  <p className="text-gray-600">
+                    Our AI is performing a comprehensive diagnostic scan of your store
+                  </p>
+                </div>
+
+                <div className="flex justify-center mb-8">
+                  <div className="relative">
+                    <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#9F7E4C' }}>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <RiSearchLine size={24} style={{ color: '#9F7E4C' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-8">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium" style={{ color: '#9F7E4C' }}>Scan Progress</span>
+                    <span className="text-sm text-gray-600">{scanProgress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${scanProgress}%`,
+                        backgroundColor: '#9F7E4C'
+                      }}
+                    />
+                  </div>
+                  <p className="text-center mt-4 font-medium text-gray-700">
+                    {scanningSteps[currentStep]?.message || "Initializing scan..."}
+                  </p>
+                </div>
+
+                <div className="text-center mb-6">
+                  <p className="text-sm text-gray-500">This usually takes 30 seconds</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {scanningSteps.map((step, index) => (
+                    <div 
+                      key={index}
+                      className={`flex items-center gap-2 ${
+                        index <= currentStep ? 'text-green-600' : 'text-gray-400'
+                      }`}
+                    >
+                      {index <= currentStep ? (
+                        <RiCheckboxCircleLine size={16} />
+                      ) : (
+                        <div className="w-4 h-4 border border-gray-300 rounded-full" />
+                      )}
+                      {step.message.replace('...', '')}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="text-center mt-8">
+                  <p className="text-sm text-gray-500">
+                    Please don't close this page. We're working hard to find opportunities to boost your revenue.
+                  </p>
+                </div>
+
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={() => setExpandedCard(null)}
+                    className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    Close (ESC)
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* User Profile & Controls */}
-      <div className="fixed top-4 right-4 flex flex-col gap-3">
-        {/* User Profile Section */}
-        <div className="bg-white rounded-xl p-3 shadow-lg">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#9F7E4C' }}>
-              <RiUser3Line size={20} className="text-white" />
-            </div>
-            <div className="flex-1">
-              <div className="text-sm font-medium text-gray-800">Sarah M.</div>
-              <div className="text-xs text-gray-500">Product Manager</div>
-            </div>
-          </div>
-          
-          <div className="flex gap-2">
-            <button 
-              className="flex-1 flex items-center justify-center p-2 rounded-lg hover:bg-gray-50 transition-colors"
-              onClick={() => alert('Notifications - Coming Soon!')}
-            >
-              <RiNotification3Line size={18} style={{ color: '#9F7E4C' }} />
-            </button>
-            <button 
-              className="flex-1 flex items-center justify-center p-2 rounded-lg hover:bg-gray-50 transition-colors"
-              onClick={() => alert('Settings - Coming Soon!')}
-            >
-              <RiSettings3Line size={18} style={{ color: '#9F7E4C' }} />
-            </button>
+      {/* Minimal User Profile & Controls */}
+      <div className="fixed top-4 right-4 flex items-center gap-4">
+        {/* User Profile Icons */}
+        <div className="flex items-center gap-3">
+          <button 
+            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors backdrop-blur-sm"
+            onClick={() => alert('Notifications - Coming Soon!')}
+            style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+          >
+            <RiNotification3Line size={18} style={{ color: '#9F7E4C' }} />
+          </button>
+          <button 
+            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors backdrop-blur-sm"
+            onClick={() => alert('Settings - Coming Soon!')}
+            style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+          >
+            <RiSettings3Line size={18} style={{ color: '#9F7E4C' }} />
+          </button>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: '#9F7E4C' }}>
+            <RiUser3Line size={18} className="text-white" />
           </div>
         </div>
 
         {/* Canvas Controls */}
-        <div className="bg-white rounded-xl p-3 shadow-lg">
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
           <button
             onClick={resetView}
-            className="w-full mb-2 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors rounded-lg"
+            className="text-xs text-gray-700 hover:text-gray-900 transition-colors mr-2"
           >
-            Reset View
+            Reset
           </button>
-          <div className="text-xs text-gray-600 text-center">
-            Zoom: {Math.round(zoom * 100)}%
-          </div>
+          <span className="text-xs text-gray-600">
+            {Math.round(zoom * 100)}%
+          </span>
         </div>
       </div>
 
@@ -246,21 +376,22 @@ export default function CanvasLanding() {
               <RiMicLine size={18} className="text-gray-400" />
             </button>
             <button 
-              className="px-4 py-1 rounded-full text-white text-sm font-medium transition-colors hover:opacity-90"
+              className="p-2 rounded-full text-white transition-colors hover:opacity-90"
               style={{ backgroundColor: '#9F7E4C' }}
             >
-              ↑
+              <RiSendPlaneLine size={16} />
             </button>
           </div>
         </div>
       </div>
 
       {/* Instructions */}
-      <div className="fixed bottom-4 left-4 bg-white rounded-lg px-4 py-2 shadow-lg text-sm text-gray-600 max-w-xs">
+      <div className="fixed bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg text-sm text-gray-600 max-w-xs">
         <div className="font-medium mb-1">Canvas Controls:</div>
-        <div>• Scroll to zoom in/out</div>
+        <div>• Scroll or +/- keys to zoom</div>
         <div>• Drag to pan around</div>
         <div>• Click cards to start tasks</div>
+        <div>• ESC to close expanded view</div>
       </div>
     </div>
   )
