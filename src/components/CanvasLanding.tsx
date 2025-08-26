@@ -11,12 +11,11 @@ import {
   RiAttachmentLine, 
   RiSendPlaneLine, 
   RiCheckboxCircleLine, 
-  RiRobotLine, 
   RiStore2Line, 
-  RiArrowRightSLine,
-  RiPauseLine,
-  RiErrorWarningLine,
-  RiLoader4Line
+  RiStarFill,
+  RiFocus3Line,
+  RiCheckLine,
+  RiArrowUpSLine
 } from '@remixicon/react'
 import shopOSLogo from '../assets/Shop OS logo.svg'
 
@@ -24,8 +23,17 @@ interface TaskCard {
   id: string
   title: string
   subtitle: string
-  icon: React.ComponentType<any>
+  icon: React.ComponentType<{ size?: string | number }>
   iconBg: string
+}
+
+// Dark Gray Monochromatic Palette
+const DARK_PALETTE = {
+  primary: '#1F2937',    // Dark gray
+  secondary: '#374151',  // Medium gray  
+  tertiary: '#4B5563',   // Light gray
+  accent: '#6B7280',     // Lighter gray
+  light: '#9CA3AF'       // Very light gray
 }
 
 const taskCards: TaskCard[] = [
@@ -34,14 +42,14 @@ const taskCards: TaskCard[] = [
     title: 'Store Health Check',
     subtitle: 'Connect your Shopify store for an instant AI diagnostic',
     icon: RiHealthBookLine,
-    iconBg: '#6B46C1'
+    iconBg: DARK_PALETTE.primary
   },
   {
     id: 'seo-optimizer', 
     title: 'SEO Optimizer',
     subtitle: 'AI-powered SEO analysis and optimization',
     icon: RiSearchEyeLine,
-    iconBg: '#7C3AED'
+    iconBg: DARK_PALETTE.secondary
   }
 ]
 
@@ -53,7 +61,22 @@ interface ChatMessage {
   state?: 'thinking' | 'generating' | 'creating' | 'retrieving' | 'suggesting' | 'completed' | 'error'
   icon?: string
   progress?: number
-  data?: any
+  data?: Record<string, unknown>
+  subtasks?: Array<{
+    id: string
+    text: string
+    completed: boolean
+  }>
+}
+
+interface SystemFeedback {
+  isVisible: boolean
+  state: 'running' | 'waiting'
+  subtasks: Array<{
+    id: string
+    text: string
+    completed: boolean
+  }>
 }
 
 export default function CanvasLanding() {
@@ -69,16 +92,21 @@ export default function CanvasLanding() {
     { 
       id: '1',
       role: 'ai', 
-      content: 'Hi! I\'m your AI assistant. How can I help optimize your store today?',
+      content: 'Hi! I\'m your AI assistant. Enter your Shopify store URL to start a comprehensive health analysis.',
       timestamp: new Date().toISOString(),
       state: 'completed',
-      icon: 'RiRobotLine'
+      icon: 'RiStarFill'
     }
   ])
   const [chatInput, setChatInput] = useState('')
-  const [isAiThinking, setIsAiThinking] = useState(false)
+  const [isAiThinking] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
+  const [systemFeedback, setSystemFeedback] = useState<SystemFeedback>({
+    isVisible: false,
+    state: 'waiting',
+    subtasks: []
+  })
   const canvasRef = useRef<HTMLDivElement>(null)
 
   const scanningSteps = [
@@ -136,33 +164,9 @@ export default function CanvasLanding() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  const getAiResponse = (userMessage: string): ChatMessage[] => {
-    const responses = [
-      {
-        id: Date.now().toString() + '_thinking',
-        role: 'ai' as const,
-        content: 'Let me analyze that for you...',
-        timestamp: new Date().toISOString(),
-        state: 'thinking' as const,
-        icon: 'RiBrainLine'
-      },
-      {
-        id: Date.now().toString() + '_response',
-        role: 'ai' as const,
-        content: userMessage.toLowerCase().includes('analyze') 
-          ? 'I found 8 optimization opportunities in your store. Your current health score is 76%. Would you like me to prioritize the fixes by impact?'
-          : userMessage.toLowerCase().includes('fix') || userMessage.toLowerCase().includes('optimize')
-          ? 'I can help optimize that! Let me create an implementation plan for you.'
-          : 'Great question! Based on your store data, here\'s what I recommend...',
-        timestamp: new Date().toISOString(),
-        state: 'completed' as const,
-        icon: 'RiCheckboxCircleLine'
-      }
-    ]
-    return responses
-  }
 
-  // Handle chat send
+
+  // Handle chat send with enterprise system feedback
   const handleChatSend = async () => {
     if (chatInput.trim() && !isSending) {
       setIsSending(true)
@@ -179,34 +183,59 @@ export default function CanvasLanding() {
       setChatMessages(prev => [...prev, userMessage])
       setChatInput('')
       
-      // Show AI thinking state
-      setTimeout(() => {
-        setIsAiThinking(true)
-        const aiResponses = getAiResponse(userMessage.content)
-        
-        // Add thinking message
-        setChatMessages(prev => [...prev, aiResponses[0]])
-        
-        // Replace with actual response after delay
-        setTimeout(() => {
-          setChatMessages(prev => {
-            const newMessages = [...prev]
-            newMessages[newMessages.length - 1] = aiResponses[1]
-            return newMessages
-          })
-          setIsAiThinking(false)
-          setIsSending(false)
-        }, 2000)
-      }, 500)
+      // Show system feedback with subtasks
+      const subtasks = [
+        { id: '1', text: 'Searching inventory', completed: false },
+        { id: '2', text: 'Filtering by criteria', completed: false },
+        { id: '3', text: 'Analyzing results', completed: false },
+        { id: '4', text: 'Generating response', completed: false }
+      ]
+      
+      setSystemFeedback({
+        isVisible: true,
+        state: 'running',
+        subtasks: subtasks
+      })
+      
+      // Simulate progressive task completion
+      let completedCount = 0
+      const taskInterval = setInterval(() => {
+        if (completedCount < subtasks.length) {
+          setSystemFeedback(prev => ({
+            ...prev,
+            subtasks: prev.subtasks.map((task, index) => 
+              index === completedCount ? { ...task, completed: true } : task
+            )
+          }))
+          completedCount++
+        } else {
+          clearInterval(taskInterval)
+          
+          // Hide system feedback and show AI response
+          setTimeout(() => {
+            setSystemFeedback({ isVisible: false, state: 'waiting', subtasks: [] })
+            
+            const aiResponse: ChatMessage = {
+              id: Date.now().toString(),
+              role: 'ai',
+              content: userMessage.content.toLowerCase().includes('analyze') 
+                ? 'I found 8 optimization opportunities in your store. Your current health score is 76%. Would you like me to prioritize the fixes by impact?'
+                : userMessage.content.toLowerCase().includes('products')
+                ? 'I can help you find products. Could you specify what type of products you\'re looking for and any specific criteria like price range, brand, or features?'
+                : 'I understand your request. Let me provide you with the most relevant information and recommendations.',
+              timestamp: new Date().toISOString(),
+              state: 'completed'
+            }
+            
+            setChatMessages(prev => [...prev, aiResponse])
+            setIsSending(false)
+          }, 500)
+        }
+      }, 800)
     }
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleChatSend()
-    }
-  }
+
 
   const toggleRecording = () => {
     setIsRecording(!isRecording)
@@ -223,6 +252,17 @@ export default function CanvasLanding() {
   const handleStoreSubmit = () => {
     if (!storeUrl.trim()) return
     
+    // Add chat message about starting analysis
+    const analysisMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'ai',
+      content: `Perfect! Starting comprehensive analysis of ${storeUrl}. I'll check performance, SEO, accessibility, and more.`,
+      timestamp: new Date().toISOString(),
+      state: 'completed',
+      icon: 'RiStarFill'
+    }
+    setChatMessages(prev => [...prev, analysisMessage])
+    
     setScanProgress(0)
     setCurrentStep(0)
     
@@ -231,6 +271,18 @@ export default function CanvasLanding() {
         const nextStep = prev + 1
         if (nextStep >= scanningSteps.length) {
           clearInterval(interval)
+          // Add completion message to chat
+          setTimeout(() => {
+            const completionMessage: ChatMessage = {
+              id: Date.now().toString() + '_complete',
+              role: 'ai',
+              content: `✅ Analysis complete! Found 8 optimization opportunities. Your store health score is 78%. Ready to see the detailed report?`,
+              timestamp: new Date().toISOString(),
+              state: 'completed',
+              icon: 'RiStarFill'
+            }
+            setChatMessages(prev => [...prev, completionMessage])
+          }, 1000)
           return prev
         }
         setScanProgress(scanningSteps[nextStep].progress)
@@ -305,7 +357,7 @@ export default function CanvasLanding() {
               return (
                 <div
                   key={task.id}
-                  className="group rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 cursor-pointer transform hover:scale-105 border border-white/40 backdrop-blur-xl overflow-hidden relative"
+                  className="rounded-3xl p-8 shadow-2xl cursor-pointer border border-white/40 backdrop-blur-xl overflow-hidden relative"
                   onClick={() => handleTaskClick(task.id)}
                   style={{ 
                     width: '420px', 
@@ -319,19 +371,12 @@ export default function CanvasLanding() {
                     `
                   }}
                 >
-                  {/* Glassmorphism overlay */}
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{
-                      background: `rgba(30, 58, 138, 0.1)`,
-                      backdropFilter: 'blur(25px)'
-                    }}
-                  />
+
                   
                   <div className="flex flex-col h-full relative z-10">
                     <div className="flex items-start gap-4 mb-6">
                       <div 
-                        className="w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-xl group-hover:shadow-2xl transition-shadow duration-300"
+                        className="w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-xl"
                         style={{ 
                           background: `linear-gradient(135deg, ${task.iconBg} 0%, ${task.iconBg}dd 50%, ${task.iconBg}bb 100%)`,
                           boxShadow: `0 12px 40px ${task.iconBg}50`
@@ -340,10 +385,10 @@ export default function CanvasLanding() {
                         <IconComponent size={28} />
                       </div>
                       <div className="flex-1 text-left">
-                        <h3 className="text-xl font-bold mb-2 group-hover:opacity-90 transition-opacity text-left text-gray-900">
+                        <h3 className="text-xl font-bold mb-2 text-left text-gray-900">
                           {task.title}
                         </h3>
-                        <div className="w-16 h-1 rounded-full" style={{ backgroundColor: task.iconBg }} />
+                        <div className="w-12 h-0.5 rounded-full bg-gray-300" />
                       </div>
                     </div>
                     
@@ -352,12 +397,8 @@ export default function CanvasLanding() {
                     </p>
                     
                     <div className="flex items-center justify-between">
-                      <div className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center gap-2" style={{ color: '#6B46C1' }}>
-                        <span>Launch workspace</span>
-                        <RiArrowRightSLine size={16} />
-                      </div>
-                      <div className="w-10 h-10 rounded-full border-2 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center" style={{ borderColor: task.iconBg, backgroundColor: 'rgba(255,255,255,0.2)' }}>
-                        <RiArrowRightSLine size={18} style={{ color: task.iconBg }} />
+                      <div className="text-sm font-medium flex items-center gap-2 text-gray-500">
+                        <span>Click to open</span>
                       </div>
                     </div>
                   </div>
@@ -367,12 +408,12 @@ export default function CanvasLanding() {
 
             {/* Add New Task Card */}
             <div
-              className="group rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 cursor-pointer transform hover:scale-105 border-2 border-dashed backdrop-blur-xl"
+              className="rounded-3xl p-8 shadow-2xl cursor-pointer border-2 border-dashed backdrop-blur-xl"
               onClick={() => alert('Add new AI agent task - Coming Soon!')}
               style={{ 
                 width: '420px', 
                 height: '260px',
-                borderColor: '#6B46C1',
+                borderColor: DARK_PALETTE.tertiary,
                 background: `rgba(255, 255, 255, 0.2)`,
                 backdropFilter: 'blur(20px)',
                 boxShadow: `
@@ -382,8 +423,8 @@ export default function CanvasLanding() {
                 `
               }}
             >
-              <div className="flex flex-col items-center justify-center h-full transition-colors" style={{ color: '#6B46C1' }}>
-                <div className="w-16 h-16 border-2 border-current rounded-2xl flex items-center justify-center mb-6 group-hover:bg-opacity-10 group-hover:bg-current transition-colors">
+              <div className="flex flex-col items-center justify-center h-full transition-colors" style={{ color: DARK_PALETTE.tertiary }}>
+                <div className="w-16 h-16 border-2 border-current rounded-2xl flex items-center justify-center mb-6">
                   <RiAddLine size={28} />
                 </div>
                 <h3 className="text-xl font-bold mb-2">
@@ -400,7 +441,7 @@ export default function CanvasLanding() {
           {expandedCard === 'store-health' && (
             <div className="mt-20 w-full max-w-7xl">
               {/* Main Heading */}
-              <div className="text-center mb-8">
+              <div className="text-left mb-8">
                 <h1 className="text-3xl font-bold mb-2 text-gray-900">
                   Store Health Check
                 </h1>
@@ -424,9 +465,9 @@ export default function CanvasLanding() {
                 }}
               >
                 <div className="flex h-full gap-6 p-6">
-                  {/* Left Section - Workflow */}
+                  {/* Left Section - Workflow (70%) */}
                   <div 
-                    className="flex-1 p-8 rounded-2xl backdrop-blur-lg"
+                    className="w-[70%] p-8 rounded-2xl backdrop-blur-lg"
                     style={{
                       background: 'rgba(255, 255, 255, 0.8)',
                       backdropFilter: 'blur(20px)',
@@ -437,12 +478,12 @@ export default function CanvasLanding() {
                     }}
                   >
                     <div className="flex items-center gap-3 mb-6">
-                      <div 
-                        className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
-                        style={{ backgroundColor: '#6B46C1' }}
-                      >
-                        <RiStore2Line size={20} />
-                      </div>
+                                              <div 
+                          className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
+                          style={{ backgroundColor: DARK_PALETTE.secondary }}
+                        >
+                          <RiStore2Line size={20} />
+                        </div>
                       <div>
                         <h2 className="text-xl font-semibold text-gray-900">
                           Store Analysis
@@ -465,13 +506,13 @@ export default function CanvasLanding() {
                               onChange={(e) => setStoreUrl(e.target.value)}
                               placeholder="yourstore.myshopify.com"
                               className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                              style={{ '--tw-ring-color': '#9F7E4C' } as any}
+                              style={{ '--tw-ring-color': '#A5D6A7' } as React.CSSProperties}
                             />
                             <button
                               onClick={handleStoreSubmit}
                               disabled={!storeUrl.trim()}
                               className="px-6 py-3 rounded-xl text-white font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg"
-                              style={{ backgroundColor: '#6B46C1' }}
+                              style={{ backgroundColor: DARK_PALETTE.primary }}
                             >
                               Start Scan
                             </button>
@@ -496,7 +537,7 @@ export default function CanvasLanding() {
                     {scanProgress > 0 && (
                       <div className="space-y-6">
                         <div className="text-center">
-                          <h3 className="text-lg font-semibold mb-2" style={{ color: '#9F7E4C' }}>
+                          <h3 className="text-lg font-semibold mb-2" style={{ color: '#A5D6A7' }}>
                             Analyzing {storeUrl || 'your store'}
                           </h3>
                           <p className="text-gray-600">AI diagnostic in progress...</p>
@@ -504,9 +545,9 @@ export default function CanvasLanding() {
 
                         <div className="flex justify-center mb-6">
                           <div className="relative">
-                            <div className="w-20 h-20 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#9F7E4C' }}>
+                            <div className="w-20 h-20 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#A5D6A7' }}>
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <RiSearchLine size={28} style={{ color: '#9F7E4C' }} />
+                                <RiSearchLine size={28} style={{ color: '#A5D6A7' }} />
                               </div>
                             </div>
                           </div>
@@ -514,7 +555,7 @@ export default function CanvasLanding() {
 
                         <div className="space-y-4">
                           <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium" style={{ color: '#9F7E4C' }}>Progress</span>
+                            <span className="text-sm font-medium" style={{ color: '#A5D6A7' }}>Progress</span>
                             <span className="text-sm text-gray-600">{scanProgress}%</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-3">
@@ -522,7 +563,7 @@ export default function CanvasLanding() {
                               className="h-full rounded-full transition-all duration-500"
                               style={{ 
                                 width: `${scanProgress}%`,
-                                background: `linear-gradient(90deg, #9F7E4C 0%, #B8926B 100%)`
+                                background: `linear-gradient(90deg, #A5D6A7 0%, #C8E6C9 100%)`
                               }}
                             />
                           </div>
@@ -557,89 +598,53 @@ export default function CanvasLanding() {
                     )}
                   </div>
 
-                  {/* Right Section - AI Chat */}
+                  {/* Right Section - Enterprise AI Chat (30%) */}
                   <div 
-                    className="w-96 rounded-2xl backdrop-blur-lg flex flex-col"
+                    className="w-[30%] rounded-2xl flex flex-col border"
                     style={{
-                      background: 'rgba(255, 255, 255, 0.8)',
-                      backdropFilter: 'blur(20px)',
-                      boxShadow: `
-                        0 8px 32px rgba(0, 0, 0, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.9)
-                      `
+                      background: '#121212',
+                      borderColor: '#333333',
+                      minHeight: '600px'
                     }}
                   >
-                    {/* Chat Header */}
-                    <div className="p-6 border-b border-gray-200/30">
+                    {/* Enterprise Chat Header */}
+                    <div className="p-4 border-b" style={{ borderColor: '#333333' }}>
                       <div className="flex items-center gap-3">
                         <div 
-                          className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
-                          style={{ backgroundColor: '#6B46C1' }}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center"
+                          style={{ backgroundColor: '#1E1E1E' }}
                         >
-                          <RiRobotLine size={20} />
+                          <RiStarFill size={16} className="text-white" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">
-                            AI Assistant
+                          <h3 className="font-medium text-sm" style={{ color: '#EAEAEA' }}>
+                            Shopping Assistant
                           </h3>
-                          <p className="text-xs text-gray-500">Always here to help</p>
+                          <p className="text-xs" style={{ color: '#888888' }}>Enterprise AI</p>
                         </div>
                       </div>
                     </div>
 
-                    {/* Chat Messages */}
-                    <div className="flex-1 p-6 overflow-y-auto space-y-4" style={{ maxHeight: '400px' }}>
+                    {/* Enterprise Chat History */}
+                    <div className="flex-1 p-4 overflow-y-auto space-y-3" style={{ maxHeight: '400px' }}>
                       {chatMessages.map((message) => (
                         <div
                           key={message.id}
                           className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
-                          <div className={`flex items-start gap-3 max-w-xs ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                            {/* Message Icon */}
-                            {message.role === 'ai' && (
-                              <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" 
-                                   style={{ backgroundColor: message.state === 'thinking' ? '#F59E0B' : '#6B46C1' }}>
-                                {message.state === 'thinking' ? (
-                                  <RiLoader4Line size={16} className="text-white animate-spin" />
-                                ) : message.state === 'error' ? (
-                                  <RiErrorWarningLine size={16} className="text-white" />
-                                ) : (
-                                  <RiRobotLine size={16} className="text-white" />
-                                )}
-                              </div>
-                            )}
-                            
+                          <div className={`max-w-[85%] ${message.role === 'user' ? 'ml-8' : 'mr-8'}`}>
                             {/* Message Bubble */}
                             <div
-                              className={`px-4 py-3 rounded-2xl text-sm relative ${
-                                message.role === 'user'
-                                  ? 'text-white shadow-lg'
-                                  : 'text-gray-800 shadow-sm border border-gray-100'
-                              }`}
+                              className="px-4 py-3 rounded-lg text-sm"
                               style={{
-                                backgroundColor: message.role === 'user' 
-                                  ? '#6B46C1' 
-                                  : message.state === 'thinking'
-                                  ? 'linear-gradient(135deg, #FFF9C4 0%, #F0F4C3 100%)'
-                                  : 'rgba(255, 255, 255, 0.9)'
+                                backgroundColor: message.role === 'user' ? '#2A2A2A' : '#1E1E1E',
+                                color: '#EAEAEA'
                               }}
                             >
-                              {/* AI State Indicator */}
-                              {message.role === 'ai' && message.state === 'thinking' && (
-                                <div className="flex items-center gap-2 mb-2 text-xs text-gray-600">
-                                  <div className="flex space-x-1">
-                                    <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce"></div>
-                                    <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                    <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                                  </div>
-                                  <span>AI is thinking...</span>
-                                </div>
-                              )}
-                              
                               <div>{message.content}</div>
                               
                               {/* Timestamp */}
-                              <div className={`text-xs mt-2 ${message.role === 'user' ? 'text-purple-100' : 'text-gray-400'}`}>
+                              <div className="text-xs mt-2" style={{ color: '#888888' }}>
                                 {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </div>
                             </div>
@@ -647,101 +652,145 @@ export default function CanvasLanding() {
                         </div>
                       ))}
                       
-                      {/* AI Working Indicator */}
-                      {isAiThinking && (
-                        <div className="flex justify-start">
-                          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl" 
-                               style={{ background: 'linear-gradient(135deg, #FFF9C4 0%, #F0F4C3 100%)' }}>
-                            <RiLoader4Line size={16} className="text-gray-600 animate-spin" />
-                            <span className="text-sm text-gray-700">AI is analyzing...</span>
+                      {/* System Feedback Component */}
+                      {systemFeedback.isVisible && (
+                        <div className="w-full">
+                          <div 
+                            className="p-4 rounded-lg border"
+                            style={{ 
+                              backgroundColor: '#252525',
+                              borderColor: '#333333'
+                            }}
+                          >
+                            {systemFeedback.state === 'running' ? (
+                              <div>
+                                <div className="flex items-center gap-3 mb-3">
+                                  <RiFocus3Line 
+                                    size={16} 
+                                    className="text-white animate-spin" 
+                                    style={{ 
+                                      animation: 'spin 2s linear infinite',
+                                      color: '#4D9FFF'
+                                    }} 
+                                  />
+                                  <span className="text-sm font-medium" style={{ color: '#EAEAEA' }}>
+                                    Running...
+                                  </span>
+                                </div>
+                                
+                                {/* Subtasks Checklist */}
+                                <div className="space-y-2">
+                                  {systemFeedback.subtasks.map((task) => (
+                                    <div key={task.id} className="flex items-center gap-2">
+                                      {task.completed ? (
+                                        <RiCheckLine size={14} style={{ color: '#4D9FFF' }} />
+                                      ) : (
+                                        <div className="w-3.5 h-3.5 border border-gray-500 rounded-sm" />
+                                      )}
+                                      <span 
+                                        className="text-xs"
+                                        style={{ 
+                                          color: task.completed ? '#EAEAEA' : '#888888'
+                                        }}
+                                      >
+                                        {task.text}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="text-xs" style={{ color: '#888888' }}>
+                                Assistant is waiting for your response...
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
                     </div>
 
-                    {/* Modern Chat Input */}
-                    <div className="p-6 border-t border-gray-200/30">
-                      <div 
-                        className="flex items-center gap-3 p-4 rounded-2xl border transition-all duration-300"
-                        style={{
-                          background: isAiThinking 
-                            ? 'linear-gradient(135deg, #FFF9C4 0%, #F0F4C3 100%)' 
-                            : 'rgba(255, 255, 255, 0.9)',
-                          borderColor: isSending ? '#6B46C1' : '#E5E7EB',
-                          boxShadow: isSending 
-                            ? '0 0 0 3px rgba(107, 70, 193, 0.1)' 
-                            : '0 2px 8px rgba(0, 0, 0, 0.05)'
-                        }}
-                      >
-                        {/* Attach Button */}
-                        <button 
-                          className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
-                          onClick={() => alert('File attachment - Coming Soon!')}
-                        >
-                          <RiAttachmentLine size={18} className="text-gray-400" />
-                        </button>
-                        
-                        {/* Text Input */}
-                        <input
-                          type="text"
+                    {/* Enterprise Input Area - Fixed to Bottom */}
+                    <div 
+                      className="border-t p-4"
+                      style={{ borderColor: '#333333' }}
+                    >
+                      {/* Multi-line Text Input */}
+                      <div className="mb-3">
+                        <textarea
                           value={chatInput}
                           onChange={(e) => setChatInput(e.target.value)}
-                          onKeyPress={handleKeyPress}
-                          placeholder={isAiThinking ? "AI is working..." : "Ask me anything about your store..."}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault()
+                              handleChatSend()
+                            }
+                          }}
+                          placeholder="Ask about products, orders, or anything else..."
                           disabled={isSending || isAiThinking}
-                          className="flex-1 outline-none bg-transparent text-gray-700 placeholder-gray-400 disabled:opacity-50"
+                          rows={2}
+                          className="w-full resize-none outline-none text-sm p-3 rounded-lg border"
+                          style={{
+                            backgroundColor: '#1E1E1E',
+                            borderColor: '#333333',
+                            color: '#EAEAEA',
+                            fontFamily: 'Inter, sans-serif'
+                          }}
                         />
+                      </div>
+                      
+                      {/* Action Buttons Row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {/* Attach File */}
+                          <button 
+                            className="p-2 rounded-lg transition-colors"
+                            onClick={() => alert('File attachment - Coming Soon!')}
+                            style={{ 
+                              color: '#888888',
+                              backgroundColor: 'transparent'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#4D9FFF'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = '#888888'}
+                          >
+                            <RiAttachmentLine size={18} />
+                          </button>
+                          
+                          {/* Voice Dictation */}
+                          <button 
+                            className={`p-2 rounded-lg transition-all duration-300 ${
+                              isRecording ? 'animate-pulse' : ''
+                            }`}
+                            onClick={toggleRecording}
+                            style={{ 
+                              color: isRecording ? '#FF4444' : '#888888',
+                              backgroundColor: 'transparent'
+                            }}
+                            onMouseEnter={(e) => !isRecording && (e.currentTarget.style.color = '#4D9FFF')}
+                            onMouseLeave={(e) => !isRecording && (e.currentTarget.style.color = '#888888')}
+                          >
+                            <RiMicLine size={18} />
+                          </button>
+                        </div>
                         
-                        {/* Voice/Recording Button */}
-                        <button 
-                          className={`p-2 rounded-xl transition-all duration-300 ${
-                            isRecording 
-                              ? 'bg-red-500 text-white animate-pulse' 
-                              : 'hover:bg-gray-100 text-gray-400'
-                          }`}
-                          onClick={toggleRecording}
-                        >
-                          <RiMicLine size={18} />
-                        </button>
-                        
-                        {/* Send/Pause Button */}
+                        {/* Send Button */}
                         <button 
                           onClick={handleChatSend}
                           disabled={!chatInput.trim() || isAiThinking}
-                          className={`p-3 rounded-xl text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
-                            isSending 
-                              ? 'bg-orange-500 hover:bg-orange-600' 
-                              : 'bg-purple-600 hover:bg-purple-700 hover:shadow-lg'
-                          }`}
+                          className="p-2 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{
+                            backgroundColor: chatInput.trim() && !isAiThinking ? '#4D9FFF' : '#333333',
+                            color: '#FFFFFF'
+                          }}
                         >
-                          {isSending ? (
-                            <RiPauseLine size={16} />
-                          ) : (
-                            <RiSendPlaneLine size={16} />
-                          )}
+                          <RiArrowUpSLine size={18} />
                         </button>
                       </div>
                       
                       {/* Recording Indicator */}
                       {isRecording && (
-                        <div className="flex items-center justify-center gap-2 mt-3 text-sm text-red-600">
+                        <div className="flex items-center justify-center gap-2 mt-3 text-xs" style={{ color: '#FF4444' }}>
                           <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                          <span>Recording... Tap to stop</span>
-                        </div>
-                      )}
-                      
-                      {/* Quick Suggestions */}
-                      {!isSending && !isAiThinking && chatMessages.length === 1 && (
-                        <div className="flex flex-wrap gap-2 mt-4">
-                          {['Analyze my store', 'Check performance', 'Find issues', 'Optimize SEO'].map((suggestion) => (
-                            <button
-                              key={suggestion}
-                              onClick={() => setChatInput(suggestion)}
-                              className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition-colors"
-                            >
-                              {suggestion}
-                            </button>
-                          ))}
+                          <span>Recording... Tap microphone to stop</span>
                         </div>
                       )}
                     </div>
@@ -767,7 +816,7 @@ export default function CanvasLanding() {
       <div className="fixed top-4 right-4 flex items-center gap-4">
         {/* User Profile Icons */}
         <div 
-          className="flex items-center gap-3 p-3 rounded-2xl backdrop-blur-xl border border-white/40"
+          className="flex items-center gap-1 p-1 rounded-3xl backdrop-blur-xl border border-white/40"
           style={{
             background: 'rgba(255, 255, 255, 0.3)',
             backdropFilter: 'blur(20px)',
@@ -782,15 +831,15 @@ export default function CanvasLanding() {
             className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
             onClick={() => alert('Notifications - Coming Soon!')}
           >
-            <RiNotification3Line size={18} style={{ color: '#6B46C1' }} />
+            <RiNotification3Line size={18} style={{ color: DARK_PALETTE.tertiary }} />
           </button>
           <button 
             className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
             onClick={() => alert('Settings - Coming Soon!')}
           >
-            <RiSettings3Line size={18} style={{ color: '#6B46C1' }} />
+            <RiSettings3Line size={18} style={{ color: DARK_PALETTE.tertiary }} />
           </button>
-          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#6B46C1' }}>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: DARK_PALETTE.primary }}>
             <RiUser3Line size={18} className="text-white" />
           </div>
         </div>
@@ -823,7 +872,7 @@ export default function CanvasLanding() {
             `
           }}
         >
-          <RiSearchLine size={20} style={{ color: '#6B46C1' }} />
+          <RiSearchLine size={20} style={{ color: DARK_PALETTE.tertiary }} />
           <input
             type="text"
             placeholder="Ask anything..."
@@ -838,7 +887,7 @@ export default function CanvasLanding() {
             </button>
             <button 
               className="p-2 rounded-full text-white transition-colors hover:opacity-90"
-              style={{ backgroundColor: '#6B46C1' }}
+              style={{ backgroundColor: DARK_PALETTE.primary }}
             >
               <RiSendPlaneLine size={16} />
             </button>
@@ -857,3 +906,4 @@ export default function CanvasLanding() {
     </div>
   )
 }
+
