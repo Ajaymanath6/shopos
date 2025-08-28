@@ -11,5 +11,8 @@ export default defineConfig(({ mode }) => {
     base: isProd ? repoBase : '/',
     build: { outDir: 'dist', assetsDir: 'assets' },
     assetsInclude: ['**/*.svg', '**/*.woff2', '**/*.woff', '**/*.ttf'],
+    server: {
+      host: true
+    }
   }
 })
