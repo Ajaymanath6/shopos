@@ -62,7 +62,6 @@ const DARK_PALETTE = {
 interface AIConversationCardProps {
   taskCards: TaskCard[]
   expandedCards: string[]
-  storeUrl: string
   scanProgress: number
   currentStep: number
   isScanning: boolean
@@ -70,7 +69,7 @@ interface AIConversationCardProps {
   onAutoStartScan?: () => void
 }
 
-function AIConversationCard({ taskCards, expandedCards, storeUrl, scanProgress, currentStep, isScanning, onAutoEnterUrl, onAutoStartScan }: AIConversationCardProps) {
+function AIConversationCard({ taskCards, expandedCards, scanProgress, currentStep, isScanning, onAutoEnterUrl, onAutoStartScan }: AIConversationCardProps) {
   const [messages, setMessages] = useState<Array<{
     id: string
     type: 'thinking' | 'planning' | 'executing' | 'result' | 'error' | 'summary'
@@ -159,21 +158,21 @@ function AIConversationCard({ taskCards, expandedCards, storeUrl, scanProgress, 
     }, messageDelay)
     messageDelay += 8000
 
-    // Message 3: User flow steps
+    // Message 3: What I will do (first person)
     setTimeout(() => {
       addTypingMessage({
         type: 'planning',
-        content: "Here's what you normally do in 4 steps:\n• Step 1: Enter your Shopify store URL\n• Step 2: Click 'Start Free Scan' button\n• Step 3: Wait for AI analysis to complete\n• Step 4: Review your personalized report",
+        content: "Here's what I'll do in 4 steps:\n• Step 1: I'll enter your Shopify store URL\n• Step 2: I'll click 'Start Free Scan' button\n• Step 3: I'll run the AI analysis\n• Step 4: I'll generate your personalized report",
         icon: RiBrainLine
       })
     }, messageDelay)
     messageDelay += 10000
 
-    // Message 4: I'll do it for you
+    // Message 4: Starting first step
     setTimeout(() => {
       addTypingMessage({
         type: 'executing',
-        content: "Let me do these steps for you. First, I'll enter a demo URL in the interface...",
+        content: "Starting Step 1: I'm entering a demo URL in the interface...",
         icon: RiSearchEyeLine
       })
       
@@ -186,11 +185,11 @@ function AIConversationCard({ taskCards, expandedCards, storeUrl, scanProgress, 
     }, messageDelay)
     messageDelay += 8000
 
-    // Message 5: Press button and start scanning
+    // Message 5: Starting second step
     setTimeout(() => {
       addTypingMessage({
         type: 'executing',
-        content: "Now I'll click the 'Start Free Scan' button and begin the analysis...",
+        content: "Step 2: I'm clicking the 'Start Free Scan' button and beginning the analysis...",
         icon: RiSearchEyeLine
       })
       
@@ -270,11 +269,11 @@ function AIConversationCard({ taskCards, expandedCards, storeUrl, scanProgress, 
         setMessages([]) // Reset messages for new task
         setShowSkeleton(true)
         
-        // 10-second delay before starting AI interaction
+        // 5-second delay before starting AI interaction
         setTimeout(() => {
           setShowSkeleton(false)
           startAIConversation(task)
-        }, 10000)
+        }, 5000)
       }
     } else {
       setCurrentTask(null)
@@ -284,16 +283,7 @@ function AIConversationCard({ taskCards, expandedCards, storeUrl, scanProgress, 
     }
   }, [expandedCards, taskCards, currentTask, startAIConversation])
 
-  // React to store URL input
-  useEffect(() => {
-    if (storeUrl && currentTask && !isScanning) {
-      addTypingMessage({
-        type: 'thinking',
-        content: `Perfect! I can see you want me to analyze ${storeUrl}. Let me prepare my analysis strategy...`,
-        icon: RiPulseLine
-      })
-    }
-  }, [storeUrl, currentTask, isScanning, addTypingMessage])
+
 
   // React to scanning progress
   useEffect(() => {
@@ -332,14 +322,18 @@ function AIConversationCard({ taskCards, expandedCards, storeUrl, scanProgress, 
           
           {/* Right side icons */}
           <div className="flex items-center gap-2">
-            {currentlyTyping && (
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#374151' }}></div>
-                <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#374151', animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#374151', animationDelay: '0.2s' }}></div>
+            {(currentlyTyping || isScanning) && (
+              <div className="flex items-center gap-2">
+                {currentlyTyping && (
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#374151' }}></div>
+                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#374151', animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#374151', animationDelay: '0.2s' }}></div>
+                  </div>
+                )}
+                <RiLoader2Line size={16} className="animate-spin" style={{ color: '#374151' }} />
               </div>
             )}
-            {isScanning && <RiLoader2Line size={16} className="animate-spin" style={{ color: '#374151' }} />}
             <RiPauseCircleFill size={16} style={{ color: '#374151' }} />
           </div>
         </div>
@@ -681,6 +675,7 @@ export default function CanvasLanding() {
   const [scanProgress, setScanProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
   const [storeUrl, setStoreUrl] = useState('')
+  const loadingPageScanRef = useRef<(() => void) | null>(null)
   
   // Auto functions for AI to control interface
   const handleAutoEnterUrl = (url: string) => {
@@ -688,12 +683,22 @@ export default function CanvasLanding() {
   }
   
   const handleAutoStartScan = () => {
-    if (storeUrl) {
-      handleStoreSubmit()
-      // Start the scanning progress
-      setScanProgress(1)
-      setCurrentStep(0)
+    if (storeUrl && loadingPageScanRef.current) {
+      // Call the LoadingPage's handleStartScan directly
+      loadingPageScanRef.current()
+    } else if (!storeUrl) {
+      // Ensure URL is set before scanning
+      setStoreUrl('https://demo-store.myshopify.com')
+      setTimeout(() => {
+        if (loadingPageScanRef.current) {
+          loadingPageScanRef.current()
+        }
+      }, 100)
     }
+  }
+  
+  const handleLoadingPageScanReady = (scanFn: () => void) => {
+    loadingPageScanRef.current = scanFn
   }
   
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -1267,6 +1272,7 @@ export default function CanvasLanding() {
                                   currentStep={currentStep}
                                   scanningSteps={scanningSteps}
                                   handleStoreSubmit={handleStoreSubmit}
+                                  onStartScan={handleLoadingPageScanReady}
                                 />
                               </div>
 
@@ -1428,6 +1434,7 @@ export default function CanvasLanding() {
                                   currentStep={currentStep}
                                   scanningSteps={scanningSteps}
                                   handleStoreSubmit={handleStoreSubmit}
+                                  onStartScan={handleLoadingPageScanReady}
                                 />
                               </div>
 
@@ -1567,7 +1574,6 @@ export default function CanvasLanding() {
               <AIConversationCard 
                 taskCards={taskCards}
                 expandedCards={expandedCards}
-                storeUrl={storeUrl}
                 scanProgress={scanProgress}
                 currentStep={currentStep}
                 isScanning={scanProgress > 0}
@@ -1601,7 +1607,7 @@ export default function CanvasLanding() {
                 onClick={() => sectionMode && handleProjectSelection(task.id)}
               >
                 {/* Main Heading - Outside Interface */}
-              <div className="text-left mb-6 relative">
+              <div className="text-left mb-6 relative" style={{ marginTop: '120px' }}>
                 <div className="flex items-center justify-between">
                   <div>
                     <h1 className="text-3xl font-bold mb-2 text-gray-900">
@@ -1673,6 +1679,7 @@ export default function CanvasLanding() {
                         currentStep={currentStep}
                         scanningSteps={scanningSteps}
                         handleStoreSubmit={handleStoreSubmit}
+                        onStartScan={handleLoadingPageScanReady}
                       />
                     </div>
 
@@ -1786,7 +1793,7 @@ export default function CanvasLanding() {
                 onClick={() => handleProjectSelection('store-health')}
               >
               {/* Main Heading */}
-              <div className="text-left mb-6 relative">
+              <div className="text-left mb-6 relative" style={{ marginTop: '120px' }}>
                 <div className="flex items-center justify-between">
                   <div>
                     <h1 className="text-3xl font-bold mb-2 text-gray-900">
@@ -1856,6 +1863,7 @@ export default function CanvasLanding() {
                       currentStep={currentStep}
                       scanningSteps={scanningSteps}
                       handleStoreSubmit={handleStoreSubmit}
+                      onStartScan={handleLoadingPageScanReady}
                     />
                   </div>
 

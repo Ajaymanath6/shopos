@@ -31,6 +31,7 @@ interface LoadingPageProps {
   currentStep: number
   scanningSteps: ScanStep[]
   handleStoreSubmit: () => void
+  onStartScan?: (scanFn: () => void) => void
 }
 
 export default function LoadingPage({
@@ -39,7 +40,8 @@ export default function LoadingPage({
   scanProgress,
   currentStep,
   scanningSteps,
-  handleStoreSubmit
+  handleStoreSubmit,
+  onStartScan
 }: LoadingPageProps) {
   const isScanning = scanProgress > 0
   const [currentScanStep, setCurrentScanStep] = React.useState(0)
@@ -81,7 +83,7 @@ export default function LoadingPage({
     }
   ]
 
-  const handleStartScan = () => {
+  const handleStartScan = React.useCallback(() => {
     setCurrentScanStep(0)
     setScanResults([])
     setAiThoughts([])
@@ -117,7 +119,14 @@ export default function LoadingPage({
         setScanResults(prev => [...prev, result])
       }, 8000 + index * 2000)
     })
-  }
+  }, [handleStoreSubmit])
+
+  // Register the handleStartScan function with parent component
+  React.useEffect(() => {
+    if (onStartScan) {
+      onStartScan(handleStartScan)
+    }
+  }, [onStartScan, handleStartScan])
 
   if (isScanning) {
     return (
@@ -137,7 +146,7 @@ export default function LoadingPage({
     <div 
       className="w-full p-8 rounded-3xl backdrop-blur-lg"
       style={{
-        background: 'rgba(255, 255, 255, 0.6)',
+        background: 'rgba(255, 255, 255, 01)',
         backdropFilter: 'blur(20px)',
         boxShadow: `
           0 8px 32px rgba(0, 0, 0, 0.1),
