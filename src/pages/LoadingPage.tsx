@@ -41,7 +41,7 @@ export default function LoadingPage({
   scanningSteps,
   handleStoreSubmit
 }: LoadingPageProps) {
-  const [isScanning, setIsScanning] = React.useState(false)
+  const isScanning = scanProgress > 0
   const [currentScanStep, setCurrentScanStep] = React.useState(0)
   const [scanResults, setScanResults] = React.useState<string[]>([])
   const [aiThoughts, setAiThoughts] = React.useState<string[]>([])
@@ -82,7 +82,6 @@ export default function LoadingPage({
   ]
 
   const handleStartScan = () => {
-    setIsScanning(true)
     setCurrentScanStep(0)
     setScanResults([])
     setAiThoughts([])
@@ -138,7 +137,7 @@ export default function LoadingPage({
     <div 
       className="w-full p-8 rounded-3xl backdrop-blur-lg"
       style={{
-        background: 'rgba(255, 255, 255, 0.8)',
+        background: 'rgba(255, 255, 255, 0.6)',
         backdropFilter: 'blur(20px)',
         boxShadow: `
           0 8px 32px rgba(0, 0, 0, 0.1),

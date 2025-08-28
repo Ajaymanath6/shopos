@@ -66,9 +66,11 @@ interface AIConversationCardProps {
   scanProgress: number
   currentStep: number
   isScanning: boolean
+  onAutoEnterUrl?: (url: string) => void
+  onAutoStartScan?: () => void
 }
 
-function AIConversationCard({ taskCards, expandedCards, storeUrl, scanProgress, currentStep, isScanning }: AIConversationCardProps) {
+function AIConversationCard({ taskCards, expandedCards, storeUrl, scanProgress, currentStep, isScanning, onAutoEnterUrl, onAutoStartScan }: AIConversationCardProps) {
   const [messages, setMessages] = useState<Array<{
     id: string
     type: 'thinking' | 'planning' | 'executing' | 'result' | 'error' | 'summary'
@@ -134,39 +136,72 @@ function AIConversationCard({ taskCards, expandedCards, storeUrl, scanProgress, 
                     task.id.includes('performance') ? 'performance' :
                     task.id.includes('conversion') ? 'conversion' : 'default'
 
-    addTypingMessage({
-      type: 'thinking',
-      content: greetings[taskType],
-      icon: RiBrainLine
-    })
+    // Sequential message flow - each waits for previous to complete
+    let messageDelay = 0
 
-    // Follow up with capability explanation
+    // Message 1: Introduction
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'thinking',
+        content: greetings[taskType],
+        icon: RiBrainLine
+      })
+    }, messageDelay)
+    messageDelay += 6000 // Wait for typing to complete
+
+    // Message 2: What I'll help with
     setTimeout(() => {
       addTypingMessage({
         type: 'planning',
-        content: "I work by analyzing your store systematically. Just paste your Shopify URL and I'll create a comprehensive action plan.",
+        content: "I will help you check your store health and give you a comprehensive report with actionable recommendations.",
         icon: RiBrainLine
       })
-    }, 4000)
+    }, messageDelay)
+    messageDelay += 8000
 
-    // Add 4-step plan
+    // Message 3: User flow steps
     setTimeout(() => {
       addTypingMessage({
         type: 'planning',
-        content: "Here's my systematic approach:\n• Step 1: Store Structure & Navigation Analysis\n• Step 2: Performance & Speed Optimization\n• Step 3: SEO & Content Review\n• Step 4: Conversion Funnel Enhancement",
+        content: "Here's what you normally do in 4 steps:\n• Step 1: Enter your Shopify store URL\n• Step 2: Click 'Start Free Scan' button\n• Step 3: Wait for AI analysis to complete\n• Step 4: Review your personalized report",
         icon: RiBrainLine
       })
-    }, 8000)
+    }, messageDelay)
+    messageDelay += 10000
 
-    // Start implementing first step
+    // Message 4: I'll do it for you
     setTimeout(() => {
       addTypingMessage({
         type: 'executing',
-        content: "Starting Step 1: Analyzing your store structure and navigation patterns...",
+        content: "Let me do these steps for you. First, I'll enter a demo URL in the interface...",
         icon: RiSearchEyeLine
       })
-    }, 12000)
-  }, [addTypingMessage])
+      
+      // Auto-enter URL after message completes
+      setTimeout(() => {
+        if (onAutoEnterUrl) {
+          onAutoEnterUrl('https://demo-store.myshopify.com')
+        }
+      }, 3000)
+    }, messageDelay)
+    messageDelay += 8000
+
+    // Message 5: Press button and start scanning
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'executing',
+        content: "Now I'll click the 'Start Free Scan' button and begin the analysis...",
+        icon: RiSearchEyeLine
+      })
+      
+      // Auto-click scan button after message completes
+      setTimeout(() => {
+        if (onAutoStartScan) {
+          onAutoStartScan()
+        }
+      }, 3000)
+    }, messageDelay)
+  }, [addTypingMessage, onAutoEnterUrl, onAutoStartScan])
 
   const handleScanningProgress = useCallback(() => {
     if (!currentTask) return
@@ -304,7 +339,7 @@ function AIConversationCard({ taskCards, expandedCards, storeUrl, scanProgress, 
                 <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#374151', animationDelay: '0.2s' }}></div>
               </div>
             )}
-            <RiLoader2Line size={16} className="animate-spin" style={{ color: '#374151' }} />
+            {isScanning && <RiLoader2Line size={16} className="animate-spin" style={{ color: '#374151' }} />}
             <RiPauseCircleFill size={16} style={{ color: '#374151' }} />
           </div>
         </div>
@@ -646,6 +681,21 @@ export default function CanvasLanding() {
   const [scanProgress, setScanProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
   const [storeUrl, setStoreUrl] = useState('')
+  
+  // Auto functions for AI to control interface
+  const handleAutoEnterUrl = (url: string) => {
+    setStoreUrl(url)
+  }
+  
+  const handleAutoStartScan = () => {
+    if (storeUrl) {
+      handleStoreSubmit()
+      // Start the scanning progress
+      setScanProgress(1)
+      setCurrentStep(0)
+    }
+  }
+  
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     { 
       id: '1',
@@ -1521,12 +1571,14 @@ export default function CanvasLanding() {
                 scanProgress={scanProgress}
                 currentStep={currentStep}
                 isScanning={scanProgress > 0}
+                onAutoEnterUrl={handleAutoEnterUrl}
+                onAutoStartScan={handleAutoStartScan}
               />
             </div>
           )}
 
           {/* Projects Container - Full Canvas Layout */}
-          <div className="mt-26 w-full flex flex-wrap gap-12" style={{ minWidth: '100vw', padding: '0 2rem', paddingLeft: '360px' }}>
+          <div className="mt-26 w-full flex flex-wrap gap-12" style={{ minWidth: '100vw', padding: '0 2rem', paddingLeft: '360px', marginBottom: '50px' }}>
             {/* AI-Created Tasks using LoadingPage - Only when NOT in section */}
             {taskCards.filter(task => 
               task.id.startsWith('ai-') && 
@@ -1543,7 +1595,8 @@ export default function CanvasLanding() {
                 style={{ 
                   width: '1400px',
                   minWidth: '1400px',
-                  flexShrink: 0
+                  flexShrink: 0,
+                  marginBottom: '50px'
                 }}
                 onClick={() => sectionMode && handleProjectSelection(task.id)}
               >
@@ -1727,7 +1780,8 @@ export default function CanvasLanding() {
                               style={{ 
                   width: '1400px',
                   minWidth: '1400px',
-                  flexShrink: 0
+                  flexShrink: 0,
+                  marginBottom: '50px'
                 }}
                 onClick={() => handleProjectSelection('store-health')}
               >

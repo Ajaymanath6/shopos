@@ -20,7 +20,7 @@ export default class ErrorBoundary extends React.Component<ErrorBoundaryProps, E
     return { hasError: true, error }
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo): void {
+  componentDidCatch(_error: Error, info: React.ErrorInfo): void {
     this.setState({ info })
     // Optionally send to monitoring here
   }
