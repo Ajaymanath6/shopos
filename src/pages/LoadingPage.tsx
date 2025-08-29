@@ -1,5 +1,28 @@
 import React from 'react'
-import { RiSearchLine, RiSettings3Line, RiRocketLine, RiCheckLine, RiAppleLine, RiGoogleLine, RiMicrosoftLine, RiAmazonLine, RiNetflixLine } from '@remixicon/react'
+import {
+  RiSearchLine,
+  RiSettings3Line,
+  RiRocketLine,
+  RiCheckLine,
+  RiAppleLine,
+  RiGoogleLine,
+  RiMicrosoftLine,
+  RiAmazonLine,
+  RiNetflixLine,
+  RiMoneyDollarCircleLine,
+  RiArrowUpLine,
+  RiTimeLine,
+  RiShieldCheckLine,
+  RiDownloadLine,
+  RiSearch2Line,
+  RiPhoneLine,
+  RiAlertLine,
+  RiImageLine,
+  RiSpeedLine,
+  RiSmartphoneLine,
+  RiBarChartLine,
+  RiGroupLine
+} from '@remixicon/react'
 
 // Dark Gray Monochromatic Palette
 const DARK_PALETTE = {
@@ -86,159 +109,240 @@ export default function LoadingPage({
             <div className="grid grid-cols-5 gap-6">
               {/* Left Column - 70% (3/5 columns) */}
               <div className="col-span-3 space-y-6">
-                {/* Box 1 - Performance Optimization */}
+                {/* Box 1 - Health Score */}
                 <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#10B981' }}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                  {/* Header Section */}
+                  <div className="text-center mb-8">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Store Health Score</h3>
+                    <p className="text-sm text-gray-600">Overall store health based on 14 performance factors</p>
+                  </div>
+
+                  {/* Main Score Display */}
+                  <div className="text-center mb-8">
+                    <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center border-2 border-gray-200 mx-auto">
+                      <span className="text-2xl font-bold text-gray-900">78</span>
                     </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">Performance Optimization</h3>
-                      <p className="text-gray-600">Critical speed improvements identified</p>
+                    <div className="mt-3">
+                      <div className="text-sm font-medium text-gray-900">Good Performance</div>
+                      <div className="text-xs text-gray-500 mt-1">Room for improvement</div>
                     </div>
                   </div>
+
+                  {/* Performance Factors */}
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm font-medium text-gray-700">Page Load Speed</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-gray-200 rounded-full">
-                          <div className="w-16 h-2 bg-yellow-500 rounded-full"></div>
-                        </div>
-                        <span className="text-sm text-gray-600">68%</span>
-                      </div>
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-sm text-gray-700">Performance</span>
+                      <span className="text-sm font-medium text-gray-900">75%</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm font-medium text-gray-700">Image Optimization</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 bg-gray-200 rounded-full">
-                          <div className="w-20 h-2 bg-green-500 rounded-full"></div>
-                        </div>
-                        <span className="text-sm text-gray-600">83%</span>
+
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-sm text-gray-700">SEO</span>
+                      <span className="text-sm font-medium text-gray-900">82%</span>
+                    </div>
+
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-sm text-gray-700">Security</span>
+                      <span className="text-sm font-medium text-gray-900">88%</span>
+                    </div>
+                  </div>
+
+                  {/* Summary Stats */}
+                  <div className="mt-6 pt-4 border-t border-gray-100">
+                    <div className="grid grid-cols-2 gap-4 text-center">
+                      <div>
+                        <div className="text-lg font-bold text-gray-900">14</div>
+                        <div className="text-xs text-gray-500">Factors Analyzed</div>
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-gray-900">+22</div>
+                        <div className="text-xs text-gray-500">Points to Improve</div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Box 2 - SEO Improvements */}
+                {/* Box 2 - Top Priority Issues */}
                 <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#F59E0B' }}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gray-100">
+                      <RiAlertLine size={24} className="text-gray-700" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900">SEO Improvements</h3>
-                      <p className="text-gray-600">Search visibility enhancements</p>
+                      <h3 className="text-xl font-bold text-gray-900">Top Priority Issues</h3>
+                      <p className="text-gray-600">Issues that need immediate attention</p>
                     </div>
                   </div>
-                  <div className="space-y-3">
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">Meta Tags Missing</span>
-                        <span className="text-sm text-red-600 font-medium">12 pages</span>
-                      </div>
-                      <p className="text-xs text-gray-600">Add proper meta descriptions and title tags to improve search rankings</p>
-                    </div>
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">Image Alt Tags</span>
-                        <span className="text-sm text-orange-600 font-medium">8 missing</span>
-                      </div>
-                      <p className="text-xs text-gray-600">Add descriptive alt text to improve accessibility and SEO</p>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Box 3 - Security & Performance */}
-                <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#EF4444' }}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                  {/* Issue 1 - Critical */}
+                  <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <RiImageLine size={16} className="text-gray-700" />
+                        <span className="text-sm font-medium text-gray-900">Image Quality</span>
+                      </div>
+                      <span className="text-xs text-gray-600 bg-gray-200 px-2 py-1 rounded-full">High Impact</span>
                     </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">Security & Performance</h3>
-                      <p className="text-gray-600">Technical issues that need attention</p>
+                    <div className="mb-3">
+                      <h4 className="text-sm font-bold text-gray-900 mb-1">Blurry Product Images</h4>
+                      <p className="text-xs text-gray-600 mb-2">23 product images are low resolution and could be affecting conversions</p>
+                      <div className="flex items-center gap-2 text-xs text-green-600">
+                        <RiArrowUpLine size={12} />
+                        <span>Potential impact: +12% conversion rate</span>
+                      </div>
                     </div>
+                    <button
+                      className="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Fix with Shopos AI
+                    </button>
                   </div>
-                  <div className="space-y-3">
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-red-700">Outdated SSL Certificate</span>
-                        <span className="text-sm text-red-600 font-medium">High Risk</span>
+
+                  {/* Issue 2 - Critical */}
+                  <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <RiSpeedLine size={16} className="text-gray-700" />
+                        <span className="text-sm font-medium text-gray-900">Page Speed</span>
                       </div>
-                      <p className="text-xs text-red-600">Update SSL certificate to maintain secure connections</p>
+                      <span className="text-xs text-gray-600 bg-gray-200 px-2 py-1 rounded-full">High Revenue Impact</span>
                     </div>
-                    <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-orange-700">Large JavaScript Files</span>
-                        <span className="text-sm text-orange-600 font-medium">3 files</span>
+                    <div className="mb-3">
+                      <h4 className="text-sm font-bold text-gray-900 mb-1">Slow Page Loading</h4>
+                      <p className="text-xs text-gray-600 mb-2">Homepage loads in 4.2s, 68% slower than optimal</p>
+                      <div className="flex items-center gap-2 text-xs text-green-600">
+                        <RiMoneyDollarCircleLine size={12} />
+                        <span>Potential impact: +$8,400/month revenue</span>
                       </div>
-                      <p className="text-xs text-orange-600">Minify and compress JavaScript for better performance</p>
                     </div>
+                    <button
+                      className="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Fix with Shopos AI
+                    </button>
+                  </div>
+
+                  {/* Issue 3 - Warning */}
+                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <RiSmartphoneLine size={16} className="text-gray-700" />
+                        <span className="text-sm font-medium text-gray-900">Mobile UX</span>
+                      </div>
+                      <span className="text-xs text-gray-600 bg-gray-200 px-2 py-1 rounded-full">Medium Impact</span>
+                    </div>
+                    <div className="mb-3">
+                      <h4 className="text-sm font-bold text-gray-900 mb-1">Mobile Layout Issues</h4>
+                      <p className="text-xs text-gray-600 mb-2">Product grid breaks on small screens, affecting 45% of visitors</p>
+                      <div className="flex items-center gap-2 text-xs text-green-600">
+                        <RiArrowUpLine size={12} />
+                        <span>Potential impact: +8% mobile conversions</span>
+                      </div>
+                    </div>
+                    <button
+                      className="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Fix with Shopos AI
+                    </button>
                   </div>
                 </div>
               </div>
 
               {/* Right Column - 30% (2/5 columns) */}
               <div className="col-span-2 space-y-6">
-                {/* Box 1 - Health Score */}
+                {/* Box 1 - Potential Impact */}
                 <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <div className="text-center mb-4">
-                    <div className="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ backgroundColor: DARK_PALETTE.primary }}>
-                      <span className="text-2xl font-bold text-white">78</span>
+                  <div className="text-center mb-6">
+                    <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center bg-gray-100">
+                      <RiBarChartLine size={24} className="text-gray-700" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">Health Score</h3>
-                    <p className="text-sm text-gray-600">Overall store performance</p>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">Potential Impact</h3>
+                    <p className="text-sm text-gray-600">Estimated improvements</p>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Performance</span>
-                      <span className="font-medium text-gray-900">75%</span>
+                  <div className="space-y-6">
+                    {/* Potential Revenue Increase */}
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                        <RiMoneyDollarCircleLine size={20} className="text-gray-700" />
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-gray-900">$10,500</div>
+                        <div className="text-sm font-medium text-gray-600">Potential Revenue Increase</div>
+                        <div className="text-xs text-gray-500">per month</div>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">SEO</span>
-                      <span className="font-medium text-gray-900">82%</span>
+
+                    {/* Conversion Rate Lift */}
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                        <RiArrowUpLine size={20} className="text-gray-700" />
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-gray-900">+20%</div>
+                        <div className="text-sm font-medium text-gray-600">Conversion Rate Lift</div>
+                        <div className="text-xs text-gray-500">estimated</div>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Security</span>
-                      <span className="font-medium text-gray-900">88%</span>
+
+                    {/* Time to Fix */}
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                        <RiTimeLine size={20} className="text-gray-700" />
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-gray-900">5 min</div>
+                        <div className="text-sm font-medium text-gray-600">Time to Fix</div>
+                        <div className="text-xs text-gray-500">per issue</div>
+                      </div>
+                    </div>
+
+                    {/* Users Affected */}
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                        <RiGroupLine size={20} className="text-gray-700" />
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-gray-900">2,847</div>
+                        <div className="text-sm font-medium text-gray-600">Users Affected</div>
+                        <div className="text-xs text-gray-500">per week</div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Box 2 - Quick Wins */}
+                {/* Box 2 - Quick Actions */}
                 <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <div className="text-center mb-4">
-                    <div className="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ backgroundColor: '#10B981' }}>
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                  <div className="text-center mb-6">
+                    <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center bg-gray-100">
+                      <RiRocketLine size={24} className="text-gray-700" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">Quick Wins</h3>
-                    <p className="text-sm text-gray-600">Easy improvements</p>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">Quick Actions</h3>
+                    <p className="text-sm text-gray-600">Next steps</p>
                   </div>
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-gray-700">Enable browser caching</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-gray-700">Compress images</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-gray-700">Add meta descriptions</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm text-gray-700">Fix broken links</span>
-                    </div>
+                    <button className="w-full p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-left group">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center group-hover:bg-gray-50 transition-colors">
+                          <RiDownloadLine size={16} className="text-gray-700" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">Download Report</span>
+                      </div>
+                    </button>
+                    <button className="w-full p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-left group">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center group-hover:bg-gray-50 transition-colors">
+                          <RiSearch2Line size={16} className="text-gray-700" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">Scan Another Store</span>
+                      </div>
+                    </button>
+                    <button className="w-full p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-left group">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center group-hover:bg-gray-50 transition-colors">
+                          <RiPhoneLine size={16} className="text-gray-700" />
+                        </div>
+                        <span className="text-sm font-medium text-gray-700">Schedule Call</span>
+                      </div>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -564,5 +668,6 @@ export default function LoadingPage({
     </div>
   )
 }
+
 
 

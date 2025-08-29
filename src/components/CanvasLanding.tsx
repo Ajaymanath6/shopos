@@ -8,10 +8,7 @@ import {
   RiSearchLine, 
   RiMicLine, 
   RiAttachmentLine,
-
-  
   RiStarFill,
-  RiFocus3Line,
   RiCheckLine,
   RiArrowUpSLine,
   RiHomeLine,
@@ -173,7 +170,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         content: "Execution - Step 1: I'm now establishing the connection by entering a demo URL into the interface. This provides us with a representative sample to work with for the comprehensive analysis.",
         icon: RiSearchEyeLine
       })
-
+      
       // Auto-enter URL after message completes
       setTimeout(() => {
         if (onAutoEnterUrl) {
@@ -190,7 +187,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         content: "Execution - Step 2: Now I'm initiating the comprehensive scan process. This will systematically analyze your store's performance, identify optimization opportunities, and prepare detailed recommendations for growth.",
         icon: RiSearchEyeLine
       })
-
+      
       // Auto-click scan button after message completes
       setTimeout(() => {
         if (onAutoStartScan) {
@@ -222,12 +219,12 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
     if (scanProgress >= 100 && !completionMessageShown) {
       console.log('Scan completed, showing health report...')
       setCompletionMessageShown(true)
-      addTypingMessage({
-        type: 'summary',
+        addTypingMessage({
+          type: 'summary',
         content: "Analysis complete! I've identified key optimization opportunities. Here are your detailed findings:",
-        icon: RiCheckLine,
-        status: 'completed'
-      })
+          icon: RiCheckLine,
+          status: 'completed'
+        })
       
       // Health report will show automatically in LoadingPage when scanProgress reaches 100%
     }
@@ -438,15 +435,7 @@ interface ChatMessage {
   }>
 }
 
-interface SystemFeedback {
-  isVisible: boolean
-  state: 'running' | 'waiting'
-  subtasks: Array<{
-    id: string
-    text: string
-    completed: boolean
-  }>
-}
+
 
 export default function CanvasLanding() {
   const [taskCards, setTaskCards] = useState<TaskCard[]>(DEFAULT_TASKS)
@@ -656,7 +645,7 @@ export default function CanvasLanding() {
     loadingPageScanRef.current = scanFn
   }
   
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+  const [chatMessages] = useState<ChatMessage[]>([
     { 
       id: '1',
       role: 'ai', 
@@ -666,15 +655,6 @@ export default function CanvasLanding() {
       icon: 'RiStarFill'
     }
   ])
-  const [chatInput, setChatInput] = useState('')
-  const [isAiThinking] = useState(false)
-  const [isSending, setIsSending] = useState(false)
-  const [isRecording, setIsRecording] = useState(false)
-  const [systemFeedback, setSystemFeedback] = useState<SystemFeedback>({
-    isVisible: false,
-    state: 'waiting',
-    subtasks: []
-  })
   const [showAiSearch, setShowAiSearch] = useState(false)
   const [aiSearchQuery, setAiSearchQuery] = useState('')
   const [isProcessingAiCommand, setIsProcessingAiCommand] = useState(false)
@@ -754,102 +734,13 @@ export default function CanvasLanding() {
 
 
 
-  // Handle chat send with enterprise system feedback
-  const handleChatSend = async () => {
-    if (chatInput.trim() && !isSending) {
-      setIsSending(true)
-      
-      // Add user message
-      const userMessage: ChatMessage = {
-        id: Date.now().toString(),
-        role: 'user',
-        content: chatInput,
-        timestamp: new Date().toISOString(),
-        state: 'completed'
-      }
-      
-      setChatMessages(prev => [...prev, userMessage])
-      setChatInput('')
-      
-      // Show system feedback with subtasks
-      const subtasks = [
-        { id: '1', text: 'Analysis: Processing your request and identifying key requirements', completed: false },
-        { id: '2', text: 'Plan: Developing structured approach to address your needs', completed: false },
-        { id: '3', text: 'Execution: Implementing solution and gathering relevant information', completed: false },
-        { id: '4', text: 'Reflection: Reviewing results and preparing comprehensive response', completed: false }
-      ]
-      
-      setSystemFeedback({
-        isVisible: true,
-        state: 'running',
-        subtasks: subtasks
-      })
-      
-      // Simulate progressive task completion
-      let completedCount = 0
-      const taskInterval = setInterval(() => {
-        if (completedCount < subtasks.length) {
-          setSystemFeedback(prev => ({
-            ...prev,
-            subtasks: prev.subtasks.map((task, index) => 
-              index === completedCount ? { ...task, completed: true } : task
-            )
-          }))
-          completedCount++
-        } else {
-          clearInterval(taskInterval)
-          
-          // Hide system feedback and show AI response
-          setTimeout(() => {
-            setSystemFeedback({ isVisible: false, state: 'waiting', subtasks: [] })
-            
-            const aiResponse: ChatMessage = {
-              id: Date.now().toString(),
-              role: 'ai',
-              content: userMessage.content.toLowerCase().includes('analyze')
-                ? "Analysis: I can see you're interested in a comprehensive store analysis. Let me break this down systematically.\n\nPlan: I'll examine your optimization opportunities, calculate performance metrics, and provide prioritized recommendations.\n\nExecution: Based on my analysis, I've identified 8 key optimization opportunities with your current health score at 76%. The most impactful improvements focus on performance bottlenecks and conversion optimization.\n\nReflection: This assessment provides a solid foundation for growth. Would you like me to prioritize these fixes by potential impact and implementation complexity?"
-                : userMessage.content.toLowerCase().includes('products')
-                ? "Analysis: You're looking for product-related assistance. Let me understand your specific needs to provide the most relevant recommendations.\n\nPlan: I'll need details about your product requirements to deliver accurate suggestions.\n\nExecution: I can help you find products, but I'd need more specific criteria to provide the most valuable recommendations.\n\nReflection: Could you specify what type of products you're looking for? Details like price range, brand preferences, or specific features would help me provide more targeted assistance."
-                : "Analysis: I understand your request and I'm ready to help. Let me process what you're asking for.\n\nPlan: I'll analyze your specific needs and provide the most relevant information and actionable recommendations.\n\nExecution: I've reviewed your request and prepared comprehensive information based on the details you've provided.\n\nReflection: I've provided the most relevant information and recommendations for your specific situation. Does this address what you were looking for?",
-              timestamp: new Date().toISOString(),
-              state: 'completed'
-            }
-            
-            setChatMessages(prev => [...prev, aiResponse])
-            setIsSending(false)
-          }, 500)
-        }
-      }, 800)
-    }
-  }
 
-
-
-  const toggleRecording = () => {
-    setIsRecording(!isRecording)
-    if (!isRecording) {
-      // Simulate voice recording
-      setTimeout(() => {
-        setIsRecording(false)
-        setChatInput('Can you analyze my store performance?')
-      }, 3000)
-    }
-  }
 
   // Handle store URL submission
   const handleStoreSubmit = () => {
     if (!storeUrl.trim()) return
     
-    // Add chat message about starting analysis
-    const analysisMessage: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'ai',
-      content: `Perfect! Starting comprehensive analysis of ${storeUrl}. I'll check performance, SEO, accessibility, and more.`,
-      timestamp: new Date().toISOString(),
-      state: 'completed',
-      icon: 'RiStarFill'
-    }
-    setChatMessages(prev => [...prev, analysisMessage])
+    // Analysis started - ChatBot components will handle their own messages
     
     setProjectStatus(`Analyzing ${storeUrl}...`)
     setScanProgress(0)
@@ -858,29 +749,20 @@ export default function CanvasLanding() {
     const interval = setInterval(() => {
       stepIndex++
       const nextStep = stepIndex
-      if (nextStep >= scanningSteps.length) {
-        clearInterval(interval)
+        if (nextStep >= scanningSteps.length) {
+          clearInterval(interval)
         console.log('Scan completed, setting scanProgress to 100')
         setScanProgress(100)
         
         // Health report will show automatically in LoadingPage when scanProgress reaches 100%
         
-        // Add completion message to chat
-        setTimeout(() => {
-          const completionMessage: ChatMessage = {
-            id: Date.now().toString() + '_complete',
-            role: 'ai',
-            content: `✅ Analysis complete! Found 8 optimization opportunities. Your store health score is 78%. Ready to see the detailed report?`,
-            timestamp: new Date().toISOString(),
-            state: 'completed',
-            icon: 'RiStarFill'
-          }
-          setChatMessages(prev => [...prev, completionMessage])
-          setProjectStatus('Analysis complete - 78% health score')
-        }, 1000)
+        // Update project status - ChatBot components will handle their own messages
+          setTimeout(() => {
+            setProjectStatus('Analysis complete - 78% health score')
+          }, 1000)
         return
-      }
-      setScanProgress(scanningSteps[nextStep].progress)
+        }
+        setScanProgress(scanningSteps[nextStep].progress)
     }, 2000)
   }
 
@@ -1230,69 +1112,17 @@ export default function CanvasLanding() {
                               </div>
 
                               {/* Right Section - AI Chat (30%) */}
-                              <div
-                                className="w-[30%] rounded-2xl flex flex-col border"
-                                style={{
-                                  backgroundColor: '#FAFAFA',
-                                  borderColor: '#E5E7EB'
-                                }}
-                              >
+                              <div className="w-[30%]">
                                 {(() => {
                                   const task = taskCards.find(t => t.id === projectId)
                                   return task ? (
-                                    <>
-                                      <div className="p-4 border-b" style={{ borderColor: '#E5E7EB' }}>
-                                        <div className="flex items-center gap-3">
-                                          <div
-                                            className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                            style={{
-                                              background: 'linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%)'
-                                            }}
-                                          >
-                                            <RiStarFill size={16} className="text-white" />
-                                          </div>
-                                          <div>
-                                            <div className="text-sm font-medium text-gray-900">AI Agent: {task.title}</div>
-                                            <div className="text-xs text-gray-600">Ready to assist with {task.title.toLowerCase()}</div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div className="flex-1 flex flex-col">
-                                        <div className="flex-1 p-4 text-center text-gray-500">
-                                          <div className="space-y-4">
-                                            <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center">
-                                              <RiStarFill size={24} className="text-gray-400" />
-                                            </div>
-                                            <p className="text-sm">
-                                              Hi! I'm your AI assistant for {task.title.toLowerCase()}. 
-                                              {task.subtitle.includes('http') 
-                                                ? ' I\'ll analyze your store and provide recommendations.'
-                                                : ' How can I help you today?'
-                                              }
-                                            </p>
-                                          </div>
-                                        </div>
-                                        <div 
-                                          className="border-t p-4"
-                                          style={{ borderColor: '#E5E7EB' }}
-                                        >
-                                          <div className="mb-3">
-                                            <textarea
+                                    <ChatBot
+                                      title={`AI Agent: ${task.title}`}
+                                      subtitle={`Ready to assist with ${task.title.toLowerCase()}`}
                                               placeholder={`Ask about ${task.title.toLowerCase()}...`}
-                                              rows={2}
-                                              className="w-full resize-none outline-none text-sm p-3 rounded-lg border opacity-50"
-                                              style={{
-                                                backgroundColor: '#F9FAFB',
-                                                borderColor: '#E5E7EB',
-                                                color: '#6B7280',
-                                                fontFamily: 'Inter, sans-serif'
-                                              }}
-                                              disabled
-                                            />
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </>
+                                      className="h-full"
+                                      style={{ backgroundColor: '#FAFAFA' }}
+                                    />
                                   ) : null
                                 })()}
                               </div>
@@ -1392,115 +1222,20 @@ export default function CanvasLanding() {
                               </div>
 
                               {/* Right Section - AI Chat (30%) */}
-                              <div
-                                className="w-[30%] rounded-3xl flex flex-col border"
+                              <div className="w-[30%]">
+                                <ChatBot
+                                  title="Shopping Assistant"
+                                  subtitle="Enterprise AI"
+                                  placeholder="Ask about products, orders, or anything else..."
+                                  className="h-full rounded-3xl"
                                 style={{
                                   background: 'rgba(255, 255, 255, 0.8)',
                                   borderColor: '#E5E7EB',
                                   minHeight: 'auto'
                                 }}
-                              >
-                                {/* Chat Header */}
-                                <div className="p-4 border-b" style={{ borderColor: '#E5E7EB' }}>
-                                  <div className="flex items-center gap-3">
-                                    <div 
-                                      className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                      style={{ backgroundColor: '#F9FAFB' }}
-                                    >
-                                      <RiStarFill size={16} style={{ color: '#6B7280' }} />
-                                    </div>
-                                    <div>
-                                      <h3 className="font-medium text-sm text-gray-900">
-                                        Shopping Assistant
-                                      </h3>
-                                      <p className="text-xs text-gray-600">Enterprise AI</p>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Chat Messages */}
-                                <div className="flex-1 p-4 space-y-3">
-                                  {chatMessages.map((message) => (
-                                    <div
-                                      key={message.id}
-                                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                                    >
-                                      <div className={`max-w-[85%] ${message.role === 'user' ? 'ml-8' : 'mr-8'}`}>
-                                        <div
-                                          className="px-4 py-3 rounded-lg text-sm"
-                                          style={{
-                                            backgroundColor: message.role === 'user' ? '#F3F4F6' : '#E5E7EB',
-                                            color: '#374151'
-                                          }}
-                                        >
-                                          <div>{message.content}</div>
-                                          <div className="text-xs mt-2 text-gray-500">
-                                            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-
-                                {/* Chat Input */}
-                                <div className="border-t p-4" style={{ borderColor: '#E5E7EB' }}>
-                                  <div className="mb-3">
-                                    <textarea
-                                      value={chatInput}
-                                      onChange={(e) => setChatInput(e.target.value)}
-                                      placeholder="Ask about products, orders, or anything else..."
-                                      disabled={isSending || isAiThinking}
-                                      rows={2}
-                                      className="w-full resize-none outline-none text-sm p-3 rounded-lg border"
-                                      style={{
-                                        backgroundColor: '#FFFFFF',
-                                        borderColor: '#E5E7EB',
-                                        color: '#374151',
-                                        fontFamily: 'Inter, sans-serif'
-                                      }}
+                                  initialMessages={chatMessages}
                                     />
                                   </div>
-                                  
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                      <button 
-                                        className="p-2 rounded-lg transition-colors"
-                                        onClick={() => alert('File attachment - Coming Soon!')}
-                                        style={{ 
-                                          color: '#6B7280',
-                                          backgroundColor: 'transparent'
-                                        }}
-                                      >
-                                        <RiAttachmentLine size={18} />
-                                      </button>
-                                      
-                                      <button 
-                                        className="p-2 rounded-lg transition-colors"
-                                        onClick={toggleRecording}
-                                        style={{ 
-                                          color: isRecording ? '#FF4444' : '#6B7280',
-                                          backgroundColor: 'transparent'
-                                        }}
-                                      >
-                                        <RiMicLine size={18} />
-                                      </button>
-                                    </div>
-                                    
-                                    <button 
-                                      onClick={handleChatSend}
-                                      disabled={!chatInput.trim() || isAiThinking}
-                                      className="p-2 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                                      style={{
-                                        backgroundColor: chatInput.trim() && !isAiThinking ? DARK_PALETTE.primary : '#E5E7EB',
-                                        color: chatInput.trim() && !isAiThinking ? '#FFFFFF' : '#6B7280'
-                                      }}
-                                    >
-                                      <RiArrowUpSLine size={18} />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
                             </div>
                           </div>
                         </div>
@@ -1516,15 +1251,15 @@ export default function CanvasLanding() {
 
           {/* AI Conversation Card - Fixed Position Left Side */}
           {expandedCards.length > 0 && (
-            <div
-              className="fixed left-6 z-50"
-              style={{
-                width: '320px',
+                    <div 
+          className="fixed left-6 z-50"
+          style={{ 
+            width: '320px',
                 top: '200px',
                 height: '500px'
-              }}
-            >
-              <AIConversationCard
+          }}
+        >
+              <AIConversationCard 
                 taskCards={taskCards}
                 expandedCards={expandedCards}
                 scanProgress={scanProgress}
@@ -1591,7 +1326,7 @@ export default function CanvasLanding() {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <div
+                  <div 
                       className="w-8 h-8 rounded-lg flex items-center justify-center text-white"
                     style={{
                       background: 'linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%)'
@@ -1636,95 +1371,15 @@ export default function CanvasLanding() {
                     </div>
 
                     {/* Right Section - AI Chat (30%) */}
-                    <div 
-                      className="w-[30%] rounded-2xl flex flex-col border"
-                    style={{
-                        backgroundColor: '#FAFAFA',
-                        borderColor: '#E5E7EB'
-                      }}
-                    >
-                      {/* Chat Header */}
-                      <div className="p-4 border-b" style={{ borderColor: '#E5E7EB' }}>
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="w-8 h-8 rounded-lg flex items-center justify-center"
-                            style={{
-                              background: 'linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%)'
-                            }}
-                          >
-                            <RiStarFill size={16} className="text-white" />
-                        </div>
-                      <div>
-                            <div className="text-sm font-medium text-gray-900">AI Agent: {task.title}</div>
-                            <div className="text-xs text-gray-600">Ready to assist with {task.title.toLowerCase()}</div>
-                          </div>
-                      </div>
-                    </div>
-
-                      {/* Chat Interface */}
-                      <div className="flex-1 flex flex-col">
-                        <div className="flex-1 p-4 text-center text-gray-500">
-                          <div className="space-y-4">
-                            <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center">
-                              <RiStarFill size={24} className="text-gray-400" />
-                            </div>
-                            <p className="text-sm">
-                              Hi! I'm your AI assistant for {task.title.toLowerCase()}. 
-                              {task.subtitle.includes('http') 
-                                ? ' I\'ll analyze your store and provide recommendations.'
-                                : ' How can I help you today?'
-                              }
-                            </p>
-                          </div>
-                        </div>
-
-                        <div 
-                          className="border-t p-4"
-                          style={{ borderColor: '#E5E7EB' }}
-                        >
-                          <div className="mb-3">
-                            <textarea
+                    <div className="w-[30%]">
+                      <ChatBot
+                        title={`AI Agent: ${task.title}`}
+                        subtitle={`Ready to assist with ${task.title.toLowerCase()}`}
                               placeholder={`Ask about ${task.title.toLowerCase()}...`}
-                              rows={2}
-                              className="w-full resize-none outline-none text-sm p-3 rounded-lg border opacity-50"
-                              style={{
-                                backgroundColor: '#F9FAFB',
-                                borderColor: '#E5E7EB',
-                                color: '#6B7280',
-                                fontFamily: 'Inter, sans-serif'
-                              }}
-                              disabled
+                        className="h-full rounded-2xl"
+                        style={{ backgroundColor: '#FAFAFA', borderColor: '#E5E7EB' }}
                             />
                           </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                            <button
-                                className="p-2 rounded-lg transition-colors opacity-50"
-                                style={{ backgroundColor: '#F3F4F6' }}
-                                disabled
-                              >
-                                <RiAttachmentLine size={16} className="text-gray-400" />
-                              </button>
-                              <button 
-                                className="p-2 rounded-lg transition-colors opacity-50"
-                                style={{ backgroundColor: '#F3F4F6' }}
-                                disabled
-                              >
-                                <RiMicLine size={16} className="text-gray-400" />
-                              </button>
-                            </div>
-                            <button 
-                              className="px-4 py-2 text-white text-sm font-medium rounded-lg transition-all opacity-50"
-                              style={{ backgroundColor: DARK_PALETTE.primary }}
-                              disabled
-                            >
-                              Send
-                            </button>
-                          </div>
-                        </div>
-                          </div>
-                        </div>
                       </div>
                         </div>
                               </div>
@@ -1776,7 +1431,7 @@ export default function CanvasLanding() {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <div
+                  <div 
                     className="w-8 h-8 rounded-lg flex items-center justify-center"
                     style={{
                       background: 'linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%)'
@@ -1809,9 +1464,9 @@ export default function CanvasLanding() {
                   minHeight: 'auto'
                 }}
               >
-                <div className="flex h-full gap-6 p-6">
-                  {/* Left Section - Loading Page (70%) */}
-                  <div className="w-[70%]">
+                <div className="p-6">
+                  {/* Full Width Section - Loading Page (100%) */}
+                  <div className="w-full">
                     <LoadingPage
                       storeUrl={storeUrl}
                       setStoreUrl={setStoreUrl}
@@ -1819,201 +1474,6 @@ export default function CanvasLanding() {
                       handleStoreSubmit={handleStoreSubmit}
                       onStartScan={handleLoadingPageScanReady}
                     />
-                  </div>
-
-                  {/* Right Section - Enterprise AI Chat (30%) */}
-                  <div 
-                    className="w-[30%] rounded-2xl flex flex-col border"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.8)',
-                      borderColor: '#E5E7EB',
-                      minHeight: 'auto'
-                    }}
-                  >
-                    {/* Enterprise Chat Header */}
-                    <div className="p-4 border-b" style={{ borderColor: '#E5E7EB' }}>
-                                                            <div className="flex items-center gap-3">
-                                        <div 
-                                          className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                          style={{ backgroundColor: '#F9FAFB' }}
-                                        >
-                                          <RiStarFill size={16} style={{ color: '#6B7280' }} />
-                                        </div>
-                                        <div>
-                                          <h3 className="font-medium text-sm text-gray-900">
-                                            Shopping Assistant
-                                          </h3>
-                                          <p className="text-xs text-gray-600">Enterprise AI</p>
-                                        </div>
-                                      </div>
-                    </div>
-
-                    {/* Enterprise Chat History */}
-                    <div className="flex-1 p-4 space-y-3">
-                      {chatMessages.map((message) => (
-                        <div
-                          key={message.id}
-                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div className={`max-w-[85%] ${message.role === 'user' ? 'ml-8' : 'mr-8'}`}>
-                            {/* Message Bubble */}
-                            <div
-                              className="px-4 py-3 rounded-lg text-sm"
-                              style={{
-                                backgroundColor: message.role === 'user' ? '#F3F4F6' : '#E5E7EB',
-                                color: '#374151'
-                              }}
-                            >
-                              <div>{message.content}</div>
-                              
-                              {/* Timestamp */}
-                              <div className="text-xs mt-2 text-gray-500">
-                                {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      
-                      {/* System Feedback Component */}
-                      {systemFeedback.isVisible && (
-                        <div className="w-full">
-                          <div 
-                            className="p-4 rounded-lg border"
-                            style={{ 
-                              backgroundColor: '#F9FAFB',
-                              borderColor: '#E5E7EB'
-                            }}
-                          >
-                            {systemFeedback.state === 'running' ? (
-                              <div>
-                                <div className="flex items-center gap-3 mb-3">
-                                  <RiFocus3Line 
-                                    size={16} 
-                                    className="text-white animate-spin" 
-                                    style={{ 
-                                      animation: 'spin 2s linear infinite',
-                                      color: DARK_PALETTE.light
-                                    }} 
-                                  />
-                                  <span className="text-sm font-medium text-gray-900">
-                                    Running...
-                                  </span>
-                                </div>
-                                
-                                {/* Subtasks Checklist */}
-                                <div className="space-y-2">
-                                  {systemFeedback.subtasks.map((task) => (
-                                    <div key={task.id} className="flex items-center gap-2">
-                                      {task.completed ? (
-                                        <RiCheckLine size={14} style={{ color: DARK_PALETTE.light }} />
-                                      ) : (
-                                        <div className="w-3.5 h-3.5 border border-gray-500 rounded-sm" />
-                                      )}
-                                      <span 
-                                        className={`text-xs ${task.completed ? 'text-gray-900' : 'text-gray-500'}`}
-                                      >
-                                        {task.text}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="text-xs text-gray-500">
-                                Assistant is waiting for your response...
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Enterprise Input Area - Fixed to Bottom */}
-                    <div 
-                      className="border-t p-4"
-                      style={{ borderColor: '#E5E7EB' }}
-                    >
-                      {/* Multi-line Text Input */}
-                      <div className="mb-3">
-                        <textarea
-                          value={chatInput}
-                          onChange={(e) => setChatInput(e.target.value)}
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault()
-                              handleChatSend()
-                            }
-                          }}
-                          placeholder="Ask about products, orders, or anything else..."
-                          disabled={isSending || isAiThinking}
-                          rows={2}
-                          className="w-full resize-none outline-none text-sm p-3 rounded-lg border"
-                          style={{
-                            backgroundColor: '#FFFFFF',
-                            borderColor: '#E5E7EB',
-                            color: '#374151',
-                            fontFamily: 'Inter, sans-serif'
-                          }}
-                        />
-                      </div>
-                      
-                      {/* Action Buttons Row */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          {/* Attach File */}
-                          <button 
-                            className="p-2 rounded-lg transition-colors"
-                            onClick={() => alert('File attachment - Coming Soon!')}
-                            style={{ 
-                              color: '#6B7280',
-                              backgroundColor: 'transparent'
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.color = DARK_PALETTE.primary}
-                            onMouseLeave={(e) => e.currentTarget.style.color = '#6B7280'}
-                          >
-                            <RiAttachmentLine size={18} />
-                          </button>
-                          
-                          {/* Voice Dictation */}
-                          <button 
-                            className={`p-2 rounded-lg transition-all duration-300 ${
-                              isRecording ? 'animate-pulse' : ''
-                            }`}
-                            onClick={toggleRecording}
-                            style={{ 
-                              color: isRecording ? '#FF4444' : '#6B7280',
-                              backgroundColor: 'transparent'
-                            }}
-                            onMouseEnter={(e) => !isRecording && (e.currentTarget.style.color = DARK_PALETTE.primary)}
-                            onMouseLeave={(e) => !isRecording && (e.currentTarget.style.color = '#6B7280')}
-                          >
-                            <RiMicLine size={18} />
-                          </button>
-                        </div>
-                        
-                        {/* Send Button */}
-                        <button 
-                          onClick={handleChatSend}
-                          disabled={!chatInput.trim() || isAiThinking}
-                          className="p-2 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                          style={{
-                            backgroundColor: chatInput.trim() && !isAiThinking ? DARK_PALETTE.primary : '#E5E7EB',
-                            color: chatInput.trim() && !isAiThinking ? '#FFFFFF' : '#6B7280'
-                          }}
-                        >
-                          <RiArrowUpSLine size={18} />
-                        </button>
-                      </div>
-                      
-                      {/* Recording Indicator */}
-                      {isRecording && (
-                        <div className="flex items-center justify-center gap-2 mt-3 text-xs" style={{ color: '#FF4444' }}>
-                          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                          <span>Recording... Tap microphone to stop</span>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </div>
 
@@ -2175,109 +1635,26 @@ export default function CanvasLanding() {
                     </div>
 
                     {/* Right Section - AI Chat (30%) */}
-                    <div 
-                      className="w-[30%] rounded-2xl flex flex-col border"
+                    <div className="w-[30%]">
+                      <ChatBot
+                        title={`${task.title} Assistant`}
+                        subtitle="AI-powered guidance"
+                        placeholder="Chat will be available soon..."
+                        className="h-full rounded-2xl"
                       style={{
                         background: 'rgba(255, 255, 255, 0.8)',
                         borderColor: '#E5E7EB',
                         minHeight: 'auto'
                       }}
-                    >
-                      {/* Chat Header */}
-                      <div className="p-4 border-b" style={{ borderColor: '#E5E7EB' }}>
-                        <div className="flex items-center gap-3">
-                          <div 
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-white"
-                            style={{ backgroundColor: task.iconBg }}
-                          >
-                            <TaskIcon size={16} />
-                          </div>
-                          <div>
-                            <h3 className="font-medium text-sm text-gray-900">
-                              {task.title} Assistant
-                            </h3>
-                            <p className="text-xs text-gray-600">AI-powered guidance</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Chat Messages */}
-                      <div className="flex-1 p-4 space-y-3">
-                        <div className="flex justify-start">
-                          <div className="max-w-[85%] mr-8">
-                            <div
-                              className="px-4 py-3 rounded-lg text-sm"
-                              style={{
-                                backgroundColor: '#E5E7EB',
-                                color: '#374151'
-                              }}
-                            >
-                              <div>Hi! I'm your {task.title} assistant. I'm currently in development, but I'll be ready to help you with {task.title.toLowerCase()} soon!</div>
-                              <div className="text-xs mt-2 text-gray-500">
-                                {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Chat Input (Disabled for now) */}
-                      <div 
-                        className="border-t p-4"
-                        style={{ borderColor: '#E5E7EB' }}
-                      >
-                        <div className="mb-3">
-                          <textarea
-                            placeholder="Chat will be available soon..."
-                            disabled
-                            rows={2}
-                            className="w-full resize-none outline-none text-sm p-3 rounded-lg border opacity-50"
-                            style={{
-                              backgroundColor: '#F9FAFB',
-                              borderColor: '#E5E7EB',
-                              color: '#6B7280',
-                              fontFamily: 'Inter, sans-serif'
-                            }}
+                        initialMessages={[{
+                          id: '1',
+                          role: 'ai',
+                          content: `Hi! I'm your ${task.title} assistant. I'm currently in development, but I'll be ready to help you with ${task.title.toLowerCase()} soon!`,
+                          timestamp: new Date().toISOString(),
+                          state: 'completed'
+                        }]}
                           />
                         </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <button 
-                              disabled
-                              className="p-2 rounded-lg transition-colors opacity-50"
-                              style={{ 
-                                color: '#6B7280',
-                                backgroundColor: 'transparent'
-                              }}
-                            >
-                              <RiAttachmentLine size={18} />
-                            </button>
-                            <button 
-                              disabled
-                              className="p-2 rounded-lg transition-colors opacity-50"
-                              style={{ 
-                                color: '#6B7280',
-                                backgroundColor: 'transparent'
-                              }}
-                            >
-                              <RiMicLine size={18} />
-                            </button>
-                          </div>
-                          
-                          <button 
-                            disabled
-                            className="p-2 rounded-lg transition-all duration-300 opacity-50"
-                            style={{
-                              backgroundColor: '#E5E7EB',
-                              color: '#6B7280'
-                            }}
-                          >
-                            <RiArrowUpSLine size={18} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -2448,105 +1825,26 @@ export default function CanvasLanding() {
                   </div>
 
                   {/* Right Section - AI SEO Assistant (30%) */}
-                  <div 
-                    className="w-[30%] rounded-2xl flex flex-col border"
+                  <div className="w-[30%]">
+                    <ChatBot
+                      title="SEO Assistant"
+                      subtitle="AI-powered SEO guidance"
+                      placeholder="Ask about SEO best practices..."
+                      className="h-full rounded-2xl"
                     style={{
                       background: 'rgba(255, 255, 255, 0.8)',
                       borderColor: '#E5E7EB',
                       minHeight: 'auto'
                     }}
-                  >
-                    {/* SEO Chat Header */}
-                    <div className="p-4 border-b" style={{ borderColor: '#E5E7EB' }}>
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: DARK_PALETTE.secondary }}
-                        >
-                          <RiSearchEyeLine size={16} className="text-white" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-sm text-gray-900">
-                            SEO Assistant
-                          </h3>
-                          <p className="text-xs text-gray-600">AI-powered SEO guidance</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* SEO Chat Messages */}
-                    <div className="flex-1 p-4 space-y-3">
-                      <div className="flex justify-start">
-                        <div className="max-w-[85%] mr-8">
-                          <div
-                            className="px-4 py-3 rounded-lg text-sm"
-                            style={{
-                              backgroundColor: '#E5E7EB',
-                              color: '#374151'
-                            }}
-                          >
-                            <div>Hi! I'm your SEO assistant. I can help you optimize your website for search engines. What would you like to improve?</div>
-                            <div className="text-xs mt-2 text-gray-500">
-                              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* SEO Chat Input */}
-                    <div 
-                      className="border-t p-4"
-                      style={{ borderColor: '#E5E7EB' }}
-                    >
-                      <div className="mb-3">
-                        <textarea
-                          placeholder="Ask about SEO best practices..."
-                          rows={2}
-                          className="w-full resize-none outline-none text-sm p-3 rounded-lg border"
-                          style={{
-                            backgroundColor: '#FFFFFF',
-                            borderColor: '#E5E7EB',
-                            color: '#374151',
-                            fontFamily: 'Inter, sans-serif'
-                          }}
+                      initialMessages={[{
+                        id: '1',
+                        role: 'ai',
+                        content: 'Hi! I\'m your SEO assistant. I can help you optimize your website for search engines. What would you like to improve?',
+                        timestamp: new Date().toISOString(),
+                        state: 'completed'
+                      }]}
                         />
                       </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <button 
-                            className="p-2 rounded-lg transition-colors"
-                            style={{ 
-                              color: '#6B7280',
-                              backgroundColor: 'transparent'
-                            }}
-                          >
-                            <RiAttachmentLine size={18} />
-                          </button>
-                          <button 
-                            className="p-2 rounded-lg transition-colors"
-                            style={{ 
-                              color: '#6B7280',
-                              backgroundColor: 'transparent'
-                            }}
-                          >
-                            <RiMicLine size={18} />
-                          </button>
-                        </div>
-                        
-                        <button 
-                          className="p-2 rounded-lg transition-all duration-300"
-                          style={{
-                            backgroundColor: DARK_PALETTE.secondary,
-                            color: '#FFFFFF'
-                          }}
-                        >
-                          <RiArrowUpSLine size={18} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
