@@ -80,7 +80,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, currentSte
     status?: 'pending' | 'active' | 'completed' | 'failed'
   }>>([])
 
-  const [currentlyTyping, setCurrentlyTyping] = useState(false)
+
   const [currentTask, setCurrentTask] = useState<TaskCard | null>(null)
   const [showSkeleton, setShowSkeleton] = useState(true)
   const initializedTaskIdRef = useRef<string | null>(null)
@@ -94,7 +94,6 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, currentSte
       content: '' // Start with empty content
     }
 
-    setCurrentlyTyping(true)
     setMessages(prev => [...prev, newMessage])
 
     // Type letter by letter
@@ -115,7 +114,6 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, currentSte
         setMessages(prev => prev.map(msg => 
           msg.id === newMessage.id ? { ...msg, isTyping: false } : msg
         ))
-        setCurrentlyTyping(false)
       }
     }, 30) // 30ms per character for realistic typing speed
   }, [])
@@ -307,13 +305,8 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, currentSte
       <div className="p-4 border-b bg-white" style={{ borderColor: '#E5E7EB' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div 
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{
-                background: 'linear-gradient(135deg, #374151 0%, #4B5563 50%, #6B7280 100%)'
-              }}
-            >
-              <RiSparklingFill size={16} className="text-white" />
+            <div className="flex items-center justify-center">
+              <RiSparklingFill size={16} style={{ color: '#374151' }} />
             </div>
             <div>
               <div className="text-sm font-bold text-gray-900">Ask Shopos Agent...</div>
@@ -322,17 +315,8 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, currentSte
           
           {/* Right side icons */}
           <div className="flex items-center gap-2">
-            {(currentlyTyping || isScanning) && (
-              <div className="flex items-center gap-2">
-                {currentlyTyping && (
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#374151' }}></div>
-                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#374151', animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#374151', animationDelay: '0.2s' }}></div>
-                  </div>
-                )}
-                <RiLoader2Line size={16} className="animate-spin" style={{ color: '#374151' }} />
-              </div>
+            {isScanning && (
+              <RiLoader2Line size={16} className="animate-spin" style={{ color: '#374151' }} />
             )}
             <RiPauseCircleFill size={16} style={{ color: '#374151' }} />
           </div>
@@ -1269,8 +1253,7 @@ export default function CanvasLanding() {
                                   storeUrl={storeUrl}
                                   setStoreUrl={setStoreUrl}
                                   scanProgress={scanProgress}
-                                  currentStep={currentStep}
-                                  scanningSteps={scanningSteps}
+
                                   handleStoreSubmit={handleStoreSubmit}
                                   onStartScan={handleLoadingPageScanReady}
                                 />
@@ -1290,9 +1273,11 @@ export default function CanvasLanding() {
                                     <>
                                       <div className="p-4 border-b" style={{ borderColor: '#E5E7EB' }}>
                                         <div className="flex items-center gap-3">
-                                          <div 
+                                          <div
                                             className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                            style={{ backgroundColor: DARK_PALETTE.primary }}
+                                            style={{
+                                              background: 'linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%)'
+                                            }}
                                           >
                                             <RiStarFill size={16} className="text-white" />
                                           </div>
@@ -1431,8 +1416,7 @@ export default function CanvasLanding() {
                                   storeUrl={storeUrl}
                                   setStoreUrl={setStoreUrl}
                                   scanProgress={scanProgress}
-                                  currentStep={currentStep}
-                                  scanningSteps={scanningSteps}
+
                                   handleStoreSubmit={handleStoreSubmit}
                                   onStartScan={handleLoadingPageScanReady}
                                 />
@@ -1639,9 +1623,11 @@ export default function CanvasLanding() {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <div 
+                  <div
                       className="w-8 h-8 rounded-lg flex items-center justify-center text-white"
-                    style={{ backgroundColor: DARK_PALETTE.primary }}
+                    style={{
+                      background: 'linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%)'
+                    }}
                   >
                       <RiPulseLine size={16} />
                   </div>
@@ -1676,8 +1662,6 @@ export default function CanvasLanding() {
                         storeUrl={storeUrl}
                         setStoreUrl={setStoreUrl}
                         scanProgress={scanProgress}
-                        currentStep={currentStep}
-                        scanningSteps={scanningSteps}
                         handleStoreSubmit={handleStoreSubmit}
                         onStartScan={handleLoadingPageScanReady}
                       />
@@ -1694,9 +1678,11 @@ export default function CanvasLanding() {
                       {/* Chat Header */}
                       <div className="p-4 border-b" style={{ borderColor: '#E5E7EB' }}>
                         <div className="flex items-center gap-3">
-                          <div 
+                          <div
                             className="w-8 h-8 rounded-lg flex items-center justify-center"
-                            style={{ backgroundColor: DARK_PALETTE.primary }}
+                            style={{
+                              background: 'linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%)'
+                            }}
                           >
                             <RiStarFill size={16} className="text-white" />
                         </div>
@@ -1822,9 +1808,11 @@ export default function CanvasLanding() {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <div 
+                  <div
                     className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: DARK_PALETTE.primary }}
+                    style={{
+                      background: 'linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%)'
+                    }}
                   >
                     <RiStarFill size={16} className="text-white" />
                             </div>
@@ -1860,8 +1848,6 @@ export default function CanvasLanding() {
                       storeUrl={storeUrl}
                       setStoreUrl={setStoreUrl}
                       scanProgress={scanProgress}
-                      currentStep={currentStep}
-                      scanningSteps={scanningSteps}
                       handleStoreSubmit={handleStoreSubmit}
                       onStartScan={handleLoadingPageScanReady}
                     />
