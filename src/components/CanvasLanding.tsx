@@ -15,14 +15,15 @@ import {
   RiCloseLine,
   RiDeleteBinLine,
   RiLoader4Line,
+  RiLoader4Fill,
   RiSparklingFill,
   RiLoader2Line,
   RiPauseCircleFill,
-  RiBrainLine
+  RiBrainLine,
+  RiEditLine
 } from '@remixicon/react'
 import shopOSLogo from '../assets/shop-os-logo.svg'
 import LoadingPage from '../pages/LoadingPage'
-import ChatBot from './ChatBot'
 
 
 // Custom SVG Icons
@@ -83,7 +84,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
   const [showSkeleton, setShowSkeleton] = useState(true)
   const initializedTaskIdRef = useRef<string | null>(null)
 
-  const addTypingMessage = useCallback((message: Omit<typeof messages[0], 'id' | 'timestamp' | 'isTyping'>) => {
+  const addTypingMessage = useCallback((message: Omit<typeof messages[0], 'id' | 'timestamp' | 'isTyping'> & { statusIndicator?: string }) => {
     const newMessage = {
       ...message,
       id: Date.now().toString(),
@@ -94,7 +95,39 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
 
     setMessages(prev => [...prev, newMessage])
 
+    // Show status indicator first if provided
+    if (message.statusIndicator) {
+      setMessages(prev => prev.map(msg => 
+        msg.id === newMessage.id 
+          ? { ...msg, content: message.statusIndicator || '', icon: RiLoader4Fill }
+          : msg
+      ))
+      
+      // Wait 2 seconds before starting actual message
+      setTimeout(() => {
     // Type letter by letter
+        const fullContent = message.content
+        let currentIndex = 0
+        
+        const typeInterval = setInterval(() => {
+          if (currentIndex < fullContent.length) {
+            setMessages(prev => prev.map(msg => 
+              msg.id === newMessage.id 
+                ? { ...msg, content: fullContent.substring(0, currentIndex + 1), icon: message.icon || RiBrainLine }
+                : msg
+            ))
+            currentIndex++
+          } else {
+            // Finished typing
+            clearInterval(typeInterval)
+            setMessages(prev => prev.map(msg => 
+              msg.id === newMessage.id ? { ...msg, isTyping: false } : msg
+            ))
+          }
+        }, 30) // 30ms per character for realistic typing speed
+      }, 2000)
+    } else {
+      // Type letter by letter (no status indicator)
     const fullContent = message.content
     let currentIndex = 0
     
@@ -114,6 +147,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         ))
       }
     }, 30) // 30ms per character for realistic typing speed
+    }
   }, [])
 
   const startAIConversation = useCallback((task: TaskCard) => {
@@ -139,37 +173,41 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
       addTypingMessage({
         type: 'thinking',
         content: `${greetings[taskType]}`,
-        icon: RiBrainLine
+        icon: RiBrainLine,
+        statusIndicator: 'SHOPOS_THINKING'
       })
     }, messageDelay)
-    messageDelay += 4000
+    messageDelay += 6000 // Increased for status indicator
 
     // Message 2: Analysis
     setTimeout(() => {
       addTypingMessage({
         type: 'thinking',
         content: "Analysis: I'll run a comprehensive store diagnostic to identify optimization opportunities.",
-        icon: RiBrainLine
+        icon: RiBrainLine,
+        statusIndicator: 'SHOPOS_ANALYZING'
       })
     }, messageDelay)
-    messageDelay += 5000
+    messageDelay += 7000 // Increased for status indicator
 
     // Message 3: Plan
     setTimeout(() => {
       addTypingMessage({
         type: 'planning',
-        content: "Plan: Enter store URL → Run scan → Generate optimization report",
-        icon: RiBrainLine
+        content: "Plan:\n• Enter store URL\n• Run comprehensive scan\n• Generate optimization report",
+        icon: RiBrainLine,
+        statusIndicator: 'SHOPOS_PLANNING'
       })
     }, messageDelay)
-    messageDelay += 4000
+    messageDelay += 6000 // Increased for status indicator
 
     // Message 4: Execution - URL Entry
     setTimeout(() => {
       addTypingMessage({
         type: 'executing',
         content: "Execution: Entering demo URL for analysis...",
-        icon: RiSearchEyeLine
+        icon: RiSearchEyeLine,
+        statusIndicator: 'SHOPOS_SEARCHING_TOOLS'
       })
       
       // Auto-enter URL after message completes
@@ -177,16 +215,28 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         if (onAutoEnterUrl) {
           onAutoEnterUrl('https://demo-store.myshopify.com')
         }
-      }, 2000)
+        
+        // Update plan to show first step completed
+        setMessages(prev => prev.map(msg => {
+          if (msg.content.includes('Plan:') && msg.content.includes('Enter store URL')) {
+            return {
+              ...msg,
+              content: msg.content.replace('• Enter store URL', '• ~~Enter store URL~~')
+            }
+          }
+          return msg
+        }))
+      }, 4000) // Wait for status + typing to complete
     }, messageDelay)
-    messageDelay += 5000
+    messageDelay += 7000 // Increased for status indicator
 
     // Message 5: Execution - Start Scan
     setTimeout(() => {
       addTypingMessage({
         type: 'executing',
         content: "Starting comprehensive store scan...",
-        icon: RiSearchEyeLine
+        icon: RiSearchEyeLine,
+        statusIndicator: 'SHOPOS_INITIALIZING'
       })
       
       // Auto-click scan button after message completes
@@ -194,7 +244,18 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         if (onAutoStartScan) {
           onAutoStartScan()
         }
-      }, 2000)
+        
+        // Update plan to show second step completed
+        setMessages(prev => prev.map(msg => {
+          if (msg.content.includes('Plan:') && msg.content.includes('Run comprehensive scan')) {
+            return {
+              ...msg,
+              content: msg.content.replace('• Run comprehensive scan', '• ~~Run comprehensive scan~~')
+            }
+          }
+          return msg
+        }))
+      }, 4000) // Wait for status + typing to complete
     }, messageDelay)
   }, [addTypingMessage, onAutoEnterUrl, onAutoStartScan])
 
@@ -212,7 +273,8 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         type: 'executing',
         content: "Scanning your store and analyzing optimization opportunities...",
         icon: RiSearchLine,
-        status: 'active'
+        status: 'active',
+        statusIndicator: 'SHOPOS_SCANNING'
       })
     }
 
@@ -224,8 +286,22 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
           type: 'summary',
         content: "Analysis complete! I've identified key optimization opportunities. Here are your detailed findings:",
           icon: RiCheckLine,
-          status: 'completed'
+          status: 'completed',
+          statusIndicator: 'SHOPOS_GENERATING_REPORT'
         })
+      
+      // Update plan to show final step completed
+      setTimeout(() => {
+        setMessages(prev => prev.map(msg => {
+          if (msg.content.includes('Plan:') && msg.content.includes('Generate optimization report')) {
+            return {
+              ...msg,
+              content: msg.content.replace('• Generate optimization report', '• ~~Generate optimization report~~')
+            }
+          }
+          return msg
+        }))
+      }, 4000)
       
       // Health report will show automatically in LoadingPage when scanProgress reaches 100%
     }
@@ -369,7 +445,11 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
               return (
                 <div key={message.id} className="flex items-start gap-3 animate-fadeIn">
                   <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
-                    <IconComponent size={14} style={iconStyle} />
+                    <IconComponent 
+                      size={14} 
+                      style={iconStyle} 
+                      className={IconComponent === RiLoader4Fill ? 'animate-spin' : ''}
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={`text-xs leading-relaxed ${
@@ -378,7 +458,20 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
                       <>
                         {message.content.split('\n').map((line, index) => (
                           <span key={index}>
-                            {line}
+                            {line.includes('~~') ? (
+                              // Handle strikethrough text
+                              line.split('~~').map((part, partIndex) => (
+                                partIndex % 2 === 1 ? (
+                                  <span key={partIndex} style={{ textDecoration: 'line-through', color: '#9CA3AF' }}>
+                                    {part}
+                                  </span>
+                                ) : (
+                                  <span key={partIndex}>{part}</span>
+                                )
+                              ))
+                            ) : (
+                              line
+                            )}
                             {index < message.content.split('\n').length - 1 && <br />}
                           </span>
                         ))}
@@ -420,21 +513,7 @@ const DEFAULT_TASKS: TaskCard[] = [
   }
 ]
 
-interface ChatMessage {
-  id: string
-  role: 'user' | 'ai' | 'system'
-  content: string
-  timestamp: string
-  state?: 'thinking' | 'generating' | 'creating' | 'retrieving' | 'suggesting' | 'completed' | 'error'
-  icon?: string
-  progress?: number
-  data?: Record<string, unknown>
-  subtasks?: Array<{
-    id: string
-    text: string
-    completed: boolean
-  }>
-}
+
 
 
 
@@ -472,10 +551,18 @@ export default function CanvasLanding() {
       let taskSubtitle = ''
       let taskId = ''
       
-      // Store health check commands
-      if (lowerQuery.includes('store health') || lowerQuery.includes('health check') || lowerQuery.includes('store diagnostic')) {
+      // Store health check commands - catch various ways users might ask for store analysis
+      if (lowerQuery.includes('store health') || 
+          lowerQuery.includes('health check') || 
+          lowerQuery.includes('store diagnostic') ||
+          lowerQuery.includes('analyze store') ||
+          lowerQuery.includes('check store') ||
+          lowerQuery.includes('store analysis') ||
+          lowerQuery.includes('optimize store') ||
+          lowerQuery.includes('audit store') ||
+          (lowerQuery.includes('store') && (lowerQuery.includes('scan') || lowerQuery.includes('check') || lowerQuery.includes('analyze')))) {
         taskTitle = 'Store Health Check'
-        taskSubtitle = storeUrl ? `Analyzing ${storeUrl} for optimization opportunities` : 'AI-powered store diagnostic and optimization'
+        taskSubtitle = 'Connect your Shopify store for an instant AI diagnostic and optimization recommendations'
         taskId = 'ai-store-health-' + Date.now()
       }
       // SEO analysis commands
@@ -496,11 +583,11 @@ export default function CanvasLanding() {
         taskSubtitle = storeUrl ? `Optimizing ${storeUrl} for higher conversions` : 'AI-powered conversion rate optimization'
         taskId = 'ai-conversion-' + Date.now()
       }
-      // Default/Generic task
+      // Default/Generic task - default to Store Health Check
       else {
-        taskTitle = 'AI Task'
-        taskSubtitle = query.length > 80 ? query.substring(0, 80) + '...' : query
-        taskId = 'ai-custom-' + Date.now()
+        taskTitle = 'Store Health Check'
+        taskSubtitle = 'Connect your Shopify store for an instant AI diagnostic and optimization recommendations'
+        taskId = 'ai-store-health-' + Date.now()
       }
 
       // Create new task card
@@ -646,20 +733,11 @@ export default function CanvasLanding() {
     loadingPageScanRef.current = scanFn
   }
   
-  const [chatMessages] = useState<ChatMessage[]>([
-    { 
-      id: '1',
-      role: 'ai', 
-      content: 'Hi! I\'m your AI assistant. Enter your Shopify store URL to start a comprehensive health analysis.',
-      timestamp: new Date().toISOString(),
-      state: 'completed',
-      icon: 'RiStarFill'
-    }
-  ])
+
   const [showAiSearch, setShowAiSearch] = useState(false)
   const [aiSearchQuery, setAiSearchQuery] = useState('')
   const [isProcessingAiCommand, setIsProcessingAiCommand] = useState(false)
-  const [projectStatus, setProjectStatus] = useState('Ready to analyze your store')
+
   const [sectionMode, setSectionMode] = useState(false)
   const [selectedProjects, setSelectedProjects] = useState<string[]>([])
   const [projectSections, setProjectSections] = useState<{[key: string]: {
@@ -741,9 +819,7 @@ export default function CanvasLanding() {
   const handleStoreSubmit = () => {
     if (!storeUrl.trim()) return
     
-    // Analysis started - ChatBot components will handle their own messages
-    
-    setProjectStatus(`Analyzing ${storeUrl}...`)
+    // Analysis started
     setScanProgress(0)
     
     let stepIndex = 0
@@ -757,10 +833,7 @@ export default function CanvasLanding() {
         
         // Health report will show automatically in LoadingPage when scanProgress reaches 100%
         
-        // Update project status - ChatBot components will handle their own messages
-          setTimeout(() => {
-            setProjectStatus('Analysis complete - 78% health score')
-          }, 1000)
+        // Analysis complete
         return
         }
         setScanProgress(scanningSteps[nextStep].progress)
@@ -967,15 +1040,28 @@ export default function CanvasLanding() {
                         </button>
                         </div>
 
-                      {/* Delete button for custom tasks */}
+                      {/* Edit and Delete buttons for custom tasks */}
                       {task.id !== 'store-health' && (
-                        <button
-                          onClick={(e) => handleDeleteClick(task.id, e)}
-                          className="p-2 rounded-lg bg-red-100"
-                          title="Delete task"
-                        >
-                          <RiDeleteBinLine size={16} className="text-red-500" />
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              // Edit task action - for now just alert
+                              alert(`Edit task: ${task.title}`)
+                            }}
+                            className="p-2 rounded-lg bg-blue-100"
+                            title="Edit task"
+                          >
+                            <RiEditLine size={16} className="text-blue-500" />
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteClick(task.id, e)}
+                            className="p-2 rounded-lg bg-red-100"
+                            title="Delete task"
+                          >
+                            <RiDeleteBinLine size={16} className="text-red-500" />
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -1100,9 +1186,9 @@ export default function CanvasLanding() {
                               `
                             }}
                           >
-                            <div className="flex h-full gap-6 p-6">
-                              {/* Left Section - Loading Page (70%) */}
-                              <div className="w-[70%]">
+                            <div className="p-6">
+                              {/* Full Width Section - Loading Page (100%) */}
+                              <div className="w-full">
                                 <LoadingPage
                                   storeUrl={storeUrl}
                                   setStoreUrl={setStoreUrl}
@@ -1110,22 +1196,6 @@ export default function CanvasLanding() {
                                   handleStoreSubmit={handleStoreSubmit}
                                   onStartScan={handleLoadingPageScanReady}
                                 />
-                              </div>
-
-                              {/* Right Section - AI Chat (30%) */}
-                              <div className="w-[30%]">
-                                {(() => {
-                                  const task = taskCards.find(t => t.id === projectId)
-                                  return task ? (
-                                    <ChatBot
-                                      title={`AI Agent: ${task.title}`}
-                                      subtitle={`Ready to assist with ${task.title.toLowerCase()}`}
-                                              placeholder={`Ask about ${task.title.toLowerCase()}...`}
-                                      className="h-full"
-                                      style={{ backgroundColor: '#FAFAFA' }}
-                                    />
-                                  ) : null
-                                })()}
                               </div>
                             </div>
                           </div>
@@ -1183,11 +1253,11 @@ export default function CanvasLanding() {
                                 className="w-8 h-8 rounded-lg flex items-center justify-center"
                                 style={{ backgroundColor: '#F9FAFB' }}
                               >
-                                <RiStarFill size={16} style={{ color: '#6B7280' }} />
+                                <RiSparklingFill size={16} style={{ color: '#374151' }} />
                               </div>
                               <div>
                                 <div className="text-sm font-medium text-gray-900">AI Agent: Store Health Analyzer</div>
-                                <div className="text-xs text-gray-600">{projectStatus}</div>
+                                <div className="text-xs text-gray-600">Ready to analyze your store</div>
                               </div>
                             </div>
                             <div className="ml-auto flex items-center gap-2">
@@ -1210,9 +1280,9 @@ export default function CanvasLanding() {
                               minHeight: 'auto'
                             }}
                           >
-                            <div className="flex h-full gap-6 p-6">
-                              {/* Left Section - Loading Page (70%) */}
-                              <div className="w-[70%]">
+                            <div className="p-6">
+                              {/* Full Width Section - Loading Page (100%) */}
+                              <div className="w-full">
                                 <LoadingPage
                                   storeUrl={storeUrl}
                                   setStoreUrl={setStoreUrl}
@@ -1221,22 +1291,6 @@ export default function CanvasLanding() {
                                   onStartScan={handleLoadingPageScanReady}
                                 />
                               </div>
-
-                              {/* Right Section - AI Chat (30%) */}
-                              <div className="w-[30%]">
-                                <ChatBot
-                                  title="Shopping Assistant"
-                                  subtitle="Enterprise AI"
-                                  placeholder="Ask about products, orders, or anything else..."
-                                  className="h-full rounded-3xl"
-                                style={{
-                                  background: 'rgba(255, 255, 255, 0.8)',
-                                  borderColor: '#E5E7EB',
-                                  minHeight: 'auto'
-                                }}
-                                  initialMessages={chatMessages}
-                                    />
-                                  </div>
                             </div>
                           </div>
                         </div>
@@ -1250,33 +1304,15 @@ export default function CanvasLanding() {
             )
           })}
 
-          {/* AI Conversation Card - Fixed Position Left Side */}
-          {expandedCards.length > 0 && (
-                    <div 
-          className="fixed left-6 z-50"
-          style={{ 
-            width: '320px',
-                top: '200px',
-                height: '500px'
-          }}
-        >
-              <AIConversationCard 
-                taskCards={taskCards}
-                expandedCards={expandedCards}
-                scanProgress={scanProgress}
-                isScanning={scanProgress > 0 && scanProgress < 100}
-                onAutoEnterUrl={handleAutoEnterUrl}
-                onAutoStartScan={handleAutoStartScan}
-              />
-            </div>
-          )}
+
+
+
 
           {/* Projects Container - Full Canvas Layout */}
           <div className="mt-26 w-full flex flex-wrap gap-12" style={{ minWidth: '100vw', padding: '0 2rem', paddingLeft: '360px', marginBottom: '50px' }}>
-            {/* AI-Created Tasks using LoadingPage (excluding store health) - Only when NOT in section */}
+            {/* AI-Created Tasks using LoadingPage - Only when NOT in section */}
             {taskCards.filter(task => 
               task.id.startsWith('ai-') && 
-              !task.id.startsWith('ai-store-health') &&
               expandedCards.includes(task.id) && 
               !getProjectSection(task.id)
             ).map(task => (
@@ -1329,16 +1365,14 @@ export default function CanvasLanding() {
               >
                 <div className="flex items-center gap-3">
                   <div 
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white"
-                    style={{
-                      background: 'linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%)'
-                    }}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ backgroundColor: '#F9FAFB' }}
                   >
-                      <RiPulseLine size={16} />
+                      <RiSparklingFill size={16} style={{ color: '#374151' }} />
                   </div>
                   <div>
-                      <div className="text-sm font-medium text-gray-900">AI Agent: {task.title}</div>
-                      <div className="text-xs text-gray-600">Ready to assist with optimization</div>
+                      <div className="text-sm font-medium text-gray-900">AI Agent: Store Health Analyzer</div>
+                      <div className="text-xs text-gray-600">Ready to analyze your store</div>
                   </div>
                 </div>
                 <div className="ml-auto flex items-center gap-2">
@@ -1347,8 +1381,29 @@ export default function CanvasLanding() {
                 </div>
               </div>
 
-              <div 
-                  className="rounded-3xl overflow-hidden"
+              {/* Interface with AI Card Layout */}
+              <div className="flex gap-6">
+                {/* AI Conversation Card - Left Side */}
+                <div 
+                  className="flex-shrink-0"
+                  style={{ 
+                    width: '320px',
+                    height: '500px'
+                  }}
+                >
+                  <AIConversationCard 
+                    taskCards={taskCards}
+                    expandedCards={[task.id]} // Only show this specific task
+                    scanProgress={scanProgress}
+                    isScanning={scanProgress > 0 && scanProgress < 100}
+                    onAutoEnterUrl={handleAutoEnterUrl}
+                    onAutoStartScan={handleAutoStartScan}
+                  />
+                </div>
+
+                {/* Main Interface - Right Side */}
+                <div 
+                    className="rounded-3xl overflow-hidden flex-1"
                 style={{ 
                     minHeight: '800px',
                     background: 'rgba(255, 255, 255, 0.8)',
@@ -1360,9 +1415,9 @@ export default function CanvasLanding() {
                     `
                 }}
               >
-                <div className="flex h-full gap-6 p-6">
-                    {/* Left Section - Loading Page (70%) */}
-                    <div className="w-[70%]">
+                <div className="p-6">
+                    {/* Full Width Section - Loading Page (100%) */}
+                    <div className="w-full">
                       <LoadingPage
                         storeUrl={storeUrl}
                         setStoreUrl={setStoreUrl}
@@ -1371,26 +1426,14 @@ export default function CanvasLanding() {
                         onStartScan={handleLoadingPageScanReady}
                       />
                     </div>
-
-                    {/* Right Section - AI Chat (30%) */}
-                    <div className="w-[30%]">
-                      <ChatBot
-                        title={`AI Agent: ${task.title}`}
-                        subtitle={`Ready to assist with ${task.title.toLowerCase()}`}
-                              placeholder={`Ask about ${task.title.toLowerCase()}...`}
-                        className="h-full rounded-2xl"
-                        style={{ backgroundColor: '#FAFAFA', borderColor: '#E5E7EB' }}
-                            />
-                          </div>
-                      </div>
-                        </div>
-                              </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             ))}
 
-            {/* Store Health Check Expandable Interface (Original + AI-Created) - Only when NOT in section */}
-            {(expandedCards.includes('store-health') || expandedCards.some(id => id.startsWith('ai-store-health'))) && 
-             (expandedCards.includes('store-health') ? !getProjectSection('store-health') : 
-              !getProjectSection(expandedCards.find(id => id.startsWith('ai-store-health')) || '')) && (
+            {/* Store Health Check Expandable Interface (Original ONLY) - Only when NOT in section */}
+            {expandedCards.includes('store-health') && !getProjectSection('store-health') && (
               <div 
                 className={`transition-all duration-300 ${
                   sectionMode ? 'cursor-pointer' : ''
@@ -1403,41 +1446,26 @@ export default function CanvasLanding() {
                   flexShrink: 0,
                   marginBottom: '50px'
                 }}
-                onClick={() => {
-                  const activeStoreHealthId = expandedCards.includes('store-health') ? 'store-health' : 
-                                            expandedCards.find(id => id.startsWith('ai-store-health')) || 'store-health'
-                  handleProjectSelection(activeStoreHealthId)
-                }}
+                onClick={() => handleProjectSelection('store-health')}
               >
-              {(() => {
-                const activeTask = expandedCards.includes('store-health') ? 
-                  taskCards.find(t => t.id === 'store-health') :
-                  taskCards.find(t => t.id.startsWith('ai-store-health') && expandedCards.includes(t.id))
-                const taskTitle = activeTask?.title || 'Store Health Check'
-                const taskSubtitle = activeTask?.subtitle || 'AI-powered diagnostic and optimization workspace'
-                
-                return (
-                  <>
-                    {/* Main Heading */}
-                    <div className="text-left mb-6 relative" style={{ marginTop: '120px' }}>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h1 className="text-3xl font-bold mb-2 text-gray-900">
-                            {taskTitle}
-                          </h1>
-                          <p className="text-lg text-gray-600">
-                            {taskSubtitle}
-                          </p>
+              {/* Main Heading */}
+              <div className="text-left mb-6 relative" style={{ marginTop: '120px' }}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold mb-2 text-gray-900">
+                      Store Health Check
+                    </h1>
+                    <p className="text-lg text-gray-600">
+                      AI-powered diagnostic and optimization workspace
+                    </p>
                   </div>
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            const activeTaskId = expandedCards.includes('store-health') ? 'store-health' : 
-                                               expandedCards.find(id => id.startsWith('ai-store-health')) || 'store-health'
-                            setExpandedCards(prev => prev.filter(id => id !== activeTaskId))
-                          }}
-                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
-                        >
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setExpandedCards(prev => prev.filter(id => id !== 'store-health'))
+                    }}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
+                  >
                     <RiCloseLine size={24} />
                   </button>
                 </div>
@@ -1455,15 +1483,13 @@ export default function CanvasLanding() {
                 <div className="flex items-center gap-3">
                   <div 
                     className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{
-                      background: 'linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%)'
-                    }}
+                    style={{ backgroundColor: '#F9FAFB' }}
                   >
-                    <RiStarFill size={16} className="text-white" />
+                    <RiSparklingFill size={16} style={{ color: '#374151' }} />
                             </div>
                   <div>
                     <div className="text-sm font-medium text-gray-900">AI Agent: Store Health Analyzer</div>
-                    <div className="text-xs text-gray-600">{projectStatus}</div>
+                    <div className="text-xs text-gray-600">Ready to analyze your store</div>
                         </div>
                       </div>
                 <div className="ml-auto flex items-center gap-2">
@@ -1472,9 +1498,31 @@ export default function CanvasLanding() {
                 </div>
               </div>
 
-              {/* Two Section Layout - Fully Transparent Glassmorphism */}
-              <div 
-                className="rounded-3xl shadow-2xl border border-white/40 backdrop-blur-xl overflow-hidden"
+              {/* Interface with AI Card Layout */}
+              <div className="flex gap-6">
+                {/* AI Conversation Card - Left Side */}
+                <div 
+                  className="flex-shrink-0"
+                  style={{ 
+                    width: '320px',
+                    height: '500px'
+                  }}
+                >
+                  <AIConversationCard 
+                    taskCards={taskCards}
+                    expandedCards={['store-health']} // Only show store health task
+                    scanProgress={scanProgress}
+                    isScanning={scanProgress > 0 && scanProgress < 100}
+                    onAutoEnterUrl={handleAutoEnterUrl}
+                    onAutoStartScan={handleAutoStartScan}
+                  />
+                </div>
+
+                {/* Main Interface - Right Side */}
+                <div className="flex-1">
+                  {/* Two Section Layout - Fully Transparent Glassmorphism */}
+                  <div 
+                    className="rounded-3xl shadow-2xl border border-white/40 backdrop-blur-xl overflow-hidden"
                 style={{ 
                   background: 'rgba(255, 255, 255, 0.1)',
                   backdropFilter: 'blur(25px)',
@@ -1509,9 +1557,8 @@ export default function CanvasLanding() {
                   </button>
                 </div>
               </div>
-                  </>
-                )
-              })()}
+                </div>
+              </div>
             </div>
                         )}
 
@@ -1579,14 +1626,14 @@ export default function CanvasLanding() {
                 >
                   <div className="flex items-center gap-3">
                     <div 
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white"
-                      style={{ backgroundColor: task.iconBg }}
+                      className="w-8 h-8 rounded-lg flex items-center justify-center"
+                      style={{ backgroundColor: '#F9FAFB' }}
                     >
-                      <TaskIcon size={16} />
+                      <RiSparklingFill size={16} style={{ color: '#374151' }} />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-gray-900">AI Agent: {task.title}</div>
-                      <div className="text-xs text-gray-600">Ready to assist with {task.title.toLowerCase()}</div>
+                      <div className="text-sm font-medium text-gray-900">AI Agent: Store Health Analyzer</div>
+                      <div className="text-xs text-gray-600">Ready to analyze your store</div>
                     </div>
                   </div>
                   <div className="ml-auto flex items-center gap-2">
@@ -1608,10 +1655,10 @@ export default function CanvasLanding() {
                     `
                   }}
                 >
-                  <div className="flex gap-6 p-6">
-                    {/* Left Section - Main Interface (70%) */}
+                  <div className="p-6">
+                    {/* Full Width Section - Main Interface (100%) */}
                     <div 
-                      className="w-[70%] rounded-3xl p-8"
+                      className="w-full rounded-3xl p-8"
                       style={{
                         background: 'rgba(255, 255, 255, 0.8)',
                         minHeight: 'auto'
@@ -1658,28 +1705,6 @@ export default function CanvasLanding() {
                         </div>
                       </div>
                     </div>
-
-                    {/* Right Section - AI Chat (30%) */}
-                    <div className="w-[30%]">
-                      <ChatBot
-                        title={`${task.title} Assistant`}
-                        subtitle="AI-powered guidance"
-                        placeholder="Chat will be available soon..."
-                        className="h-full rounded-2xl"
-                      style={{
-                        background: 'rgba(255, 255, 255, 0.8)',
-                        borderColor: '#E5E7EB',
-                        minHeight: 'auto'
-                      }}
-                        initialMessages={[{
-                          id: '1',
-                          role: 'ai',
-                          content: `Hi! I'm your ${task.title} assistant. I'm currently in development, but I'll be ready to help you with ${task.title.toLowerCase()} soon!`,
-                          timestamp: new Date().toISOString(),
-                          state: 'completed'
-                        }]}
-                          />
-                        </div>
                   </div>
                 </div>
               </div>
@@ -1761,10 +1786,10 @@ export default function CanvasLanding() {
                   `
                 }}
               >
-                <div className="flex gap-6 p-6">
-                  {/* Left Section - SEO Analysis (70%) */}
+                <div className="p-6">
+                  {/* Full Width Section - SEO Analysis (100%) */}
                   <div 
-                    className="w-[70%] rounded-2xl p-8"
+                    className="w-full rounded-2xl p-8"
                     style={{
                       background: 'rgba(255, 255, 255, 0.8)',
                       minHeight: 'auto'
@@ -1848,28 +1873,6 @@ export default function CanvasLanding() {
                       </div>
                     </div>
                   </div>
-
-                  {/* Right Section - AI SEO Assistant (30%) */}
-                  <div className="w-[30%]">
-                    <ChatBot
-                      title="SEO Assistant"
-                      subtitle="AI-powered SEO guidance"
-                      placeholder="Ask about SEO best practices..."
-                      className="h-full rounded-2xl"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.8)',
-                      borderColor: '#E5E7EB',
-                      minHeight: 'auto'
-                    }}
-                      initialMessages={[{
-                        id: '1',
-                        role: 'ai',
-                        content: 'Hi! I\'m your SEO assistant. I can help you optimize your website for search engines. What would you like to improve?',
-                        timestamp: new Date().toISOString(),
-                        state: 'completed'
-                      }]}
-                        />
-                      </div>
                 </div>
               </div>
             </div>
