@@ -26,6 +26,7 @@ import {
 import shopOSLogo from '../assets/shop-os-logo.svg'
 import LoadingPage from '../pages/LoadingPage'
 
+
 // Custom SVG Icons
 const SectionIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -63,13 +64,12 @@ interface AIConversationCardProps {
   taskCards: TaskCard[]
   expandedCards: string[]
   scanProgress: number
-  currentStep: number
   isScanning: boolean
   onAutoEnterUrl?: (url: string) => void
   onAutoStartScan?: () => void
 }
 
-function AIConversationCard({ taskCards, expandedCards, scanProgress, currentStep, isScanning, onAutoEnterUrl, onAutoStartScan }: AIConversationCardProps) {
+function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning, onAutoEnterUrl, onAutoStartScan }: AIConversationCardProps) {
   const [messages, setMessages] = useState<Array<{
     id: string
     type: 'thinking' | 'planning' | 'executing' | 'result' | 'error' | 'summary'
@@ -119,13 +119,13 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, currentSte
   }, [])
 
   const startAIConversation = useCallback((task: TaskCard) => {
-    // Initial greeting based on task type
+    // Initial greeting based on task type with structured framework
     const greetings = {
-      'store-health': "Hello! I'm your AI assistant for Store Health Check. Ready to help you optimize and grow!",
-      'seo': "Hello! I'm your AI assistant for SEO Analysis. Ready to help you optimize and grow!",
-      'performance': "Hello! I'm your AI assistant for Performance Optimization. Ready to help you optimize and grow!",
-      'conversion': "Hello! I'm your AI assistant for Conversion Analysis. Ready to help you optimize and grow!",
-      'default': `Hello! I'm your AI assistant for ${task.title}. Ready to help you optimize and grow!`
+      'store-health': "Hello! I'm your intelligent AI agent for Store Health Check. Let's break down what we'll accomplish together.",
+      'seo': "Hello! I'm your intelligent AI agent for SEO Analysis. Let's approach this systematically.",
+      'performance': "Hello! I'm your intelligent AI agent for Performance Optimization. Let's think through this step by step.",
+      'conversion': "Hello! I'm your intelligent AI agent for Conversion Analysis. Let's plan our approach carefully.",
+      'default': `Hello! I'm your intelligent AI agent for ${task.title}. Let's structure our approach to this task.`
     }
 
     const taskType = task.id.includes('health') ? 'store-health' :
@@ -136,44 +136,44 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, currentSte
     // Sequential message flow - each waits for previous to complete
     let messageDelay = 0
 
-    // Message 1: Introduction
+    // Message 1: Analysis Phase - Introduction with framework
     setTimeout(() => {
       addTypingMessage({
         type: 'thinking',
-        content: greetings[taskType],
+        content: `${greetings[taskType]} Let's start with a clear analysis of what we're working with.`,
         icon: RiBrainLine
       })
     }, messageDelay)
-    messageDelay += 6000 // Wait for typing to complete
+    messageDelay += 7000 // Wait for typing to complete
 
-    // Message 2: What I'll help with
+    // Message 2: Analysis Phase - Task Understanding
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'thinking',
+        content: "Analysis: I can see you want to optimize your store's performance and growth potential. The key factors here are comprehensive diagnostics, actionable insights, and measurable improvements. I'll focus on identifying specific opportunities that will have the most impact.",
+        icon: RiBrainLine
+      })
+    }, messageDelay)
+    messageDelay += 9000
+
+    // Message 3: Plan Phase - Strategy Outline
     setTimeout(() => {
       addTypingMessage({
         type: 'planning',
-        content: "I will help you check your store health and give you a comprehensive report with actionable recommendations.",
+        content: "Plan: Here's my strategic approach to this task:\n\nStep 1: I'll establish a connection by entering your store URL into the interface\nStep 2: I'll initiate the comprehensive analysis by triggering the scan process\nStep 3: I'll systematically examine your store across multiple dimensions\nStep 4: I'll compile detailed findings and generate your personalized optimization report\n\nThis methodical approach ensures we cover all critical areas efficiently.",
         icon: RiBrainLine
       })
     }, messageDelay)
-    messageDelay += 8000
+    messageDelay += 12000
 
-    // Message 3: What I will do (first person)
-    setTimeout(() => {
-      addTypingMessage({
-        type: 'planning',
-        content: "Here's what I'll do in 4 steps:\n• Step 1: I'll enter your Shopify store URL\n• Step 2: I'll click 'Start Free Scan' button\n• Step 3: I'll run the AI analysis\n• Step 4: I'll generate your personalized report",
-        icon: RiBrainLine
-      })
-    }, messageDelay)
-    messageDelay += 10000
-
-    // Message 4: Starting first step
+    // Message 4: Execution Phase - Starting Step 1
     setTimeout(() => {
       addTypingMessage({
         type: 'executing',
-        content: "Starting Step 1: I'm entering a demo URL in the interface...",
+        content: "Execution - Step 1: I'm now establishing the connection by entering a demo URL into the interface. This provides us with a representative sample to work with for the comprehensive analysis.",
         icon: RiSearchEyeLine
       })
-      
+
       // Auto-enter URL after message completes
       setTimeout(() => {
         if (onAutoEnterUrl) {
@@ -181,16 +181,16 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, currentSte
         }
       }, 3000)
     }, messageDelay)
-    messageDelay += 8000
+    messageDelay += 10000
 
-    // Message 5: Starting second step
+    // Message 5: Execution Phase - Starting Step 2
     setTimeout(() => {
       addTypingMessage({
         type: 'executing',
-        content: "Step 2: I'm clicking the 'Start Free Scan' button and beginning the analysis...",
+        content: "Execution - Step 2: Now I'm initiating the comprehensive scan process. This will systematically analyze your store's performance, identify optimization opportunities, and prepare detailed recommendations for growth.",
         icon: RiSearchEyeLine
       })
-      
+
       // Auto-click scan button after message completes
       setTimeout(() => {
         if (onAutoStartScan) {
@@ -200,58 +200,38 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, currentSte
     }, messageDelay)
   }, [addTypingMessage, onAutoEnterUrl, onAutoStartScan])
 
+  const [scanningMessageShown, setScanningMessageShown] = useState(false)
+  const [completionMessageShown, setCompletionMessageShown] = useState(false)
+
   const handleScanningProgress = useCallback(() => {
+    console.log('handleScanningProgress called with scanProgress:', scanProgress)
     if (!currentTask) return
 
-    const progressMessages = [
-      {
-        step: 0,
-        content: "Starting deep analysis of your store structure and navigation...",
-        type: 'executing' as const,
-        icon: RiSearchLine
-      },
-      {
-        step: 1,
-        content: "Analyzing page load speeds and performance bottlenecks...",
-        type: 'executing' as const,
-        icon: RiPulseLine
-      },
-      {
-        step: 2,
-        content: "Checking SEO factors and search optimization opportunities...",
-        type: 'executing' as const,
-        icon: RiSearchEyeLine
-      },
-      {
-        step: 3,
-        content: "Evaluating conversion funnels and sales optimization potential...",
-        type: 'executing' as const,
-        icon: RiStarFill
-      }
-    ]
-
-    const currentMessage = progressMessages[currentStep]
-    if (currentMessage && !messages.find(m => m.content === currentMessage.content)) {
+    // Simple scanning message - only show once
+    if (scanProgress > 0 && scanProgress < 100 && !scanningMessageShown) {
+      setScanningMessageShown(true)
       addTypingMessage({
-        type: currentMessage.type,
-        content: currentMessage.content,
-        icon: currentMessage.icon,
+        type: 'executing',
+        content: "Scanning your store and analyzing optimization opportunities...",
+        icon: RiSearchLine,
         status: 'active'
       })
     }
 
-    // Add completion message when scan is done
-    if (scanProgress >= 100) {
-      setTimeout(() => {
-        addTypingMessage({
-          type: 'summary',
-          content: `✅ Analysis complete! I found several optimization opportunities. I've identified 12 actionable improvements that could boost your conversions by 15-25%.`,
-          icon: RiCheckLine,
-          status: 'completed'
-        })
-      }, 1000)
+    // Add completion message when scan reaches 100 - only once
+    if (scanProgress >= 100 && !completionMessageShown) {
+      console.log('Scan completed, showing health report...')
+      setCompletionMessageShown(true)
+      addTypingMessage({
+        type: 'summary',
+        content: "Analysis complete! I've identified key optimization opportunities. Here are your detailed findings:",
+        icon: RiCheckLine,
+        status: 'completed'
+      })
+      
+      // Health report will show automatically in LoadingPage when scanProgress reaches 100%
     }
-  }, [currentTask, messages, addTypingMessage, currentStep, scanProgress])
+  }, [currentTask, addTypingMessage, scanProgress, scanningMessageShown, completionMessageShown])
 
   // Get the current active task
   useEffect(() => {
@@ -266,6 +246,8 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, currentSte
         setCurrentTask(task)
         setMessages([]) // Reset messages for new task
         setShowSkeleton(true)
+        setScanningMessageShown(false) // Reset scanning message flag
+        setCompletionMessageShown(false) // Reset completion message flag
         
         // 5-second delay before starting AI interaction
         setTimeout(() => {
@@ -285,10 +267,14 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, currentSte
 
   // React to scanning progress
   useEffect(() => {
+    console.log('useEffect triggered:', { isScanning, scanProgress, currentTask: !!currentTask })
     if (isScanning && scanProgress > 0 && currentTask) {
+      console.log('Calling handleScanningProgress with scanProgress:', scanProgress)
       handleScanningProgress()
     }
-  }, [scanProgress, currentStep, isScanning, currentTask, handleScanningProgress])
+  }, [scanProgress, isScanning, currentTask, handleScanningProgress])
+
+
 
   if (!currentTask) return null
 
@@ -315,7 +301,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, currentSte
           
           {/* Right side icons */}
           <div className="flex items-center gap-2">
-            {isScanning && (
+            {(isScanning || messages.some(m => m.isTyping)) && (
               <RiLoader2Line size={16} className="animate-spin" style={{ color: '#374151' }} />
             )}
             <RiPauseCircleFill size={16} style={{ color: '#374151' }} />
@@ -414,21 +400,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, currentSte
         </div>
       </div>
 
-      {/* Progress Indicator */}
-      {isScanning && (
-        <div className="p-4 border-t bg-gray-50" style={{ borderColor: '#E5E7EB' }}>
-          <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-            <span>Analysis Progress</span>
-            <span>{scanProgress}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-green-500 rounded-full transition-all duration-700 animate-pulse"
-              style={{ width: `${scanProgress}%` }}
-            ></div>
-          </div>
-        </div>
-      )}
+
     </div>
   )
 }
@@ -657,7 +629,6 @@ export default function CanvasLanding() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [expandedCards, setExpandedCards] = useState<string[]>([])
   const [scanProgress, setScanProgress] = useState(0)
-  const [currentStep, setCurrentStep] = useState(0)
   const [storeUrl, setStoreUrl] = useState('')
   const loadingPageScanRef = useRef<(() => void) | null>(null)
   
@@ -773,7 +744,6 @@ export default function CanvasLanding() {
         } else {
           setExpandedCards([])
           setScanProgress(0)
-          setCurrentStep(0)
         }
       }
     }
@@ -803,10 +773,10 @@ export default function CanvasLanding() {
       
       // Show system feedback with subtasks
       const subtasks = [
-        { id: '1', text: 'Searching inventory', completed: false },
-        { id: '2', text: 'Filtering by criteria', completed: false },
-        { id: '3', text: 'Analyzing results', completed: false },
-        { id: '4', text: 'Generating response', completed: false }
+        { id: '1', text: 'Analysis: Processing your request and identifying key requirements', completed: false },
+        { id: '2', text: 'Plan: Developing structured approach to address your needs', completed: false },
+        { id: '3', text: 'Execution: Implementing solution and gathering relevant information', completed: false },
+        { id: '4', text: 'Reflection: Reviewing results and preparing comprehensive response', completed: false }
       ]
       
       setSystemFeedback({
@@ -836,11 +806,11 @@ export default function CanvasLanding() {
             const aiResponse: ChatMessage = {
               id: Date.now().toString(),
               role: 'ai',
-              content: userMessage.content.toLowerCase().includes('analyze') 
-                ? 'I found 8 optimization opportunities in your store. Your current health score is 76%. Would you like me to prioritize the fixes by impact?'
+              content: userMessage.content.toLowerCase().includes('analyze')
+                ? "Analysis: I can see you're interested in a comprehensive store analysis. Let me break this down systematically.\n\nPlan: I'll examine your optimization opportunities, calculate performance metrics, and provide prioritized recommendations.\n\nExecution: Based on my analysis, I've identified 8 key optimization opportunities with your current health score at 76%. The most impactful improvements focus on performance bottlenecks and conversion optimization.\n\nReflection: This assessment provides a solid foundation for growth. Would you like me to prioritize these fixes by potential impact and implementation complexity?"
                 : userMessage.content.toLowerCase().includes('products')
-                ? 'I can help you find products. Could you specify what type of products you\'re looking for and any specific criteria like price range, brand, or features?'
-                : 'I understand your request. Let me provide you with the most relevant information and recommendations.',
+                ? "Analysis: You're looking for product-related assistance. Let me understand your specific needs to provide the most relevant recommendations.\n\nPlan: I'll need details about your product requirements to deliver accurate suggestions.\n\nExecution: I can help you find products, but I'd need more specific criteria to provide the most valuable recommendations.\n\nReflection: Could you specify what type of products you're looking for? Details like price range, brand preferences, or specific features would help me provide more targeted assistance."
+                : "Analysis: I understand your request and I'm ready to help. Let me process what you're asking for.\n\nPlan: I'll analyze your specific needs and provide the most relevant information and actionable recommendations.\n\nExecution: I've reviewed your request and prepared comprehensive information based on the details you've provided.\n\nReflection: I've provided the most relevant information and recommendations for your specific situation. Does this address what you were looking for?",
               timestamp: new Date().toISOString(),
               state: 'completed'
             }
@@ -883,31 +853,34 @@ export default function CanvasLanding() {
     
     setProjectStatus(`Analyzing ${storeUrl}...`)
     setScanProgress(0)
-    setCurrentStep(0)
     
+    let stepIndex = 0
     const interval = setInterval(() => {
-      setCurrentStep(prev => {
-        const nextStep = prev + 1
-        if (nextStep >= scanningSteps.length) {
-          clearInterval(interval)
-          // Add completion message to chat
-          setTimeout(() => {
-            const completionMessage: ChatMessage = {
-              id: Date.now().toString() + '_complete',
-              role: 'ai',
-              content: `✅ Analysis complete! Found 8 optimization opportunities. Your store health score is 78%. Ready to see the detailed report?`,
-              timestamp: new Date().toISOString(),
-              state: 'completed',
-              icon: 'RiStarFill'
-            }
-            setChatMessages(prev => [...prev, completionMessage])
-            setProjectStatus('Analysis complete - 78% health score')
-          }, 1000)
-          return prev
-        }
-        setScanProgress(scanningSteps[nextStep].progress)
-        return nextStep
-      })
+      stepIndex++
+      const nextStep = stepIndex
+      if (nextStep >= scanningSteps.length) {
+        clearInterval(interval)
+        console.log('Scan completed, setting scanProgress to 100')
+        setScanProgress(100)
+        
+        // Health report will show automatically in LoadingPage when scanProgress reaches 100%
+        
+        // Add completion message to chat
+        setTimeout(() => {
+          const completionMessage: ChatMessage = {
+            id: Date.now().toString() + '_complete',
+            role: 'ai',
+            content: `✅ Analysis complete! Found 8 optimization opportunities. Your store health score is 78%. Ready to see the detailed report?`,
+            timestamp: new Date().toISOString(),
+            state: 'completed',
+            icon: 'RiStarFill'
+          }
+          setChatMessages(prev => [...prev, completionMessage])
+          setProjectStatus('Analysis complete - 78% health score')
+        }, 1000)
+        return
+      }
+      setScanProgress(scanningSteps[nextStep].progress)
     }, 2000)
   }
 
@@ -917,7 +890,6 @@ export default function CanvasLanding() {
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
         setScanProgress(0)
-        setCurrentStep(0)
         // Don't reset storeUrl if it's an AI-created task with a URL already set
         if (!taskId.startsWith('ai-')) {
         setStoreUrl('')
@@ -933,7 +905,6 @@ export default function CanvasLanding() {
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
         setScanProgress(0)
-        setCurrentStep(0)
         // Don't reset storeUrl as it may have been set from the AI command
       }
     } else {
@@ -1253,14 +1224,13 @@ export default function CanvasLanding() {
                                   storeUrl={storeUrl}
                                   setStoreUrl={setStoreUrl}
                                   scanProgress={scanProgress}
-
                                   handleStoreSubmit={handleStoreSubmit}
                                   onStartScan={handleLoadingPageScanReady}
                                 />
                               </div>
 
                               {/* Right Section - AI Chat (30%) */}
-                              <div 
+                              <div
                                 className="w-[30%] rounded-2xl flex flex-col border"
                                 style={{
                                   backgroundColor: '#FAFAFA',
@@ -1416,14 +1386,13 @@ export default function CanvasLanding() {
                                   storeUrl={storeUrl}
                                   setStoreUrl={setStoreUrl}
                                   scanProgress={scanProgress}
-
                                   handleStoreSubmit={handleStoreSubmit}
                                   onStartScan={handleLoadingPageScanReady}
                                 />
                               </div>
 
                               {/* Right Section - AI Chat (30%) */}
-                              <div 
+                              <div
                                 className="w-[30%] rounded-3xl flex flex-col border"
                                 style={{
                                   background: 'rgba(255, 255, 255, 0.8)',
@@ -1547,20 +1516,19 @@ export default function CanvasLanding() {
 
           {/* AI Conversation Card - Fixed Position Left Side */}
           {expandedCards.length > 0 && (
-                    <div 
-          className="fixed left-6 z-50"
-          style={{ 
-            width: '320px',
-            top: '200px', // Align with interface
-            height: '500px' // Increased height
-          }}
-        >
-              <AIConversationCard 
+            <div
+              className="fixed left-6 z-50"
+              style={{
+                width: '320px',
+                top: '200px',
+                height: '500px'
+              }}
+            >
+              <AIConversationCard
                 taskCards={taskCards}
                 expandedCards={expandedCards}
                 scanProgress={scanProgress}
-                currentStep={currentStep}
-                isScanning={scanProgress > 0}
+                isScanning={scanProgress > 0 && scanProgress < 100}
                 onAutoEnterUrl={handleAutoEnterUrl}
                 onAutoStartScan={handleAutoStartScan}
               />
