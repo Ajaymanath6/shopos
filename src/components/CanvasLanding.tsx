@@ -525,6 +525,10 @@ export default function CanvasLanding() {
   const [showTemplates, setShowTemplates] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null)
+  const [showEditTask, setShowEditTask] = useState(false)
+  const [taskToEdit, setTaskToEdit] = useState<string | null>(null)
+  const [editTaskName, setEditTaskName] = useState('')
+  const [editTaskDesc, setEditTaskDesc] = useState('')
 
   useEffect(() => {
     try {
@@ -699,6 +703,39 @@ export default function CanvasLanding() {
   const cancelDeleteTask = () => {
     setShowDeleteConfirm(false)
     setTaskToDelete(null)
+  }
+
+  // Handle edit task
+  const handleEditClick = (taskId: string, event: React.MouseEvent) => {
+    event.stopPropagation() // Prevent card click
+    const task = taskCards.find(t => t.id === taskId)
+    if (task) {
+      setTaskToEdit(taskId)
+      setEditTaskName(task.title)
+      setEditTaskDesc(task.subtitle)
+      setShowEditTask(true)
+    }
+  }
+
+  const confirmEditTask = () => {
+    if (taskToEdit && editTaskName.trim()) {
+      setTaskCards(prev => prev.map(task => 
+        task.id === taskToEdit 
+          ? { ...task, title: editTaskName.trim(), subtitle: editTaskDesc.trim() || task.subtitle }
+          : task
+      ))
+      setShowEditTask(false)
+      setTaskToEdit(null)
+      setEditTaskName('')
+      setEditTaskDesc('')
+    }
+  }
+
+  const cancelEditTask = () => {
+    setShowEditTask(false)
+    setTaskToEdit(null)
+    setEditTaskName('')
+    setEditTaskDesc('')
   }
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
@@ -1044,11 +1081,7 @@ export default function CanvasLanding() {
                       {task.id !== 'store-health' && (
                         <div className="flex gap-2">
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              // Edit task action - for now just alert
-                              alert(`Edit task: ${task.title}`)
-                            }}
+                            onClick={(e) => handleEditClick(task.id, e)}
                             className="p-2 rounded-lg bg-blue-100"
                             title="Edit task"
                           >
@@ -2175,6 +2208,63 @@ export default function CanvasLanding() {
                   className="px-6 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors font-medium shadow-lg hover:shadow-xl"
                 >
                   Delete Task
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Task Modal */}
+      {showEditTask && taskToEdit && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="absolute inset-0" onClick={cancelEditTask} />
+          <div className="relative w-full max-w-xl mx-4 rounded-2xl border border-white/40 backdrop-blur-2xl p-6 shadow-2xl" style={{ background: 'rgba(255,255,255,0.95)' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Edit Task</h3>
+              <button className="p-1 rounded-lg hover:bg-gray-100 text-gray-500" onClick={cancelEditTask}>
+                <RiCloseLine size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Task name</label>
+                <input
+                  value={editTaskName}
+                  onChange={(e) => setEditTaskName(e.target.value)}
+                  placeholder="e.g., Conversion Uplift Assistant"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2"
+                  style={{ '--tw-ring-color': '#A5D6A7' } as React.CSSProperties}
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Description</label>
+                <textarea
+                  value={editTaskDesc}
+                  onChange={(e) => setEditTaskDesc(e.target.value)}
+                  rows={3}
+                  placeholder="What should this agent do?"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2"
+                  style={{ '--tw-ring-color': '#A5D6A7' } as React.CSSProperties}
+                />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  className="px-4 py-2 rounded-lg text-white"
+                  style={{ backgroundColor: DARK_PALETTE.primary }}
+                  onClick={confirmEditTask}
+                  disabled={!editTaskName.trim()}
+                >
+                  Save Changes
+                </button>
+                <button
+                  className="px-4 py-2 rounded-lg text-gray-700 border"
+                  style={{ borderColor: '#E5E7EB', background: '#FFFFFF' }}
+                  onClick={cancelEditTask}
+                >
+                  Cancel
                 </button>
               </div>
             </div>
