@@ -1416,22 +1416,120 @@ export default function CanvasLanding() {
 
               {/* Interface with AI Card Layout */}
               <div className="flex gap-6">
-                {/* AI Conversation Card - Left Side */}
+                {/* AI Conversation Card & Agents - Left Side */}
                 <div 
-                  className="flex-shrink-0"
+                  className="flex-shrink-0 space-y-4"
                   style={{ 
-                    width: '320px',
-                    height: '500px'
+                    width: '320px'
                   }}
                 >
-                  <AIConversationCard 
-                    taskCards={taskCards}
-                    expandedCards={[task.id]} // Only show this specific task
-                    scanProgress={scanProgress}
-                    isScanning={scanProgress > 0 && scanProgress < 100}
-                    onAutoEnterUrl={handleAutoEnterUrl}
-                    onAutoStartScan={handleAutoStartScan}
-                  />
+                  {/* AI Conversation Card */}
+                  <div style={{ height: '500px' }}>
+                    <AIConversationCard 
+                      taskCards={taskCards}
+                      expandedCards={[task.id]} // Only show this specific task
+                      scanProgress={scanProgress}
+                      isScanning={scanProgress > 0 && scanProgress < 100}
+                      onAutoEnterUrl={handleAutoEnterUrl}
+                      onAutoStartScan={handleAutoStartScan}
+                    />
+                  </div>
+
+                  {/* AI Agents Display */}
+                  <div 
+                    className="rounded-2xl p-4 border border-white/40 backdrop-blur-xl"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      backdropFilter: 'blur(25px)',
+                      boxShadow: `
+                        0 12px 40px rgba(0, 0, 0, 0.15),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+                        inset 0 -1px 0 rgba(255, 255, 255, 0.3)
+                      `
+                    }}
+                  >
+                    <div className="text-center mb-3">
+                      <h4 className="text-sm font-semibold text-gray-800">AI Agents Used</h4>
+                      <p className="text-xs text-gray-600">Powering this analysis</p>
+                    </div>
+                    
+                    <div className="flex justify-center gap-4">
+                      {/* Perplexity */}
+                      <div className="flex flex-col items-center">
+                        <div 
+                          className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            backdropFilter: 'blur(10px)'
+                          }}
+                        >
+                          <img 
+                            src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/perplexity-ai-icon.png" 
+                            alt="Perplexity" 
+                            className="w-6 h-6 object-contain"
+                            onError={(e) => {
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.style.display = 'none';
+                              const fallback = target.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
+                          />
+                          <span className="text-xs font-bold text-blue-600 hidden">P</span>
+                        </div>
+                        <span className="text-xs text-gray-700 mt-1">Perplexity</span>
+                      </div>
+
+                      {/* ChatGPT */}
+                      <div className="flex flex-col items-center">
+                        <div 
+                          className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            backdropFilter: 'blur(10px)'
+                          }}
+                        >
+                          <img 
+                            src="https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg" 
+                            alt="ChatGPT" 
+                            className="w-6 h-6 object-contain"
+                            onError={(e) => {
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.style.display = 'none';
+                              const fallback = target.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
+                          />
+                          <span className="text-xs font-bold text-green-600 hidden">GPT</span>
+                        </div>
+                        <span className="text-xs text-gray-700 mt-1">ChatGPT</span>
+                      </div>
+
+                      {/* Claude */}
+                      <div className="flex flex-col items-center">
+                        <div 
+                          className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            backdropFilter: 'blur(10px)'
+                          }}
+                        >
+                          <img 
+                            src="https://claude.ai/images/claude_app_icon.png" 
+                            alt="Claude" 
+                            className="w-6 h-6 object-contain"
+                            onError={(e) => {
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.style.display = 'none';
+                              const fallback = target.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
+                          />
+                          <span className="text-xs font-bold text-purple-600 hidden">C</span>
+                        </div>
+                        <span className="text-xs text-gray-700 mt-1">Claude</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Main Interface - Right Side */}
@@ -1439,8 +1537,8 @@ export default function CanvasLanding() {
                     className="rounded-3xl overflow-hidden flex-1"
                 style={{ 
                     minHeight: '800px',
-                    background: 'rgba(255, 255, 255, 0.8)',
-                    backdropFilter: 'blur(20px)',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    backdropFilter: 'blur(25px)',
                   boxShadow: `
                       0 20px 60px rgba(0, 0, 0, 0.08),
                       0 8px 32px rgba(0, 0, 0, 0.06),
@@ -1533,22 +1631,120 @@ export default function CanvasLanding() {
 
               {/* Interface with AI Card Layout */}
               <div className="flex gap-6">
-                {/* AI Conversation Card - Left Side */}
+                {/* AI Conversation Card & Agents - Left Side */}
                 <div 
-                  className="flex-shrink-0"
+                  className="flex-shrink-0 space-y-4"
                   style={{ 
-                    width: '320px',
-                    height: '500px'
+                    width: '320px'
                   }}
                 >
-                  <AIConversationCard 
-                    taskCards={taskCards}
-                    expandedCards={['store-health']} // Only show store health task
-                    scanProgress={scanProgress}
-                    isScanning={scanProgress > 0 && scanProgress < 100}
-                    onAutoEnterUrl={handleAutoEnterUrl}
-                    onAutoStartScan={handleAutoStartScan}
-                  />
+                  {/* AI Conversation Card */}
+                  <div style={{ height: '500px' }}>
+                    <AIConversationCard 
+                      taskCards={taskCards}
+                      expandedCards={['store-health']} // Only show store health task
+                      scanProgress={scanProgress}
+                      isScanning={scanProgress > 0 && scanProgress < 100}
+                      onAutoEnterUrl={handleAutoEnterUrl}
+                      onAutoStartScan={handleAutoStartScan}
+                    />
+                  </div>
+
+                  {/* AI Agents Display */}
+                  <div 
+                    className="rounded-2xl p-4 border border-white/40 backdrop-blur-xl"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      backdropFilter: 'blur(25px)',
+                      boxShadow: `
+                        0 12px 40px rgba(0, 0, 0, 0.15),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+                        inset 0 -1px 0 rgba(255, 255, 255, 0.3)
+                      `
+                    }}
+                  >
+                    <div className="text-center mb-3">
+                      <h4 className="text-sm font-semibold text-gray-800">AI Agents Used</h4>
+                      <p className="text-xs text-gray-600">Powering this analysis</p>
+                    </div>
+                    
+                    <div className="flex justify-center gap-4">
+                      {/* Perplexity */}
+                      <div className="flex flex-col items-center">
+                        <div 
+                          className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            backdropFilter: 'blur(10px)'
+                          }}
+                        >
+                          <img 
+                            src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/perplexity-ai-icon.png" 
+                            alt="Perplexity" 
+                            className="w-6 h-6 object-contain"
+                            onError={(e) => {
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.style.display = 'none';
+                              const fallback = target.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
+                          />
+                          <span className="text-xs font-bold text-blue-600 hidden">P</span>
+                        </div>
+                        <span className="text-xs text-gray-700 mt-1">Perplexity</span>
+                      </div>
+
+                      {/* ChatGPT */}
+                      <div className="flex flex-col items-center">
+                        <div 
+                          className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            backdropFilter: 'blur(10px)'
+                          }}
+                        >
+                          <img 
+                            src="https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg" 
+                            alt="ChatGPT" 
+                            className="w-6 h-6 object-contain"
+                            onError={(e) => {
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.style.display = 'none';
+                              const fallback = target.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
+                          />
+                          <span className="text-xs font-bold text-green-600 hidden">GPT</span>
+                        </div>
+                        <span className="text-xs text-gray-700 mt-1">ChatGPT</span>
+                      </div>
+
+                      {/* Claude */}
+                      <div className="flex flex-col items-center">
+                        <div 
+                          className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            backdropFilter: 'blur(10px)'
+                          }}
+                        >
+                          <img 
+                            src="https://claude.ai/images/claude_app_icon.png" 
+                            alt="Claude" 
+                            className="w-6 h-6 object-contain"
+                            onError={(e) => {
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.style.display = 'none';
+                              const fallback = target.nextElementSibling as HTMLElement;
+                              if (fallback) fallback.style.display = 'flex';
+                            }}
+                          />
+                          <span className="text-xs font-bold text-purple-600 hidden">C</span>
+                        </div>
+                        <span className="text-xs text-gray-700 mt-1">Claude</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Main Interface - Right Side */}
