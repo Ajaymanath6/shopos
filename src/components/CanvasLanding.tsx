@@ -22,6 +22,7 @@ import {
 } from '@remixicon/react'
 import shopOSLogo from '../assets/shop-os-logo.svg'
 import LoadingPage from '../pages/LoadingPage'
+import ChatBot from './ChatBot'
 
 
 // Custom SVG Icons
@@ -133,41 +134,41 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
     // Sequential message flow - each waits for previous to complete
     let messageDelay = 0
 
-    // Message 1: Analysis Phase - Introduction with framework
+    // Message 1: Quick Introduction
     setTimeout(() => {
       addTypingMessage({
         type: 'thinking',
-        content: `${greetings[taskType]} Let's start with a clear analysis of what we're working with.`,
+        content: `${greetings[taskType]}`,
         icon: RiBrainLine
       })
     }, messageDelay)
-    messageDelay += 7000 // Wait for typing to complete
+    messageDelay += 4000
 
-    // Message 2: Analysis Phase - Task Understanding
+    // Message 2: Analysis
     setTimeout(() => {
       addTypingMessage({
         type: 'thinking',
-        content: "Analysis: I can see you want to optimize your store's performance and growth potential. The key factors here are comprehensive diagnostics, actionable insights, and measurable improvements. I'll focus on identifying specific opportunities that will have the most impact.",
+        content: "Analysis: I'll run a comprehensive store diagnostic to identify optimization opportunities.",
         icon: RiBrainLine
       })
     }, messageDelay)
-    messageDelay += 9000
+    messageDelay += 5000
 
-    // Message 3: Plan Phase - Strategy Outline
+    // Message 3: Plan
     setTimeout(() => {
       addTypingMessage({
         type: 'planning',
-        content: "Plan: Here's my strategic approach to this task:\n\nStep 1: I'll establish a connection by entering your store URL into the interface\nStep 2: I'll initiate the comprehensive analysis by triggering the scan process\nStep 3: I'll systematically examine your store across multiple dimensions\nStep 4: I'll compile detailed findings and generate your personalized optimization report\n\nThis methodical approach ensures we cover all critical areas efficiently.",
+        content: "Plan: Enter store URL → Run scan → Generate optimization report",
         icon: RiBrainLine
       })
     }, messageDelay)
-    messageDelay += 12000
+    messageDelay += 4000
 
-    // Message 4: Execution Phase - Starting Step 1
+    // Message 4: Execution - URL Entry
     setTimeout(() => {
       addTypingMessage({
         type: 'executing',
-        content: "Execution - Step 1: I'm now establishing the connection by entering a demo URL into the interface. This provides us with a representative sample to work with for the comprehensive analysis.",
+        content: "Execution: Entering demo URL for analysis...",
         icon: RiSearchEyeLine
       })
       
@@ -176,15 +177,15 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         if (onAutoEnterUrl) {
           onAutoEnterUrl('https://demo-store.myshopify.com')
         }
-      }, 3000)
+      }, 2000)
     }, messageDelay)
-    messageDelay += 10000
+    messageDelay += 5000
 
-    // Message 5: Execution Phase - Starting Step 2
+    // Message 5: Execution - Start Scan
     setTimeout(() => {
       addTypingMessage({
         type: 'executing',
-        content: "Execution - Step 2: Now I'm initiating the comprehensive scan process. This will systematically analyze your store's performance, identify optimization opportunities, and prepare detailed recommendations for growth.",
+        content: "Starting comprehensive store scan...",
         icon: RiSearchEyeLine
       })
       
@@ -193,7 +194,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         if (onAutoStartScan) {
           onAutoStartScan()
         }
-      }, 3000)
+      }, 2000)
     }, messageDelay)
   }, [addTypingMessage, onAutoEnterUrl, onAutoStartScan])
 
@@ -1272,9 +1273,10 @@ export default function CanvasLanding() {
 
           {/* Projects Container - Full Canvas Layout */}
           <div className="mt-26 w-full flex flex-wrap gap-12" style={{ minWidth: '100vw', padding: '0 2rem', paddingLeft: '360px', marginBottom: '50px' }}>
-            {/* AI-Created Tasks using LoadingPage - Only when NOT in section */}
+            {/* AI-Created Tasks using LoadingPage (excluding store health) - Only when NOT in section */}
             {taskCards.filter(task => 
               task.id.startsWith('ai-') && 
+              !task.id.startsWith('ai-store-health') &&
               expandedCards.includes(task.id) && 
               !getProjectSection(task.id)
             ).map(task => (
@@ -1385,8 +1387,10 @@ export default function CanvasLanding() {
                               </div>
             ))}
 
-            {/* Store Health Check Expandable Interface - Only when NOT in section */}
-            {expandedCards.includes('store-health') && !getProjectSection('store-health') && (
+            {/* Store Health Check Expandable Interface (Original + AI-Created) - Only when NOT in section */}
+            {(expandedCards.includes('store-health') || expandedCards.some(id => id.startsWith('ai-store-health'))) && 
+             (expandedCards.includes('store-health') ? !getProjectSection('store-health') : 
+              !getProjectSection(expandedCards.find(id => id.startsWith('ai-store-health')) || '')) && (
               <div 
                 className={`transition-all duration-300 ${
                   sectionMode ? 'cursor-pointer' : ''
@@ -1399,23 +1403,41 @@ export default function CanvasLanding() {
                   flexShrink: 0,
                   marginBottom: '50px'
                 }}
-                onClick={() => handleProjectSelection('store-health')}
+                onClick={() => {
+                  const activeStoreHealthId = expandedCards.includes('store-health') ? 'store-health' : 
+                                            expandedCards.find(id => id.startsWith('ai-store-health')) || 'store-health'
+                  handleProjectSelection(activeStoreHealthId)
+                }}
               >
-              {/* Main Heading */}
-              <div className="text-left mb-6 relative" style={{ marginTop: '120px' }}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h1 className="text-3xl font-bold mb-2 text-gray-900">
-                      Store Health Check
-                    </h1>
-                    <p className="text-lg text-gray-600">
-                      AI-powered diagnostic and optimization workspace
-                    </p>
+              {(() => {
+                const activeTask = expandedCards.includes('store-health') ? 
+                  taskCards.find(t => t.id === 'store-health') :
+                  taskCards.find(t => t.id.startsWith('ai-store-health') && expandedCards.includes(t.id))
+                const taskTitle = activeTask?.title || 'Store Health Check'
+                const taskSubtitle = activeTask?.subtitle || 'AI-powered diagnostic and optimization workspace'
+                
+                return (
+                  <>
+                    {/* Main Heading */}
+                    <div className="text-left mb-6 relative" style={{ marginTop: '120px' }}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h1 className="text-3xl font-bold mb-2 text-gray-900">
+                            {taskTitle}
+                          </h1>
+                          <p className="text-lg text-gray-600">
+                            {taskSubtitle}
+                          </p>
                   </div>
-                  <button 
-                    onClick={() => setExpandedCards(prev => prev.filter(id => id !== 'store-health'))}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
-                  >
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            const activeTaskId = expandedCards.includes('store-health') ? 'store-health' : 
+                                               expandedCards.find(id => id.startsWith('ai-store-health')) || 'store-health'
+                            setExpandedCards(prev => prev.filter(id => id !== activeTaskId))
+                          }}
+                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
+                        >
                     <RiCloseLine size={24} />
                   </button>
                 </div>
@@ -1487,6 +1509,9 @@ export default function CanvasLanding() {
                   </button>
                 </div>
               </div>
+                  </>
+                )
+              })()}
             </div>
                         )}
 
