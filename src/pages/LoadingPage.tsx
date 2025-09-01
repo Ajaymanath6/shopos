@@ -116,7 +116,7 @@ export default function LoadingPage({
           }}
         >
           {/* Store Health Report Content */}
-          <div className="max-w-6xl mx-auto">
+          <div className="w-[1440px] mx-auto">
             {/* Header Section */}
             <div className="text-center mb-12">
               <div className="flex items-center justify-center gap-4 mb-6">
@@ -554,14 +554,15 @@ export default function LoadingPage({
   }
   return (
     <div 
-      className="w-full p-8 rounded-3xl backdrop-blur-lg"
+      className="p-8 rounded-3xl backdrop-blur-lg"
       style={{
         background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(20px)',
         boxShadow: `
           0 8px 32px rgba(0, 0, 0, 0.1),
           inset 0 1px 0 rgba(255, 255, 255, 0.9)
-        `
+        `,
+        width: '100%'
       }}
     >
       {/* Landing Page Header */}

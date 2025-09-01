@@ -26,6 +26,7 @@ import {
 import shopOSLogo from '../assets/shop-os-logo.svg'
 import LoadingPage from '../pages/LoadingPage'
 import { ShiningText } from '../components/ui/shining-text'
+import { ModernNotification } from '../components/ui/modern-notification'
 
 // Global window interface extension
 declare global {
@@ -1551,7 +1552,7 @@ export default function CanvasLanding() {
                         >
                           {/* Store Health Check Full Interface */}
                           <div className="text-left mb-6 relative">
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center">
                               <div>
                                 <h1 className="text-3xl font-bold mb-2 text-gray-900">
                                   Store Health Check
@@ -1560,25 +1561,19 @@ export default function CanvasLanding() {
                                   AI-powered diagnostic and optimization workspace
                                 </p>
                               </div>
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setExpandedCards(prev => prev.filter(id => id !== 'store-health'))
-                                }}
-                                className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
-                              >
-                                <RiCloseLine size={24} />
-                              </button>
+
                             </div>
                           </div>
                           
                           {/* Notification Banner */}
-                          <div 
+                          <div
                             className="mb-8 p-4 rounded-3xl border flex items-center gap-4"
                             style={{
                               background: 'rgba(255, 255, 255, 0.8)',
                               borderColor: '#E5E7EB',
-                              backdropFilter: 'blur(10px)'
+                              backdropFilter: 'blur(10px)',
+                              width: '100%',
+                              minWidth: '1400px'
                             }}
                           >
                             <div className="flex items-center gap-3">
@@ -1659,7 +1654,7 @@ export default function CanvasLanding() {
 
 
           {/* Projects Container - Full Canvas Layout */}
-          <div className="mt-26 w-full flex flex-wrap gap-12" style={{ minWidth: '100vw', padding: '0 2rem', paddingLeft: '360px', marginBottom: '50px' }}>
+          <div className="mt-26 w-full flex flex-wrap gap-12 justify-center" style={{ minWidth: '100vw', padding: '0 2rem', marginBottom: '50px' }}>
             {/* AI-Created Tasks using LoadingPage - Only when NOT in section */}
             {taskCards.filter(task => 
               task.id.startsWith('ai-') && 
@@ -1683,7 +1678,7 @@ export default function CanvasLanding() {
               >
                 {/* Main Heading - Outside Interface */}
               <div className="text-left mb-6 relative" style={{ marginTop: '120px' }}>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center">
                   <div>
                     <h1 className="text-3xl font-bold mb-2 text-gray-900">
                         {task.title}
@@ -1692,25 +1687,18 @@ export default function CanvasLanding() {
                         {task.subtitle}
                     </p>
                   </div>
-                  <button 
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setExpandedCards(prev => prev.filter(id => id !== task.id))
-                      }}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
-                  >
-                    <RiCloseLine size={24} />
-                  </button>
                 </div>
               </div>
               
                 {/* Notification Banner - Outside Interface */}
-              <div 
+              <div
                 className="mb-8 p-4 rounded-2xl border flex items-center gap-4"
                 style={{
                   background: 'rgba(255, 255, 255, 0.8)',
                   borderColor: '#E5E7EB',
-                  backdropFilter: 'blur(10px)'
+                  backdropFilter: 'blur(10px)',
+                  width: '100%',
+                  minWidth: '1400px'
                 }}
               >
                 <div className="flex items-center gap-3">
@@ -1891,9 +1879,10 @@ export default function CanvasLanding() {
 
                 {/* Main Interface - Right Side */}
                 <div 
-                    className="rounded-3xl overflow-hidden flex-1"
+                    className="rounded-3xl overflow-hidden"
                 style={{ 
                     minHeight: '800px',
+                    width: 'calc(1400px - 320px - 24px)', // Total width minus left panel minus gap
                     background: 'rgba(255, 255, 255, 0.1)',
                     backdropFilter: 'blur(25px)',
                   boxShadow: `
@@ -1947,21 +1936,13 @@ export default function CanvasLanding() {
                       AI-powered diagnostic and optimization workspace
                     </p>
                   </div>
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setExpandedCards(prev => prev.filter(id => id !== 'store-health'))
-                    }}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
-                  >
-                    <RiCloseLine size={24} />
-                  </button>
+
                 </div>
                         </div>
 
               {/* Notification Banner */}
-              <div 
-                className="mb-8 p-4 rounded-2xl border flex items-center gap-4"
+              <div
+                className="mb-8 p-4 rounded-2xl border flex items-center gap-4 w-full"
                 style={{
                   background: 'rgba(255, 255, 255, 0.8)',
                   borderColor: '#E5E7EB',
@@ -2173,15 +2154,7 @@ export default function CanvasLanding() {
                   </div>
                 </div>
 
-                {/* Close Button */}
-                <div className="absolute top-4 right-4">
-                  <button
-                    onClick={() => setExpandedCards([])}
-                    className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors"
-                  >
-                    ×
-                  </button>
-                </div>
+
               </div>
                 </div>
               </div>
@@ -2229,21 +2202,13 @@ export default function CanvasLanding() {
                         {task.subtitle}
                       </p>
                     </div>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setExpandedCards(prev => prev.filter(id => id !== task.id))
-                      }}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
-                    >
-                      <RiCloseLine size={24} />
-                    </button>
+
                   </div>
                 </div>
                 
                 {/* Notification Banner */}
-                <div 
-                  className="mb-8 p-4 rounded-2xl border flex items-center gap-4"
+                <div
+                  className="mb-8 p-4 rounded-2xl border flex items-center gap-4 w-full"
                   style={{
                     background: 'rgba(255, 255, 255, 0.8)',
                     borderColor: '#E5E7EB',
@@ -2393,7 +2358,7 @@ export default function CanvasLanding() {
               >
               {/* Main Heading */}
               <div className="text-left mb-6 relative">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center">
                   <div>
                     <h1 className="text-3xl font-bold mb-2 text-gray-900">
                       SEO Optimizer
@@ -2402,18 +2367,12 @@ export default function CanvasLanding() {
                       AI-powered SEO analysis and optimization for better search rankings
                     </p>
                   </div>
-                  <button 
-                    onClick={() => setExpandedCards(prev => prev.filter(id => id !== 'seo-optimizer'))}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
-                  >
-                    <RiCloseLine size={24} />
-                  </button>
                 </div>
               </div>
               
               {/* Notification Banner */}
-              <div 
-                className="mb-8 p-4 rounded-2xl border flex items-center gap-4"
+              <div
+                className="mb-8 p-4 rounded-2xl border flex items-center gap-4 w-full"
                 style={{
                   background: 'rgba(255, 255, 255, 0.8)',
                   borderColor: '#E5E7EB',
@@ -2421,7 +2380,7 @@ export default function CanvasLanding() {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <div 
+                  <div
                     className="w-8 h-8 rounded-lg flex items-center justify-center"
                     style={{ backgroundColor: DARK_PALETTE.secondary }}
                   >
@@ -2920,14 +2879,19 @@ export default function CanvasLanding() {
           
           {/* Action Center Panel */}
           <div 
-            className="w-96 bg-white shadow-2xl border-l border-gray-200 flex flex-col"
+            className="w-96 shadow-2xl border-l border-white/40 flex flex-col backdrop-blur-xl"
             style={{
-              background: 'rgba(255, 255, 255, 0.98)',
-              backdropFilter: 'blur(20px)'
+              background: 'rgba(255, 255, 255, 0.3)',
+              backdropFilter: 'blur(20px)',
+              boxShadow: `
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.2)
+              `
             }}
           >
             {/* Header */}
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-6 border-b border-white/30">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">Action Center</h2>
@@ -2998,37 +2962,22 @@ export default function CanvasLanding() {
                       <h3 className="text-lg font-bold text-gray-900 mb-4">Recent Activity</h3>
                       <div className="space-y-3">
                         {notifications.filter(n => !n.actionRequired).map((notification) => (
-                          <div
+                          <ModernNotification
                             key={notification.id}
-                            className="p-4 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors"
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
-                                <RiCheckLine size={16} className="text-green-600" />
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="font-semibold text-gray-900 mb-1">{notification.title}</h4>
-                                <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
-                                <div className="flex items-center justify-between">
-                                  <span className="text-xs text-gray-500">
-                                    {new Date(notification.timestamp).toLocaleTimeString([], { 
-                                      hour: '2-digit', 
-                                      minute: '2-digit' 
-                                    })}
-                                  </span>
-                                  <button className="text-xs text-blue-600 hover:text-blue-800 transition-colors">
-                                    Go to Task →
-                                  </button>
-                                </div>
-                              </div>
-                              <button
-                                onClick={() => notification.id && removeNotification(notification.id)}
-                                className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-600"
-                              >
-                                <RiCloseLine size={16} />
-                              </button>
-                            </div>
-                          </div>
+                            title={notification.title}
+                            message={notification.message}
+                            timestamp={new Date(notification.timestamp).toLocaleTimeString([], { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                            type={notification.type === 'deployment_complete' ? 'success' : 'info'}
+                            onDismiss={() => notification.id && removeNotification(notification.id)}
+                            onAction={() => {
+                              // Handle "Go to Task" action
+                              console.log('Navigate to task:', notification.title)
+                            }}
+                            actionLabel="Go to Task"
+                          />
                         ))}
                       </div>
                     </div>

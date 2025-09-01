@@ -37,19 +37,6 @@ export default function AgentLiveView({ onComplete, onViewStore }: AgentLiveView
   const [overallProgress, setOverallProgress] = useState(0)
   const [currentStatus, setCurrentStatus] = useState<'initializing' | 'deploying' | 'complete'>('initializing')
   const [showCompletion, setShowCompletion] = useState(false)
-  const [heartbeatData, setHeartbeatData] = useState<number[]>([])
-
-  // Simulate heartbeat data
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setHeartbeatData(prev => {
-        const newData = [...prev, Math.random() * 40 + 30]
-        return newData.slice(-20) // Keep last 20 points
-      })
-    }, 200)
-
-    return () => clearInterval(interval)
-  }, [])
 
   const addLogEntry = useCallback((message: string, isImportant = false) => {
     const timestamp = new Date().toLocaleTimeString('en-US', { 
@@ -115,30 +102,30 @@ export default function AgentLiveView({ onComplete, onViewStore }: AgentLiveView
 
   return (
     <div className="w-full min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto p-8">
+      <div className="w-[1440px] mx-auto p-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-4 mb-6">
+        <div className="mb-8">
+          <div className="flex items-center gap-6 mb-8">
             <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-xl"
+              className="w-20 h-20 rounded-3xl flex items-center justify-center shadow-2xl"
               style={{
-                backgroundColor: DARK_PALETTE.primary,
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+                background: `linear-gradient(135deg, ${DARK_PALETTE.primary} 0%, ${DARK_PALETTE.secondary} 100%)`,
+                boxShadow: '0 12px 40px rgba(0, 0, 0, 0.2)'
               }}
             >
-              <RiRocketLine size={32} className="text-white" />
+              <RiRocketLine size={40} className="text-white" />
             </div>
-          </div>
-
-          <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
-            Agent Live View
-          </h1>
-
-          <div className="mb-6">
-            <ShiningText 
-              text="Aggo is optimizing your store in real-time. Watch the magic happen."
-              className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed"
-            />
+            <div className="flex-1">
+              <h1 className="text-5xl font-bold text-gray-900 mb-3 leading-tight">
+                Agent Live View
+              </h1>
+              <div className="w-full">
+                <ShiningText
+                  text="Shopos AI is deploying optimizations to your store. Real-time progress and insights below."
+                  className="text-2xl text-gray-700 leading-relaxed font-medium"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -205,7 +192,7 @@ export default function AgentLiveView({ onComplete, onViewStore }: AgentLiveView
                   <RiStarFill size={20} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">AI Agent: Aggo</h3>
+                  <h3 className="text-lg font-bold text-gray-900">AI Agent: Shopos AI</h3>
                   <p className="text-sm text-gray-600">Image Optimization Specialist</p>
                 </div>
               </div>
@@ -250,35 +237,7 @@ export default function AgentLiveView({ onComplete, onViewStore }: AgentLiveView
               </div>
             </div>
 
-            {/* Live Heartbeat Visualization */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">System Vitals</h3>
-              
-              <div className="h-24 bg-gray-50 rounded-lg p-4 relative overflow-hidden">
-                <svg className="w-full h-full">
-                  <polyline
-                    fill="none"
-                    stroke={DARK_PALETTE.primary}
-                    strokeWidth="2"
-                    points={heartbeatData.map((value, index) => 
-                      `${(index / (heartbeatData.length - 1)) * 100},${100 - (value / 70) * 100}`
-                    ).join(' ')}
-                  />
-                </svg>
-                
-                {currentStatus === 'complete' && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-green-50">
-                    <RiCheckLine size={32} className="text-green-600" />
-                  </div>
-                )}
-              </div>
-              
-              <div className="mt-3 text-center">
-                <div className="text-sm text-gray-600">
-                  {currentStatus === 'complete' ? 'System Stable' : 'Processing Active'}
-                </div>
-              </div>
-            </div>
+
 
             {/* Completion Actions */}
             {showCompletion && (
