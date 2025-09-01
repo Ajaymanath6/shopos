@@ -24,6 +24,7 @@ import {
 } from '@remixicon/react'
 import shopOSLogo from '../assets/shop-os-logo.svg'
 import LoadingPage from '../pages/LoadingPage'
+import { ShiningText } from '../components/ui/shining-text'
 
 
 // Custom SVG Icons
@@ -168,6 +169,22 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
     // Sequential message flow - each waits for previous to complete
     let messageDelay = 0
 
+    // Message 0: Shining Text Summary (Shows first, then disappears)
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'summary',
+        content: `I'm Shopos AI, your intelligent agent for ${task.title}. I'll analyze your store comprehensively, identify optimization opportunities, and provide actionable recommendations. My process involves entering your store URL, running a detailed diagnostic scan, and generating a complete optimization report with specific fixes you can deploy instantly.`,
+        icon: RiBrainLine,
+        statusIndicator: 'SHOPOS_THINKING'
+      })
+
+      // Hide the summary after 5 seconds and show normal responses
+      setTimeout(() => {
+        setMessages(prev => prev.filter(msg => msg.type !== 'summary'))
+      }, 5000)
+    }, messageDelay)
+    messageDelay += 3000 // Fast transition to summary
+
     // Message 1: Quick Introduction
     setTimeout(() => {
       addTypingMessage({
@@ -209,13 +226,13 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         icon: RiSearchEyeLine,
         statusIndicator: 'SHOPOS_SEARCHING_TOOLS'
       })
-      
+
       // Auto-enter URL after message completes
       setTimeout(() => {
         if (onAutoEnterUrl) {
           onAutoEnterUrl('https://demo-store.myshopify.com')
         }
-        
+
         // Update plan to show first step completed
         setMessages(prev => prev.map(msg => {
           if (msg.content.includes('Plan:') && msg.content.includes('Enter store URL')) {
@@ -238,13 +255,13 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         icon: RiSearchEyeLine,
         statusIndicator: 'SHOPOS_INITIALIZING'
       })
-      
+
       // Auto-click scan button after message completes
       setTimeout(() => {
         if (onAutoStartScan) {
           onAutoStartScan()
         }
-        
+
         // Update plan to show second step completed
         setMessages(prev => prev.map(msg => {
           if (msg.content.includes('Plan:') && msg.content.includes('Run comprehensive scan')) {
@@ -452,34 +469,40 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
                     />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-xs leading-relaxed ${
-                      message.isTyping ? 'text-gray-600' : 'text-gray-800'
-                    }`}>
-                      <>
-                        {message.content.split('\n').map((line, index) => (
-                          <span key={index}>
-                            {line.includes('~~') ? (
-                              // Handle strikethrough text
-                              line.split('~~').map((part, partIndex) => (
-                                partIndex % 2 === 1 ? (
-                                  <span key={partIndex} style={{ textDecoration: 'line-through', color: '#9CA3AF' }}>
-                                    {part}
-                                  </span>
-                                ) : (
-                                  <span key={partIndex}>{part}</span>
-                                )
-                              ))
-                            ) : (
-                              line
-                            )}
-                            {index < message.content.split('\n').length - 1 && <br />}
-                          </span>
-                        ))}
+                    {message.type === 'summary' ? (
+                      <div className="mb-3">
+                        <ShiningText text={message.content} className="text-sm leading-relaxed" />
+                      </div>
+                    ) : (
+                      <p className={`text-xs leading-relaxed ${
+                        message.isTyping ? 'text-gray-600' : 'text-gray-800'
+                      }`}>
+                        <>
+                          {message.content.split('\n').map((line, index) => (
+                            <span key={index}>
+                              {line.includes('~~') ? (
+                                // Handle strikethrough text
+                                line.split('~~').map((part, partIndex) => (
+                                  partIndex % 2 === 1 ? (
+                                    <span key={partIndex} style={{ textDecoration: 'line-through', color: '#9CA3AF' }}>
+                                      {part}
+                                    </span>
+                                  ) : (
+                                    <span key={partIndex}>{part}</span>
+                                  )
+                                ))
+                              ) : (
+                                line
+                              )}
+                              {index < message.content.split('\n').length - 1 && <br />}
+                            </span>
+                          ))}
                         {message.isTyping && (
                           <span className="inline-block w-0.5 h-4 ml-1 animate-pulse" style={{ backgroundColor: '#374151' }}></span>
                         )}
                       </>
-                    </p>
+                      </p>
+                    )}
                     <div className="text-xs text-gray-400 mt-1">
                       {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
