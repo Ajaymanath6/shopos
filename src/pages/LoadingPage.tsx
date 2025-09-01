@@ -23,6 +23,7 @@ import {
   RiGroupLine
 } from '@remixicon/react'
 import FixPreviewPage from './FixPreviewPage'
+import AgentLiveView from './AgentLiveView'
 
 // Dark Gray Monochromatic Palette
 const DARK_PALETTE = {
@@ -54,6 +55,7 @@ export default function LoadingPage({
 }: LoadingPageProps) {
   const isScanning = scanProgress > 0
   const [showFixPreview, setShowFixPreview] = useState(false)
+  const [showAgentLiveView, setShowAgentLiveView] = useState(false)
 
 
 
@@ -69,12 +71,27 @@ export default function LoadingPage({
     }
   }, [onStartScan, handleStartScan])
 
+  if (showAgentLiveView) {
+    // Show Agent Live View during deployment
+    return <AgentLiveView 
+      onComplete={() => {
+        setShowAgentLiveView(false)
+        // Return to Store Health Report after completion
+      }}
+      onViewStore={() => {
+        // Open store in new tab
+        window.open('https://yourstore.myshopify.com', '_blank')
+      }}
+    />
+  }
+
   if (showFixPreview) {
     // Show Fix Preview content
     return <FixPreviewPage 
       onBack={() => setShowFixPreview(false)}
       onDeployStart={() => {
         setShowFixPreview(false)
+        setShowAgentLiveView(true)
         // Trigger deployment messages in AI chat
         if (window.triggerDeploymentFlow) {
           window.triggerDeploymentFlow()
