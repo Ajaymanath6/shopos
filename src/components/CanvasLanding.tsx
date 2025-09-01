@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { 
+import {
   RiPulseLine,
-  RiSearchEyeLine, 
-  RiNotification3Line, 
-  RiSettings3Line, 
-  RiUser3Line, 
-  RiSearchLine, 
-  RiMicLine, 
+  RiSearchEyeLine,
+  RiNotification3Line,
+  RiSettings3Line,
+  RiUser3Line,
+  RiSearchLine,
+  RiMicLine,
   RiAttachmentLine,
   RiStarFill,
   RiCheckLine,
@@ -745,6 +745,21 @@ export default function CanvasLanding() {
   const [scanProgress, setScanProgress] = useState(0)
   const [storeUrl, setStoreUrl] = useState('')
   const loadingPageScanRef = useRef<(() => void) | null>(null)
+  const [activeAgent, setActiveAgent] = useState<{
+    name: string
+    icon: React.ComponentType<{ size?: string | number }>
+    status: 'ready' | 'analyzing' | 'processing' | 'completed'
+    statusText: string
+    subheading?: string
+    useLogo?: boolean
+  }>({
+    name: 'AI Agent: Claude',
+    icon: RiStarFill,
+    status: 'ready',
+    statusText: 'Ready to analyze your store',
+    subheading: 'Store Health Analysis Agent',
+    useLogo: true
+  })
   
   // Auto functions for AI to control interface
   const handleAutoEnterUrl = (url: string) => {
@@ -855,10 +870,18 @@ export default function CanvasLanding() {
   // Handle store URL submission
   const handleStoreSubmit = () => {
     if (!storeUrl.trim()) return
-    
+
+    // Update agent status to analyzing
+    setActiveAgent(prev => ({
+      ...prev,
+      status: 'analyzing',
+      statusText: `Analyzing ${storeUrl}...`,
+      subheading: 'Running comprehensive store diagnostics'
+    }))
+
     // Analysis started
     setScanProgress(0)
-    
+
     let stepIndex = 0
     const interval = setInterval(() => {
       stepIndex++
@@ -867,13 +890,28 @@ export default function CanvasLanding() {
           clearInterval(interval)
         console.log('Scan completed, setting scanProgress to 100')
         setScanProgress(100)
-        
+
+        // Update agent status to completed
+        setActiveAgent(prev => ({
+          ...prev,
+          status: 'completed',
+          statusText: 'Analysis complete - 78% health score',
+          subheading: 'Diagnostics finished, recommendations ready'
+        }))
+
         // Health report will show automatically in LoadingPage when scanProgress reaches 100%
-        
+
         // Analysis complete
         return
         }
         setScanProgress(scanningSteps[nextStep].progress)
+        // Update agent status with current step
+        setActiveAgent(prev => ({
+          ...prev,
+          status: 'analyzing',
+          statusText: scanningSteps[nextStep]?.message || 'Analyzing...',
+          subheading: 'Processing store data and running diagnostics'
+        }))
     }, 2000)
   }
 
@@ -883,6 +921,16 @@ export default function CanvasLanding() {
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
         setScanProgress(0)
+        // Update to Claude Agent for Store Health
+        setActiveAgent(prev => ({
+          ...prev,
+          name: 'AI Agent: Claude',
+          icon: RiStarFill,
+          status: 'ready',
+          statusText: 'Ready to analyze your store',
+          subheading: 'Store Health Analysis Agent',
+          useLogo: true
+        }))
         // Don't reset storeUrl if it's an AI-created task with a URL already set
         if (!taskId.startsWith('ai-')) {
         setStoreUrl('')
@@ -892,18 +940,54 @@ export default function CanvasLanding() {
       // Handle SEO optimizer (existing interface is built)
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
+        // Update to Claude Agent for SEO
+        setActiveAgent(prev => ({
+          ...prev,
+          name: 'AI Agent: Claude',
+          icon: RiStarFill,
+          status: 'ready',
+          statusText: 'Ready to optimize your search rankings',
+          subheading: 'SEO Optimization Agent',
+          useLogo: true
+        }))
       }
     } else if (taskId.startsWith('ai-')) {
       // Handle AI-created tasks - they all use the LoadingPage component
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
         setScanProgress(0)
+        // Update to Claude Agent for custom task
+        const task = taskCards.find(t => t.id === taskId)
+        if (task) {
+          setActiveAgent(prev => ({
+            ...prev,
+            name: 'AI Agent: Claude',
+            icon: RiStarFill,
+            status: 'ready',
+            statusText: `Ready to ${task.subtitle.toLowerCase()}`,
+            subheading: `${task.title} Agent`,
+            useLogo: true
+          }))
+        }
         // Don't reset storeUrl as it may have been set from the AI command
       }
     } else {
       // For now, expand other cards too - they'll show a basic interface
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
+        // Update to Claude Agent for generic task
+        const task = taskCards.find(t => t.id === taskId)
+        if (task) {
+          setActiveAgent(prev => ({
+            ...prev,
+            name: 'AI Agent: Claude',
+            icon: RiStarFill,
+            status: 'ready',
+            statusText: `Ready to ${task.subtitle.toLowerCase()}`,
+            subheading: `${task.title} Agent`,
+            useLogo: true
+          }))
+        }
       }
     }
   }
@@ -1282,20 +1366,37 @@ export default function CanvasLanding() {
                             }}
                           >
                             <div className="flex items-center gap-3">
-                              <div 
+                              <div
                                 className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                style={{ backgroundColor: '#F9FAFB' }}
+                                style={{
+                                  backgroundColor: activeAgent.status === 'analyzing' ? '#DBEAFE' : '#F9FAFB',
+                                  color: activeAgent.status === 'analyzing' ? DARK_PALETTE.primary : '#374151'
+                                }}
                               >
-                                <RiSparklingFill size={16} style={{ color: '#374151' }} />
+                                {activeAgent.status === 'analyzing' ? (
+                                  <RiLoader4Fill size={16} className="animate-spin" />
+                                ) : (
+                                  <activeAgent.icon size={16} />
+                                )}
                               </div>
                               <div>
-                                <div className="text-sm font-medium text-gray-900">AI Agent: Store Health Analyzer</div>
-                                <div className="text-xs text-gray-600">Ready to analyze your store</div>
+                                <div className="text-sm font-medium text-gray-900">AI Agent: {activeAgent.name}</div>
+                                <div className="text-xs text-gray-600">{activeAgent.statusText}</div>
                               </div>
                             </div>
                             <div className="ml-auto flex items-center gap-2">
-                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                              <span className="text-xs text-gray-500">Active</span>
+                              <div
+                                className={`w-2 h-2 rounded-full ${
+                                  activeAgent.status === 'analyzing' ? 'bg-blue-500 animate-pulse' :
+                                  activeAgent.status === 'completed' ? 'bg-green-500' :
+                                  'bg-gray-400'
+                                }`}
+                              ></div>
+                              <span className="text-xs text-gray-500">
+                                {activeAgent.status === 'analyzing' ? 'Processing' :
+                                 activeAgent.status === 'completed' ? 'Complete' :
+                                 'Ready'}
+                              </span>
                             </div>
                           </div>
 
@@ -1397,20 +1498,55 @@ export default function CanvasLanding() {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <div 
-                      className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: '#F9FAFB' }}
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{
+                      backgroundColor: activeAgent.status === 'analyzing' ? '#DBEAFE' : '#F9FAFB',
+                      color: activeAgent.status === 'analyzing' ? DARK_PALETTE.primary : '#374151'
+                    }}
                   >
-                      <RiSparklingFill size={16} style={{ color: '#374151' }} />
+                    {activeAgent.status === 'analyzing' ? (
+                      <RiLoader4Fill size={16} className="animate-spin" />
+                    ) : activeAgent.useLogo ? (
+                      <>
+                        <img
+                          src="https://claude.ai/images/claude_app_icon.png"
+                          alt="Claude"
+                          className="w-4 h-4 object-contain"
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLImageElement;
+                            target.style.display = 'none';
+                            const fallback = target.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                        />
+                        <span className="text-xs font-bold text-purple-600 hidden">C</span>
+                      </>
+                    ) : (
+                      <activeAgent.icon size={16} />
+                    )}
                   </div>
                   <div>
-                      <div className="text-sm font-medium text-gray-900">AI Agent: Store Health Analyzer</div>
-                      <div className="text-xs text-gray-600">Ready to analyze your store</div>
+                    <div className="text-sm font-medium text-gray-900">{activeAgent.name}</div>
+                    {activeAgent.subheading && (
+                      <div className="text-xs text-gray-500">{activeAgent.subheading}</div>
+                    )}
+                    <div className="text-xs text-gray-600">{activeAgent.statusText}</div>
                   </div>
                 </div>
                 <div className="ml-auto flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-gray-500">Active</span>
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      activeAgent.status === 'analyzing' ? 'bg-blue-500 animate-pulse' :
+                      activeAgent.status === 'completed' ? 'bg-green-500' :
+                      'bg-gray-400'
+                    }`}
+                  ></div>
+                  <span className="text-xs text-gray-500">
+                    {activeAgent.status === 'analyzing' ? 'Processing' :
+                     activeAgent.status === 'completed' ? 'Complete' :
+                     'Ready'}
+                  </span>
                 </div>
               </div>
 
@@ -1612,20 +1748,55 @@ export default function CanvasLanding() {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <div 
+                                    <div
                     className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: '#F9FAFB' }}
+                    style={{
+                      backgroundColor: activeAgent.status === 'analyzing' ? '#DBEAFE' : '#F9FAFB',
+                      color: activeAgent.status === 'analyzing' ? DARK_PALETTE.primary : '#374151'
+                    }}
                   >
-                    <RiSparklingFill size={16} style={{ color: '#374151' }} />
-                            </div>
+                    {activeAgent.status === 'analyzing' ? (
+                      <RiLoader4Fill size={16} className="animate-spin" />
+                    ) : activeAgent.useLogo ? (
+                      <>
+                        <img
+                          src="https://claude.ai/images/claude_app_icon.png"
+                          alt="Claude"
+                          className="w-4 h-4 object-contain"
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLImageElement;
+                            target.style.display = 'none';
+                            const fallback = target.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                        />
+                        <span className="text-xs font-bold text-purple-600 hidden">C</span>
+                      </>
+                    ) : (
+                      <activeAgent.icon size={16} />
+                    )}
+                  </div>
                   <div>
-                    <div className="text-sm font-medium text-gray-900">AI Agent: Store Health Analyzer</div>
-                    <div className="text-xs text-gray-600">Ready to analyze your store</div>
-                        </div>
-                      </div>
+                    <div className="text-sm font-medium text-gray-900">{activeAgent.name}</div>
+                    {activeAgent.subheading && (
+                      <div className="text-xs text-gray-500">{activeAgent.subheading}</div>
+                    )}
+                    <div className="text-xs text-gray-600">{activeAgent.statusText}</div>
+                  </div>
+                </div>
                 <div className="ml-auto flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-gray-500">Active</span>
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      activeAgent.status === 'analyzing' ? 'bg-blue-500 animate-pulse' :
+                      activeAgent.status === 'completed' ? 'bg-green-500' :
+                      'bg-gray-400'
+                    }`}
+                  ></div>
+                  <span className="text-xs text-gray-500">
+                    {activeAgent.status === 'analyzing' ? 'Processing' :
+                     activeAgent.status === 'completed' ? 'Complete' :
+                     'Ready'}
+                  </span>
                 </div>
               </div>
 
@@ -1854,20 +2025,55 @@ export default function CanvasLanding() {
                   }}
                 >
                   <div className="flex items-center gap-3">
-                    <div 
-                      className="w-8 h-8 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: '#F9FAFB' }}
-                    >
-                      <RiSparklingFill size={16} style={{ color: '#374151' }} />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">AI Agent: Store Health Analyzer</div>
-                      <div className="text-xs text-gray-600">Ready to analyze your store</div>
-                    </div>
+                                      <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{
+                      backgroundColor: activeAgent.status === 'analyzing' ? '#DBEAFE' : '#F9FAFB',
+                      color: activeAgent.status === 'analyzing' ? DARK_PALETTE.primary : '#374151'
+                    }}
+                  >
+                    {activeAgent.status === 'analyzing' ? (
+                      <RiLoader4Fill size={16} className="animate-spin" />
+                    ) : activeAgent.useLogo ? (
+                      <>
+                        <img
+                          src="https://claude.ai/images/claude_app_icon.png"
+                          alt="Claude"
+                          className="w-4 h-4 object-contain"
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLImageElement;
+                            target.style.display = 'none';
+                            const fallback = target.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                        />
+                        <span className="text-xs font-bold text-purple-600 hidden">C</span>
+                      </>
+                    ) : (
+                      <activeAgent.icon size={16} />
+                    )}
                   </div>
-                  <div className="ml-auto flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-gray-500">Active</span>
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{activeAgent.name}</div>
+                    {activeAgent.subheading && (
+                      <div className="text-xs text-gray-500">{activeAgent.subheading}</div>
+                    )}
+                    <div className="text-xs text-gray-600">{activeAgent.statusText}</div>
+                  </div>
+                </div>
+                <div className="ml-auto flex items-center gap-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      activeAgent.status === 'analyzing' ? 'bg-blue-500 animate-pulse' :
+                      activeAgent.status === 'completed' ? 'bg-green-500' :
+                      'bg-gray-400'
+                    }`}
+                  ></div>
+                  <span className="text-xs text-gray-500">
+                    {activeAgent.status === 'analyzing' ? 'Processing' :
+                     activeAgent.status === 'completed' ? 'Complete' :
+                     'Ready'}
+                  </span>
                   </div>
                 </div>
 

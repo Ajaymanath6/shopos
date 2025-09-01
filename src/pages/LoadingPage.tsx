@@ -12,7 +12,6 @@ import {
   RiMoneyDollarCircleLine,
   RiArrowUpLine,
   RiTimeLine,
-  RiShieldCheckLine,
   RiDownloadLine,
   RiSearch2Line,
   RiPhoneLine,

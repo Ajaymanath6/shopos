@@ -1,4 +1,4 @@
-import React from 'react'
+
 
 // Dark Gray Monochromatic Palette
 const DARK_PALETTE = {
