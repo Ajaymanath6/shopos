@@ -20,7 +20,8 @@ import {
   RiLoader2Line,
   RiPauseCircleFill,
   RiBrainLine,
-  RiEditLine
+  RiEditLine,
+  RiAlertLine
 } from '@remixicon/react'
 import shopOSLogo from '../assets/shop-os-logo.svg'
 import LoadingPage from '../pages/LoadingPage'
@@ -30,7 +31,18 @@ import { ShiningText } from '../components/ui/shining-text'
 declare global {
   interface Window {
     triggerDeploymentFlow?: () => void
+    triggerNotificationSystem?: (notification: NotificationItem) => void
+    triggerAIDeployment?: () => void
   }
+}
+
+interface NotificationItem {
+  type: 'deployment_complete' | 'action_required' | 'info'
+  title: string
+  message: string
+  actionRequired: boolean
+  timestamp: number
+  id?: string
 }
 
 // Custom SVG Icons
@@ -73,9 +85,10 @@ interface AIConversationCardProps {
   isScanning: boolean
   onAutoEnterUrl?: (url: string) => void
   onAutoStartScan?: () => void
+  onAddNotification?: (notification: Omit<NotificationItem, 'id'>) => void
 }
 
-function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning, onAutoEnterUrl, onAutoStartScan }: AIConversationCardProps) {
+function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning, onAutoEnterUrl, onAutoStartScan, onAddNotification }: AIConversationCardProps) {
   const [messages, setMessages] = useState<Array<{
     id: string
     type: 'thinking' | 'planning' | 'executing' | 'result' | 'error' | 'summary'
@@ -179,7 +192,37 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
     }, messageDelay)
     messageDelay += 2000
 
-    // Message 2: Processing Images
+    // Message 2: Thinking Phase with ShiningText
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'summary',
+        content: "Analyzing image quality patterns and determining optimal enhancement algorithms for each product image type.",
+        icon: RiBrainLine,
+        statusIndicator: 'AGGO_THINKING'
+      })
+
+      setTimeout(() => {
+        setMessages(prev => prev.filter(msg => msg.type !== 'summary'))
+      }, 3000)
+    }, messageDelay)
+    messageDelay += 2000
+
+    // Message 3: Planning Phase with ShiningText  
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'summary',
+        content: "Planning deployment sequence: batch processing 23 images, applying super-resolution AI, optimizing file formats, and preparing rollback procedures.",
+        icon: RiBrainLine,
+        statusIndicator: 'AGGO_PLANNING'
+      })
+
+      setTimeout(() => {
+        setMessages(prev => prev.filter(msg => msg.type !== 'summary'))
+      }, 3000)
+    }, messageDelay)
+    messageDelay += 2000
+
+    // Message 4: Processing Images
     setTimeout(() => {
       addTypingMessage({
         type: 'executing',
@@ -190,7 +233,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
     }, messageDelay)
     messageDelay += 3000
 
-    // Message 3: Progress Update
+    // Message 5: Progress Update
     setTimeout(() => {
       addTypingMessage({
         type: 'executing',
@@ -201,26 +244,62 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
     }, messageDelay)
     messageDelay += 4000
 
-    // Message 4: Deployment Complete
+    // Message 6: Deployment Complete
     setTimeout(() => {
       addTypingMessage({
         type: 'result',
-        content: "All done! 🎉 Successfully deployed 23 optimized images to your live store. Your customers will now see crisp, fast-loading product photos. Page load speed improved by 1.9 seconds!",
+        content: "All done! Successfully deployed 23 optimized images to your live store. Your customers will now see crisp, fast-loading product photos. Page load speed improved by 1.9 seconds!",
         icon: RiCheckLine,
         statusIndicator: 'AGGO_COMPLETED'
       })
     }, messageDelay)
     messageDelay += 3000
 
-    // Message 5: Next Steps
+    // Message 7: Thinking About Next Steps with ShiningText
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'summary',
+        content: "Analyzing remaining optimization opportunities and prioritizing next actions based on revenue impact and implementation complexity.",
+        icon: RiBrainLine,
+        statusIndicator: 'AGGO_ANALYZING_NEXT'
+      })
+
+      setTimeout(() => {
+        setMessages(prev => prev.filter(msg => msg.type !== 'summary'))
+      }, 3000)
+    }, messageDelay)
+    messageDelay += 2000
+
+    // Message 8: Next Steps Recommendation
     setTimeout(() => {
       addTypingMessage({
         type: 'result',
         content: "What's next? I found 2 more high-impact issues: slow page loading (potential +$8,400/month) and mobile layout problems. Ready to tackle those?",
         icon: RiBrainLine
       })
+
+      // Trigger notification system after AI finishes
+      setTimeout(() => {
+        if (onAddNotification) {
+          onAddNotification({
+            type: 'deployment_complete',
+            title: 'Image Optimization Complete',
+            message: '23 product images successfully optimized and deployed',
+            actionRequired: false,
+            timestamp: Date.now()
+          })
+        }
+      }, 2000)
     }, messageDelay)
-  }, [addTypingMessage])
+  }, [addTypingMessage, onAddNotification])
+
+  // Expose AI deployment function globally
+  useEffect(() => {
+    window.triggerAIDeployment = startDeploymentFlow
+    return () => {
+      delete window.triggerAIDeployment
+    }
+  }, [startDeploymentFlow])
 
   const startAIConversation = useCallback((task: TaskCard) => {
     // Initial greeting based on task type with structured framework
@@ -395,13 +474,8 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
     }
   }, [currentTask, addTypingMessage, scanProgress, scanningMessageShown, completionMessageShown])
 
-  // Expose deployment function globally
-  useEffect(() => {
-    window.triggerDeploymentFlow = startDeploymentFlow
-    return () => {
-      delete window.triggerDeploymentFlow
-    }
-  }, [startDeploymentFlow])
+
+
 
   // Get the current active task
   useEffect(() => {
@@ -891,6 +965,46 @@ export default function CanvasLanding() {
   const [showAiSearch, setShowAiSearch] = useState(false)
   const [aiSearchQuery, setAiSearchQuery] = useState('')
   const [isProcessingAiCommand, setIsProcessingAiCommand] = useState(false)
+
+  // Notification System State
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const [showActionCenter, setShowActionCenter] = useState(false)
+
+  // Notification System Functions
+  const addNotification = useCallback((notification: Omit<NotificationItem, 'id'>) => {
+    const newNotification: NotificationItem = {
+      ...notification,
+      id: Date.now().toString()
+    }
+    setNotifications(prev => [newNotification, ...prev])
+    
+    // Auto-show action center for action required notifications
+    if (notification.actionRequired) {
+      setShowActionCenter(true)
+    }
+  }, [])
+
+  const removeNotification = useCallback((id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id))
+  }, [])
+
+  // Deployment Flow Function - triggers AI conversation deployment
+  const startDeploymentFlow = useCallback(() => {
+    // Trigger deployment in the active AI conversation card
+    if (window.triggerAIDeployment) {
+      window.triggerAIDeployment()
+    }
+  }, [])
+
+  // Expose functions globally
+  useEffect(() => {
+    window.triggerDeploymentFlow = startDeploymentFlow
+    window.triggerNotificationSystem = addNotification
+    return () => {
+      delete window.triggerDeploymentFlow
+      delete window.triggerNotificationSystem
+    }
+  }, [startDeploymentFlow, addNotification])
 
   const [sectionMode, setSectionMode] = useState(false)
   const [selectedProjects, setSelectedProjects] = useState<string[]>([])
@@ -1674,6 +1788,7 @@ export default function CanvasLanding() {
                       isScanning={scanProgress > 0 && scanProgress < 100}
                       onAutoEnterUrl={handleAutoEnterUrl}
                       onAutoStartScan={handleAutoStartScan}
+                      onAddNotification={addNotification}
                     />
                   </div>
 
@@ -1928,6 +2043,7 @@ export default function CanvasLanding() {
                       isScanning={scanProgress > 0 && scanProgress < 100}
                       onAutoEnterUrl={handleAutoEnterUrl}
                       onAutoStartScan={handleAutoStartScan}
+                      onAddNotification={addNotification}
                     />
                   </div>
 
@@ -2446,10 +2562,15 @@ export default function CanvasLanding() {
           }}
         >
           <button 
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
-            onClick={() => alert('Notifications - Coming Soon!')}
+            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors relative"
+            onClick={() => setShowActionCenter(!showActionCenter)}
           >
             <RiNotification3Line size={18} style={{ color: DARK_PALETTE.tertiary }} />
+            {notifications.length > 0 && (
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                <span className="text-xs font-bold text-white">{notifications.length}</span>
+              </div>
+            )}
           </button>
           <button 
             className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
@@ -2783,6 +2904,137 @@ export default function CanvasLanding() {
                   Cancel
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Right-Side Action Center */}
+      {showActionCenter && (
+        <div className="fixed top-0 right-0 h-full w-96 z-[9998] flex">
+          {/* Overlay */}
+          <div 
+            className="flex-1 bg-black/20 backdrop-blur-sm" 
+            onClick={() => setShowActionCenter(false)}
+          />
+          
+          {/* Action Center Panel */}
+          <div 
+            className="w-96 bg-white shadow-2xl border-l border-gray-200 flex flex-col"
+            style={{
+              background: 'rgba(255, 255, 255, 0.98)',
+              backdropFilter: 'blur(20px)'
+            }}
+          >
+            {/* Header */}
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Action Center</h2>
+                  <p className="text-sm text-gray-600">Tasks and notifications</p>
+                </div>
+                <button
+                  onClick={() => setShowActionCenter(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
+                >
+                  <RiCloseLine size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto">
+              {notifications.length === 0 ? (
+                /* Empty State */
+                <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                    <RiNotification3Line size={32} className="text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">All caught up!</h3>
+                  <p className="text-gray-600">No notifications or actions required at the moment.</p>
+                </div>
+              ) : (
+                <div className="p-6 space-y-6">
+                  {/* Section A: Action Required */}
+                  {notifications.filter(n => n.actionRequired).length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                        Action Required
+                      </h3>
+                      <div className="space-y-3">
+                        {notifications.filter(n => n.actionRequired).map((notification) => (
+                          <div
+                            key={notification.id}
+                            className="p-4 bg-red-50 border border-red-200 rounded-xl"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+                                <RiAlertLine size={16} className="text-red-600" />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-900 mb-1">{notification.title}</h4>
+                                <p className="text-sm text-gray-600 mb-3">{notification.message}</p>
+                                <button className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                  Review & Approve
+                                </button>
+                              </div>
+                              <button
+                                onClick={() => notification.id && removeNotification(notification.id)}
+                                className="p-1 hover:bg-red-100 rounded-full transition-colors text-red-400 hover:text-red-600"
+                              >
+                                <RiCloseLine size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Section B: For Your Information */}
+                  {notifications.filter(n => !n.actionRequired).length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">Recent Activity</h3>
+                      <div className="space-y-3">
+                        {notifications.filter(n => !n.actionRequired).map((notification) => (
+                          <div
+                            key={notification.id}
+                            className="p-4 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                                <RiCheckLine size={16} className="text-green-600" />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-900 mb-1">{notification.title}</h4>
+                                <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(notification.timestamp).toLocaleTimeString([], { 
+                                      hour: '2-digit', 
+                                      minute: '2-digit' 
+                                    })}
+                                  </span>
+                                  <button className="text-xs text-blue-600 hover:text-blue-800 transition-colors">
+                                    Go to Task →
+                                  </button>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => notification.id && removeNotification(notification.id)}
+                                className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-600"
+                              >
+                                <RiCloseLine size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
