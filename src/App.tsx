@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage'
 import ScanningPage from './pages/ScanningPage'
 import HealthReportPage from './pages/HealthReportPage'
 import FixPage from './pages/FixPage'
+import FixPreviewPage from './pages/FixPreviewPage'
 import ConfirmationPage from './pages/ConfirmationPage'
 
 function App() {
@@ -23,6 +24,13 @@ function App() {
           <MainLayout>
             <div className="max-w-4xl mx-auto my-10 px-4">
               <HealthReportPage />
+            </div>
+          </MainLayout>
+        } />
+        <Route path="/diagnostics/fix-preview" element={
+          <MainLayout>
+            <div className="max-w-4xl mx-auto my-10 px-4">
+              <FixPreviewPage />
             </div>
           </MainLayout>
         } />

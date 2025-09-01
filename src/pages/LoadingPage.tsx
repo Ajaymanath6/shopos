@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   RiSearchLine,
   RiSettings3Line,
@@ -22,6 +22,7 @@ import {
   RiBarChartLine,
   RiGroupLine
 } from '@remixicon/react'
+import FixPreviewPage from './FixPreviewPage'
 
 // Dark Gray Monochromatic Palette
 const DARK_PALETTE = {
@@ -52,6 +53,7 @@ export default function LoadingPage({
   onStartScan
 }: LoadingPageProps) {
   const isScanning = scanProgress > 0
+  const [showFixPreview, setShowFixPreview] = useState(false)
 
 
 
@@ -66,6 +68,11 @@ export default function LoadingPage({
       onStartScan(handleStartScan)
     }
   }, [onStartScan, handleStartScan])
+
+  if (showFixPreview) {
+    // Show Fix Preview content
+    return <FixPreviewPage onBack={() => setShowFixPreview(false)} />
+  }
 
   if (isScanning) {
     // Show Store Health Report content when scan is complete
@@ -191,6 +198,7 @@ export default function LoadingPage({
                     </div>
                     <button
                       className="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium rounded-lg transition-colors"
+                      onClick={() => setShowFixPreview(true)}
                     >
                       Fix with Shopos AI
                     </button>

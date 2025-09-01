@@ -1512,7 +1512,11 @@ export default function CanvasLanding() {
                         <img
                           src="https://claude.ai/images/claude_app_icon.png"
                           alt="Claude"
-                          className="w-4 h-4 object-contain"
+                          className="w-9 h-8 object-contain rounded-lg"
+                          style={{
+                            borderRadius: '50% 40% 50% 40%',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                          }}
                           onError={(e) => {
                             const target = e.currentTarget as HTMLImageElement;
                             target.style.display = 'none';
@@ -1762,7 +1766,11 @@ export default function CanvasLanding() {
                         <img
                           src="https://claude.ai/images/claude_app_icon.png"
                           alt="Claude"
-                          className="w-4 h-4 object-contain"
+                          className="w-9 h-8 object-contain rounded-lg"
+                          style={{
+                            borderRadius: '50% 40% 50% 40%',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                          }}
                           onError={(e) => {
                             const target = e.currentTarget as HTMLImageElement;
                             target.style.display = 'none';
@@ -2039,7 +2047,11 @@ export default function CanvasLanding() {
                         <img
                           src="https://claude.ai/images/claude_app_icon.png"
                           alt="Claude"
-                          className="w-4 h-4 object-contain"
+                          className="w-9 h-8 object-contain rounded-lg"
+                          style={{
+                            borderRadius: '50% 40% 50% 40%',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                          }}
                           onError={(e) => {
                             const target = e.currentTarget as HTMLImageElement;
                             target.style.display = 'none';
