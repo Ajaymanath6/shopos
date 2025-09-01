@@ -1879,10 +1879,10 @@ export default function CanvasLanding() {
 
                 {/* Main Interface - Right Side */}
                 <div 
-                    className="rounded-3xl overflow-hidden"
+                    className="rounded-3xl overflow-visible flex-1"
                 style={{ 
                     minHeight: '800px',
-                    width: 'calc(1400px - 320px - 24px)', // Total width minus left panel minus gap
+                    minWidth: '1000px', // Ensure minimum width for content
                     background: 'rgba(255, 255, 255, 0.1)',
                     backdropFilter: 'blur(25px)',
                   boxShadow: `
@@ -1892,7 +1892,7 @@ export default function CanvasLanding() {
                     `
                 }}
               >
-                <div className="p-6">
+                <div className="p-2">
                     {/* Full Width Section - Loading Page (100%) */}
                     <div className="w-full">
                       <LoadingPage
@@ -2129,7 +2129,7 @@ export default function CanvasLanding() {
                 <div className="flex-1">
                   {/* Two Section Layout - Fully Transparent Glassmorphism */}
                   <div 
-                    className="rounded-3xl shadow-2xl border border-white/40 backdrop-blur-xl overflow-hidden"
+                    className="rounded-3xl shadow-2xl border border-white/40 backdrop-blur-xl overflow-visible"
                 style={{ 
                   background: 'rgba(255, 255, 255, 0.1)',
                   backdropFilter: 'blur(25px)',
@@ -2141,7 +2141,7 @@ export default function CanvasLanding() {
                   minHeight: 'auto'
                 }}
               >
-                <div className="p-6">
+                <div className="p-2">
                   {/* Full Width Section - Loading Page (100%) */}
                   <div className="w-full">
                     <LoadingPage
