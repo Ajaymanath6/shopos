@@ -11,9 +11,10 @@ const DARK_PALETTE = {
 
 interface FixPreviewPageProps {
   onBack?: () => void
+  onDeployStart?: () => void
 }
 
-export default function FixPreviewPage({ onBack }: FixPreviewPageProps) {
+export default function FixPreviewPage({ onBack, onDeployStart }: FixPreviewPageProps) {
   return (
     <div className="w-full min-h-screen bg-white">
       <div className="max-w-7xl mx-auto p-8">
@@ -200,6 +201,7 @@ export default function FixPreviewPage({ onBack }: FixPreviewPageProps) {
 
               <div className="space-y-4">
                 <button
+                  onClick={() => onDeployStart && onDeployStart()}
                   className="w-full py-4 px-8 bg-gray-800 hover:bg-gray-900 text-white font-bold text-lg rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
                 >
                   <span>🚀</span>

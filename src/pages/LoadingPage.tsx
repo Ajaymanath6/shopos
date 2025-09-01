@@ -71,7 +71,16 @@ export default function LoadingPage({
 
   if (showFixPreview) {
     // Show Fix Preview content
-    return <FixPreviewPage onBack={() => setShowFixPreview(false)} />
+    return <FixPreviewPage 
+      onBack={() => setShowFixPreview(false)}
+      onDeployStart={() => {
+        setShowFixPreview(false)
+        // Trigger deployment messages in AI chat
+        if (window.triggerDeploymentFlow) {
+          window.triggerDeploymentFlow()
+        }
+      }}
+    />
   }
 
   if (isScanning) {

@@ -26,6 +26,12 @@ import shopOSLogo from '../assets/shop-os-logo.svg'
 import LoadingPage from '../pages/LoadingPage'
 import { ShiningText } from '../components/ui/shining-text'
 
+// Global window interface extension
+declare global {
+  interface Window {
+    triggerDeploymentFlow?: () => void
+  }
+}
 
 // Custom SVG Icons
 const SectionIcon = ({ size = 20 }: { size?: number }) => (
@@ -150,6 +156,71 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
     }, 30) // 30ms per character for realistic typing speed
     }
   }, [])
+
+  const startDeploymentFlow = useCallback(() => {
+    // Clear existing messages and start deployment flow
+    setMessages([])
+    
+    let messageDelay = 0
+
+    // Message 1: Deployment Start with ShiningText
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'summary',
+        content: "On it! I'm being deployed to optimize your 23 blurry product images. I'll process each image using advanced AI upscaling and deploy them to your live store. Your store will remain safe until you approve each change.",
+        icon: RiLoader4Fill,
+        statusIndicator: 'AGGO_DEPLOYING'
+      })
+
+      // Hide the summary after 4 seconds and show progress
+      setTimeout(() => {
+        setMessages(prev => prev.filter(msg => msg.type !== 'summary'))
+      }, 4000)
+    }, messageDelay)
+    messageDelay += 2000
+
+    // Message 2: Processing Images
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'executing',
+        content: "Processing images using deep learning upscaling model... 8/23 complete",
+        icon: RiLoader4Fill,
+        statusIndicator: 'AGGO_PROCESSING'
+      })
+    }, messageDelay)
+    messageDelay += 3000
+
+    // Message 3: Progress Update
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'executing',
+        content: "Excellent progress! 18/23 images enhanced. File sizes reduced by 72% while maintaining quality.",
+        icon: RiLoader4Fill,
+        statusIndicator: 'AGGO_OPTIMIZING'
+      })
+    }, messageDelay)
+    messageDelay += 4000
+
+    // Message 4: Deployment Complete
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'result',
+        content: "All done! 🎉 Successfully deployed 23 optimized images to your live store. Your customers will now see crisp, fast-loading product photos. Page load speed improved by 1.9 seconds!",
+        icon: RiCheckLine,
+        statusIndicator: 'AGGO_COMPLETED'
+      })
+    }, messageDelay)
+    messageDelay += 3000
+
+    // Message 5: Next Steps
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'result',
+        content: "What's next? I found 2 more high-impact issues: slow page loading (potential +$8,400/month) and mobile layout problems. Ready to tackle those?",
+        icon: RiBrainLine
+      })
+    }, messageDelay)
+  }, [addTypingMessage])
 
   const startAIConversation = useCallback((task: TaskCard) => {
     // Initial greeting based on task type with structured framework
@@ -323,6 +394,14 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
       // Health report will show automatically in LoadingPage when scanProgress reaches 100%
     }
   }, [currentTask, addTypingMessage, scanProgress, scanningMessageShown, completionMessageShown])
+
+  // Expose deployment function globally
+  useEffect(() => {
+    window.triggerDeploymentFlow = startDeploymentFlow
+    return () => {
+      delete window.triggerDeploymentFlow
+    }
+  }, [startDeploymentFlow])
 
   // Get the current active task
   useEffect(() => {
