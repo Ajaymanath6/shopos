@@ -880,6 +880,24 @@ export default function CanvasLanding() {
   const [showAiSearch, setShowAiSearch] = useState(false)
   const [aiSearchQuery, setAiSearchQuery] = useState('')
 
+  // Handle AI search submission - trigger Store Health Check flow
+  const handleAiSearchSubmit = () => {
+    if (!aiSearchQuery.trim()) return
+    
+    // Extract URL from query if present
+    const urlMatch = aiSearchQuery.match(/https?:\/\/[^\s]+/)
+    if (urlMatch) {
+      setStoreUrl(urlMatch[0])
+    }
+    
+    // Clear search and close search bar
+    setAiSearchQuery('')
+    setShowAiSearch(false)
+    
+    // Trigger Store Health Check flow
+    handleTaskClick('store-health')
+  }
+
   // Notification System State
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [showActionCenter, setShowActionCenter] = useState(false)
@@ -2285,11 +2303,10 @@ export default function CanvasLanding() {
                 onChange={(e) => setAiSearchQuery(e.target.value)}
                 onKeyPress={(e) => {
                   if (e.key === 'Enter' && aiSearchQuery.trim()) {
-                    // Do nothing - just visual placeholder
-                    console.log('AI Search query:', aiSearchQuery.trim())
+                    handleAiSearchSubmit()
                   }
                 }}
-                placeholder="Ask AI anything... (currently disabled)"
+                placeholder="Ask AI anything... (e.g., 'check store health on https://mystore.com')"
                 className="flex-1 outline-none text-gray-700 placeholder-gray-400 bg-transparent"
                 autoFocus
               />
@@ -2303,8 +2320,7 @@ export default function CanvasLanding() {
                 <button 
                   onClick={() => {
                     if (aiSearchQuery.trim()) {
-                      // Do nothing - just visual placeholder
-                      console.log('AI Search query:', aiSearchQuery.trim())
+                      handleAiSearchSubmit()
                     }
                   }}
                   disabled={!aiSearchQuery.trim()}
