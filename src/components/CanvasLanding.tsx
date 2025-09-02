@@ -1467,14 +1467,11 @@ export default function CanvasLanding() {
                           
                           {/* Notification Banner */}
                           <div
-                            className="mb-8 p-4 rounded-3xl border flex items-center gap-4"
+                            className="mb-8 p-4 rounded-lg border flex items-center gap-4 w-full"
                             style={{
                               background: 'rgba(255, 255, 255, 0.8)',
                               borderColor: '#E5E7EB',
-                              backdropFilter: 'blur(10px)',
-                                                width: '1440px',
-                  maxWidth: '1440px',
-                  minWidth: '1440px'
+                              backdropFilter: 'blur(10px)'
                             }}
                           >
                             <div className="flex items-center gap-3">
@@ -1588,14 +1585,12 @@ export default function CanvasLanding() {
 
               {/* Notification Banner */}
               <div
-                className="mb-8 p-4 rounded-2xl border flex items-center gap-4"
+                className="mb-8 p-4 rounded-lg border flex items-center gap-4 w-full"
                 style={{
                   background: 'rgba(255, 255, 255, 0.8)',
                   borderColor: '#E5E7EB',
                   backdropFilter: 'blur(10px)',
-                  width: '1440px',
-                  maxWidth: '1440px',
-                  minWidth: '1440px'
+
                 }}
               >
                 <div className="flex items-center gap-3">
@@ -1857,7 +1852,7 @@ export default function CanvasLanding() {
                 
                 {/* Notification Banner */}
                 <div
-                  className="mb-8 p-4 rounded-2xl border flex items-center gap-4"
+                  className="mb-8 p-4 rounded-lg border flex items-center gap-4 w-full"
                   style={{
                     background: 'rgba(255, 255, 255, 0.8)',
                     borderColor: '#E5E7EB',
@@ -2024,14 +2019,12 @@ export default function CanvasLanding() {
               
               {/* Notification Banner */}
               <div
-                className="mb-8 p-4 rounded-2xl border flex items-center gap-4"
+                className="mb-8 p-4 rounded-lg border flex items-center gap-4 w-full"
                 style={{
                   background: 'rgba(255, 255, 255, 0.8)',
                   borderColor: '#E5E7EB',
                   backdropFilter: 'blur(10px)',
-                  width: '1440px',
-                  maxWidth: '1440px',
-                  minWidth: '1440px'
+
                 }}
               >
                 <div className="flex items-center gap-3">

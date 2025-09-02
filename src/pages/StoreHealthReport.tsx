@@ -13,14 +13,7 @@ export default function StoreHealthReport() {
   return (
     <div
       className="w-full h-full rounded-3xl backdrop-blur-lg overflow-y-auto"
-      style={{
-        background: '#F7FFF7',
-        backdropFilter: 'blur(20px)',
-        boxShadow: `
-          0 8px 32px rgba(0, 0, 0, 0.1),
-          inset 0 1px 0 rgba(255, 255, 255, 0.9)
-        `
-      }}
+   
     >
       {/* Header Section */}
       <div className="text-center mb-12">

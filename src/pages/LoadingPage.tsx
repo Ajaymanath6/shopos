@@ -150,19 +150,11 @@ export default function LoadingPage({
   // Show store health report after scanning completes
   if (scanComplete) {
     return (
-      <div className="w-full flex justify-center" style={{ background: '#F4FBF2' }}>
+      <div className="w-full flex justify-center rounded-lg" style={{ background: '#F4FBF2' }}>
         <div className="p-6" style={{ width: '1440px', maxWidth: '1440px', minWidth: '1440px' }}>
           <div
             className="w-full rounded-3xl backdrop-blur-lg p-8"
-            style={{
-              background: 'white',
-              backdropFilter: 'blur(20px)',
-              boxShadow: `
-                0 8px 32px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.9)
-              `,
-              border: '1px solid #E5E7EB'
-            }}
+       
           >
             {/* Store Health Report Content */}
             <div className="w-full max-w-none">
@@ -543,7 +535,7 @@ export default function LoadingPage({
   }
 
   return (
-    <div className="w-full flex justify-center" style={{ background: '#F4FBF2' }}>
+    <div className="w-full flex justify-center rounded-lg" style={{ background: '#F4FBF2' }}>
       <div className="p-6" style={{ width: '1440px', maxWidth: '1440px', minWidth: '1440px' }}>
         <div className="w-full p-6">
           {/* Landing Page Header */}
