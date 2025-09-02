@@ -47,7 +47,7 @@ export default function StoreHealthReport() {
         {/* Left Column - 70% (3/5 columns) */}
         <div className="col-span-3 space-y-6">
           {/* Box 1 */}
-          <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <div className="p-6 rounded-2xl border border-gray-200 shadow-sm">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#10B981' }}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

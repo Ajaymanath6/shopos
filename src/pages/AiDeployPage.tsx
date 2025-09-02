@@ -51,7 +51,7 @@ export default function AiDeployPage() {
   }, [logEntries.length])
 
   return (
-    <div className="w-full flex justify-center" style={{ background: '#F7FFF7' }}>
+    <div className="w-full flex justify-center rounded-xl" style={{ background: '#F7FFF7' }}>
       <div className="p-6" style={{ width: '1440px', maxWidth: '1440px', minWidth: '1440px' }}>
         {/* Real-time Deployment Logs Card */}
         <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">

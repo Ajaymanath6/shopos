@@ -453,7 +453,7 @@ export default function LoadingPage({
     
     // Show scanning progress UI
     return (
-      <div className="w-full flex justify-center" style={{ background: '#F7FFF7' }}>
+      <div className="w-full flex justify-center rounded-xl" style={{ background: '#F7FFF7' }}>
         <div className="p-6" style={{ width: '1440px', maxWidth: '1440px', minWidth: '1440px' }}>
           <div
             className="w-full rounded-3xl backdrop-blur-lg p-8"
@@ -624,20 +624,11 @@ export default function LoadingPage({
     )
   }
   return (
-    <div className="w-full flex justify-center" style={{ background: '#F7FFF7' }}>
+    <div className="w-full flex justify-center rounded-xl" style={{ background: '#F7FFF7' }}>
       <div className="p-6" style={{ width: '1440px', maxWidth: '1440px', minWidth: '1440px' }}>
         <div
           className="w-full rounded-3xl backdrop-blur-lg p-6"
-          style={{
-            background: 'white',
-            backdropFilter: 'blur(20px)',
-            boxShadow: `
-              0 8px 32px rgba(0, 0, 0, 0.1),
-              inset 0 1px 0 rgba(255, 255, 255, 0.9)
-            `,
-            border: '1px solid #E5E7EB',
-            overflow: 'visible'
-          }}
+        
         >
       {/* Landing Page Header */}
       <div className="text-left mb-16 max-w-4xl mx-auto">

@@ -878,7 +878,7 @@ export default function CanvasLanding() {
   const handleLoadingPageScanReady = (scanFn: () => void) => {
     loadingPageScanRef.current = scanFn
   }
-  
+
   const [showAiSearch, setShowAiSearch] = useState(false)
   const [aiSearchQuery, setAiSearchQuery] = useState('')
 
@@ -1374,8 +1374,8 @@ export default function CanvasLanding() {
                   <h3 className="text-xl font-bold text-gray-700 leading-tight group-hover:text-gray-900 transition-colors text-left">
                     Create a new task
                   </h3>
-                </div>
-                
+          </div>
+
                 {/* Subtitle */}
                 <div className="mb-8 flex-1">
                   <p className="text-gray-500 text-sm leading-relaxed font-medium group-hover:text-gray-600 transition-colors text-left">
@@ -2646,14 +2646,14 @@ export default function CanvasLanding() {
                       </h3>
                       <div className="space-y-2">
                         {notifications.filter(n => n.actionRequired).map((notification) => (
-                                                      <div
-                              key={notification.id}
+                          <div
+                            key={notification.id}
                               className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
-                            >
-                              <div className="flex items-start gap-3">
+                          >
+                            <div className="flex items-start gap-3">
                                 <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
                                   <RiAlertLine size={12} className="text-red-600" />
-                                </div>
+                              </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-start gap-2 mb-1">
                                     <div className="w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0 mt-1.5"></div>
@@ -2669,17 +2669,17 @@ export default function CanvasLanding() {
                                       )}
                                   </p>
                                   <button className="px-3 py-1.5 bg-gray-800 hover:bg-gray-900 text-white text-xs font-medium rounded-md transition-colors">
-                                    Review & Approve
-                                  </button>
-                                </div>
-                                <button
-                                  onClick={() => notification.id && removeNotification(notification.id)}
-                                  className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600 flex-shrink-0"
-                                >
-                                  <RiCloseLine size={12} />
+                                  Review & Approve
                                 </button>
                               </div>
+                              <button
+                                onClick={() => notification.id && removeNotification(notification.id)}
+                                  className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600 flex-shrink-0"
+                              >
+                                  <RiCloseLine size={12} />
+                              </button>
                             </div>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -2711,7 +2711,7 @@ export default function CanvasLanding() {
                           
                           return (
                             <div
-                              key={notification.id}
+                            key={notification.id}
                               className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
                             >
                               <div className="flex items-start gap-3">
@@ -2743,9 +2743,9 @@ export default function CanvasLanding() {
                                   <div className="flex items-center gap-3">
                                     <span className="text-xs text-gray-500">
                                       {new Date(notification.timestamp).toLocaleTimeString([], { 
-                                        hour: '2-digit', 
-                                        minute: '2-digit' 
-                                      })}
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
                                     </span>
                                   </div>
                                 </div>
