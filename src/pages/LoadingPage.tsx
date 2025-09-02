@@ -15,12 +15,11 @@ import {
   RiDownloadLine,
   RiSearch2Line,
   RiPhoneLine,
-  RiAlertLine,
-  RiImageLine,
-  RiSpeedLine,
-  RiSmartphoneLine,
   RiBarChartLine,
-  RiGroupLine
+  RiGroupLine,
+  RiCloseLine,
+  RiToolsLine,
+  RiLoader4Line
 } from '@remixicon/react'
 import FixPreviewPage from './FixPreviewPage'
 import AiDeployPage from './AiDeployPage'
@@ -58,6 +57,9 @@ export default function LoadingPage({
   const [showFixPreview, setShowFixPreview] = useState(false)
   const [showAiDeploy, setShowAiDeploy] = useState(false)
   const [showAgentLiveView, setShowAgentLiveView] = useState(false)
+  const [isFixingImages, setIsFixingImages] = useState(false)
+  const [isFixingSpeed, setIsFixingSpeed] = useState(false)
+  const [isFixingMobile, setIsFixingMobile] = useState(false)
 
 
 
@@ -123,7 +125,7 @@ export default function LoadingPage({
         <div
           className="w-full p-8 rounded-3xl backdrop-blur-lg"
           style={{
-            background: 'rgba(255, 255, 255, 0.95)',
+            background: '#F7FFF7',
             backdropFilter: 'blur(20px)',
             boxShadow: `
               0 8px 32px rgba(0, 0, 0, 0.1),
@@ -211,87 +213,139 @@ export default function LoadingPage({
 
                 {/* Box 2 - Top Priority Issues */}
                 <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gray-100">
-                      <RiAlertLine size={24} className="text-gray-700" />
-                    </div>
+                  <div className="space-y-6">
+                    {/* Issue 1 - Image Quality */}
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900">Top Priority Issues</h3>
-                      <p className="text-gray-600">Issues that need immediate attention</p>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">Blurry Product Images</h3>
+                      <p className="text-sm text-gray-600 mb-4">23 product images are low resolution and need enhancement</p>
+                      
+                      <hr className="border-gray-200 mb-4" />
+                      
+                      <div className="flex items-center justify-between mb-4">
+                        <button 
+                          className="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-red-400 transition-colors"
+                          title="Dismiss issue"
+                        >
+                          <RiCloseLine size={16} className="text-gray-500" />
+                        </button>
+                        
+                        <button 
+                          onClick={() => {
+                            setIsFixingImages(true)
+                            setTimeout(() => {
+                              setIsFixingImages(false)
+                              setShowFixPreview(true)
+                            }, 2000)
+                          }}
+                          className="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-green-400 transition-colors"
+                          title="Fix this issue"
+                        >
+                          {isFixingImages ? (
+                            <RiLoader4Line size={16} className="text-gray-500 animate-spin" />
+                          ) : (
+                            <RiToolsLine size={16} className="text-gray-500" />
+                          )}
+                        </button>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Task Progress</span>
+                          <span className="text-gray-500">Not Started</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className={`h-2 bg-gray-400 rounded-full transition-all duration-300 ${isFixingImages ? 'w-1/3' : 'w-0'}`}></div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Issue 1 - Critical */}
-                  <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <RiImageLine size={16} className="text-gray-700" />
-                        <span className="text-sm font-medium text-gray-900">Image Quality</span>
+                    {/* Issue 2 - Page Speed */}
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">Slow Page Loading</h3>
+                      <p className="text-sm text-gray-600 mb-4">Homepage loads in 4.2s, needs optimization</p>
+                      
+                      <hr className="border-gray-200 mb-4" />
+                      
+                      <div className="flex items-center justify-between mb-4">
+                        <button 
+                          className="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-red-400 transition-colors"
+                          title="Dismiss issue"
+                        >
+                          <RiCloseLine size={16} className="text-gray-500" />
+                        </button>
+                        
+                        <button 
+                          onClick={() => {
+                            setIsFixingSpeed(true)
+                            setTimeout(() => {
+                              setIsFixingSpeed(false)
+                            }, 2000)
+                          }}
+                          className="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-green-400 transition-colors"
+                          title="Fix this issue"
+                        >
+                          {isFixingSpeed ? (
+                            <RiLoader4Line size={16} className="text-gray-500 animate-spin" />
+                          ) : (
+                            <RiToolsLine size={16} className="text-gray-500" />
+                          )}
+                        </button>
                       </div>
-                      <span className="text-xs text-gray-600 bg-gray-200 px-2 py-1 rounded-full">High Impact</span>
-                    </div>
-                    <div className="mb-3">
-                      <h4 className="text-sm font-bold text-gray-900 mb-1">Blurry Product Images</h4>
-                      <p className="text-xs text-gray-600 mb-2">23 product images are low resolution and could be affecting conversions</p>
-                      <div className="flex items-center gap-2 text-xs text-green-600">
-                        <RiArrowUpLine size={12} />
-                        <span>Potential impact: +12% conversion rate</span>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Task Progress</span>
+                          <span className="text-gray-500">Not Started</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className={`h-2 bg-gray-400 rounded-full transition-all duration-300 ${isFixingSpeed ? 'w-1/3' : 'w-0'}`}></div>
+                        </div>
                       </div>
                     </div>
-                    <button
-                      className="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium rounded-lg transition-colors"
-                      onClick={() => setShowFixPreview(true)}
-                    >
-                      Fix with Shopos AI
-                    </button>
-                  </div>
 
-                  {/* Issue 2 - Critical */}
-                  <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <RiSpeedLine size={16} className="text-gray-700" />
-                        <span className="text-sm font-medium text-gray-900">Page Speed</span>
+                    {/* Issue 3 - Mobile UX */}
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">Mobile Layout Issues</h3>
+                      <p className="text-sm text-gray-600 mb-4">Product grid breaks on small screens</p>
+                      
+                      <hr className="border-gray-200 mb-4" />
+                      
+                      <div className="flex items-center justify-between mb-4">
+                        <button 
+                          className="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-red-400 transition-colors"
+                          title="Dismiss issue"
+                        >
+                          <RiCloseLine size={16} className="text-gray-500" />
+                        </button>
+                        
+                        <button 
+                          onClick={() => {
+                            setIsFixingMobile(true)
+                            setTimeout(() => {
+                              setIsFixingMobile(false)
+                            }, 2000)
+                          }}
+                          className="w-10 h-10 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-green-400 transition-colors"
+                          title="Fix this issue"
+                        >
+                          {isFixingMobile ? (
+                            <RiLoader4Line size={16} className="text-gray-500 animate-spin" />
+                          ) : (
+                            <RiToolsLine size={16} className="text-gray-500" />
+                          )}
+                        </button>
                       </div>
-                      <span className="text-xs text-gray-600 bg-gray-200 px-2 py-1 rounded-full">High Revenue Impact</span>
-                    </div>
-                    <div className="mb-3">
-                      <h4 className="text-sm font-bold text-gray-900 mb-1">Slow Page Loading</h4>
-                      <p className="text-xs text-gray-600 mb-2">Homepage loads in 4.2s, 68% slower than optimal</p>
-                      <div className="flex items-center gap-2 text-xs text-green-600">
-                        <RiMoneyDollarCircleLine size={12} />
-                        <span>Potential impact: +$8,400/month revenue</span>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Task Progress</span>
+                          <span className="text-gray-500">Not Started</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className={`h-2 bg-gray-400 rounded-full transition-all duration-300 ${isFixingMobile ? 'w-1/3' : 'w-0'}`}></div>
+                        </div>
                       </div>
                     </div>
-                    <button
-                      className="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium rounded-lg transition-colors"
-                    >
-                      Fix with Shopos AI
-                    </button>
-                  </div>
-
-                  {/* Issue 3 - Warning */}
-                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <RiSmartphoneLine size={16} className="text-gray-700" />
-                        <span className="text-sm font-medium text-gray-900">Mobile UX</span>
-                      </div>
-                      <span className="text-xs text-gray-600 bg-gray-200 px-2 py-1 rounded-full">Medium Impact</span>
-                    </div>
-                    <div className="mb-3">
-                      <h4 className="text-sm font-bold text-gray-900 mb-1">Mobile Layout Issues</h4>
-                      <p className="text-xs text-gray-600 mb-2">Product grid breaks on small screens, affecting 45% of visitors</p>
-                      <div className="flex items-center gap-2 text-xs text-green-600">
-                        <RiArrowUpLine size={12} />
-                        <span>Potential impact: +8% mobile conversions</span>
-                      </div>
-                    </div>
-                    <button
-                      className="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium rounded-lg transition-colors"
-                    >
-                      Fix with Shopos AI
-                    </button>
                   </div>
                 </div>
               </div>
@@ -406,7 +460,7 @@ export default function LoadingPage({
       <div
         className="w-full p-8 rounded-3xl backdrop-blur-lg"
         style={{
-          background: 'rgba(255, 255, 255, 0.95)',
+          background: '#F7FFF7',
           backdropFilter: 'blur(20px)',
           boxShadow: `
             0 8px 32px rgba(0, 0, 0, 0.1),
@@ -572,7 +626,7 @@ export default function LoadingPage({
     <div 
       className="p-6 rounded-3xl backdrop-blur-lg"
       style={{
-        background: 'rgba(255, 255, 255, 0.95)',
+        background: '#F7FFF7',
         backdropFilter: 'blur(20px)',
         boxShadow: `
           0 8px 32px rgba(0, 0, 0, 0.1),
@@ -583,92 +637,103 @@ export default function LoadingPage({
       }}
     >
       {/* Landing Page Header */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
-          Fix Your Shopify Store Issues<br />
-          in Minutes, Not Months
+      <div className="text-left mb-16 max-w-4xl mx-auto">
+        <h1 className="text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
+          Fix Your Shopify Store Issues in Minutes, Not Months
         </h1>
-        <p className="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
+        <p className="text-2xl text-gray-600 leading-relaxed max-w-3xl font-light">
           Our AI scans your store, identifies performance issues, and deploys fixes automatically. 
           Trusted by 500+ Shopify Plus brands to increase conversions.
         </p>
       </div>
 
-      {/* Main CTA Box */}
-      <div className="max-w-2xl mx-auto mb-12 p-8 bg-white rounded-2xl border-2 border-gray-200 shadow-lg">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">
+      {/* Modern CTA Section */}
+      <div className="max-w-4xl mx-auto mb-16">
+        <div className="text-left mb-12">
+          <h2 className="text-5xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
             Get Your Free Store Health Report
           </h2>
-          <p className="text-gray-600 mb-2">
-            Enter your Shopify store URL to start your diagnostic scan
+          <p className="text-xl text-gray-600 mb-4 leading-relaxed max-w-3xl">
+            Enter your Shopify store URL to start your diagnostic scan. We'll analyze your store's public pages to identify optimization opportunities.
           </p>
-          <p className="text-sm text-gray-500 mb-6">
-            We'll analyze your store's public pages to identify optimization opportunities
-          </p>
-          
-          <div className="flex gap-4 mb-4">
-            <input
-              type="url"
+        </div>
+        
+        <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+          <div className="mb-6">
+            <textarea
               value={storeUrl}
               onChange={(e) => setStoreUrl(e.target.value)}
               placeholder="https://yourstore.myshopify.com"
-              className="flex-1 px-6 py-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-0 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
-              style={{ '--tw-ring-color': '#A5D6A7' } as React.CSSProperties}
+              rows={4}
+              className="w-full px-4 py-4 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 outline-none transition-all resize-none font-mono"
+              style={{
+                lineHeight: '1.6',
+                fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace'
+              }}
             />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6 text-sm text-gray-500">
+              <div className="flex items-center gap-2">
+                <RiCheckLine size={16} className="text-gray-400" />
+                <span>No signup required</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <RiCheckLine size={16} className="text-gray-400" />
+                <span>Results in 30 seconds</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <RiCheckLine size={16} className="text-gray-400" />
+                <span>Completely free</span>
+              </div>
+            </div>
+            
             <button
               onClick={handleStartScan}
               disabled={!storeUrl.trim()}
-              className="px-8 py-4 rounded-xl text-white font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg"
-              style={{ backgroundColor: DARK_PALETTE.primary }}
+              className="px-8 py-3 rounded-lg text-white font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg"
+              style={{ 
+                backgroundColor: DARK_PALETTE.primary,
+                minWidth: '120px'
+              }}
             >
-              Start Free Scan
+              Analyze
             </button>
-          </div>
-          
-          <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
-            <div className="flex items-center gap-1">
-              <RiCheckLine size={16} className="text-green-500" />
-              <span>No signup required</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <RiCheckLine size={16} className="text-green-500" />
-              <span>Results in 30 seconds</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <RiCheckLine size={16} className="text-green-500" />
-              <span>Completely free</span>
-            </div>
           </div>
         </div>
       </div>
 
       {/* Trusted By Section */}
-      <div className="text-center mb-12">
-        <p className="text-sm text-gray-500 mb-6">Trusted by leading technology companies</p>
-        <div className="flex items-center justify-center gap-8">
-          <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gray-100">
-            <RiAppleLine size={24} className="text-gray-700" />
-          </div>
-          <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gray-100">
-            <RiGoogleLine size={24} className="text-gray-700" />
-          </div>
-          <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gray-100">
-            <RiMicrosoftLine size={24} className="text-gray-700" />
-          </div>
-          <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gray-100">
-            <RiAmazonLine size={24} className="text-gray-700" />
-          </div>
-          <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gray-100">
-            <RiNetflixLine size={24} className="text-gray-700" />
+      <div className="max-w-4xl mx-auto mb-16">
+        <div className="flex items-center gap-6">
+          <p className="text-sm text-gray-500">Trusted by leading technology companies</p>
+          <div className="flex items-center gap-4 opacity-60">
+            <div className="flex items-center justify-center w-8 h-8 rounded bg-gray-100">
+              <RiAppleLine size={16} className="text-gray-600" />
+            </div>
+            <div className="flex items-center justify-center w-8 h-8 rounded bg-gray-100">
+              <RiGoogleLine size={16} className="text-gray-600" />
+            </div>
+            <div className="flex items-center justify-center w-8 h-8 rounded bg-gray-100">
+              <RiMicrosoftLine size={16} className="text-gray-600" />
+            </div>
+            <div className="flex items-center justify-center w-8 h-8 rounded bg-gray-100">
+              <RiAmazonLine size={16} className="text-gray-600" />
+            </div>
+            <div className="flex items-center justify-center w-8 h-8 rounded bg-gray-100">
+              <RiNetflixLine size={16} className="text-gray-600" />
+            </div>
           </div>
         </div>
       </div>
 
       {/* How It Works Section */}
-      <div className="mb-12">
-        <h3 className="text-2xl font-bold text-gray-900 text-center mb-3">How It Works</h3>
-        <p className="text-gray-600 text-center mb-8">Get actionable fixes for your store in three simple steps</p>
+      <div className="mb-16 max-w-4xl mx-auto">
+        <div className="text-left mb-12">
+          <h3 className="text-4xl font-bold text-gray-900 mb-4 leading-tight tracking-tight">How It Works</h3>
+          <p className="text-xl text-gray-600 leading-relaxed max-w-3xl font-light">Get actionable fixes for your store in three simple steps</p>
+        </div>
         
         <div className="grid grid-cols-3 gap-8">
           {/* Step 1 */}

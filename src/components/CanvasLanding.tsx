@@ -1754,10 +1754,11 @@ export default function CanvasLanding() {
                       {/* Perplexity */}
                       <div className="flex flex-col items-center">
                         <div 
-                          className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
+                          className="w-10 h-10 flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
                           style={{
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            backdropFilter: 'blur(10px)'
+                            background: 'white',
+                            borderRadius: '50% 40% 50% 40%',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                           }}
                         >
                           <img 
@@ -1779,10 +1780,11 @@ export default function CanvasLanding() {
                       {/* ChatGPT */}
                       <div className="flex flex-col items-center">
                         <div 
-                          className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
+                          className="w-10 h-10 flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
                           style={{
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            backdropFilter: 'blur(10px)'
+                            background: 'white',
+                            borderRadius: '50% 40% 50% 40%',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                           }}
                         >
                           <img 
@@ -1804,10 +1806,11 @@ export default function CanvasLanding() {
                       {/* Claude */}
                       <div className="flex flex-col items-center">
                         <div 
-                          className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
+                          className="w-10 h-10 flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
                           style={{
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            backdropFilter: 'blur(10px)'
+                            background: 'white',
+                            borderRadius: '50% 40% 50% 40%',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                           }}
                         >
                           <img 

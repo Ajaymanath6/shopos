@@ -14,7 +14,7 @@ export default function StoreHealthReport() {
     <div
       className="w-full h-full rounded-3xl backdrop-blur-lg overflow-y-auto"
       style={{
-        background: 'rgba(255, 255, 255, 0.95)',
+        background: '#F7FFF7',
         backdropFilter: 'blur(20px)',
         boxShadow: `
           0 8px 32px rgba(0, 0, 0, 0.1),
