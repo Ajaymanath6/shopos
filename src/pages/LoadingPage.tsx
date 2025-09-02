@@ -91,16 +91,7 @@ export default function LoadingPage({
 
   if (showAiDeploy) {
     // Show AI Deploy content
-    return <AiDeployPage 
-      onComplete={() => {
-        setShowAiDeploy(false)
-        setShowAgentLiveView(true)
-      }}
-      onViewStore={() => {
-        // Open store in new tab
-        window.open('https://yourstore.myshopify.com', '_blank')
-      }}
-    />
+    return <AiDeployPage />
   }
 
   if (showFixPreview) {
@@ -122,17 +113,20 @@ export default function LoadingPage({
     // Show Store Health Report content when scan is complete
     if (scanProgress >= 100) {
       return (
-        <div
-          className="w-full p-8 rounded-3xl backdrop-blur-lg"
-          style={{
-            background: '#F7FFF7',
-            backdropFilter: 'blur(20px)',
-            boxShadow: `
-              0 8px 32px rgba(0, 0, 0, 0.1),
-              inset 0 1px 0 rgba(255, 255, 255, 0.9)
-            `
-          }}
-        >
+        <div className="w-full flex justify-center" style={{ background: '#F7FFF7' }}>
+          <div className="p-6" style={{ width: '1440px', maxWidth: '1440px', minWidth: '1440px' }}>
+            <div
+              className="w-full rounded-3xl backdrop-blur-lg p-8"
+              style={{
+                background: 'white',
+                backdropFilter: 'blur(20px)',
+                boxShadow: `
+                  0 8px 32px rgba(0, 0, 0, 0.1),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.9)
+                `,
+                border: '1px solid #E5E7EB'
+              }}
+            >
           {/* Store Health Report Content */}
           <div className="w-full max-w-none">
             {/* Header Section */}
@@ -451,23 +445,28 @@ export default function LoadingPage({
               </div>
             </div>
           </div>
+            </div>
+          </div>
         </div>
       )
     }
     
     // Show scanning progress UI
     return (
-      <div
-        className="w-full p-8 rounded-3xl backdrop-blur-lg"
-        style={{
-          background: '#F7FFF7',
-          backdropFilter: 'blur(20px)',
-          boxShadow: `
-            0 8px 32px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.9)
-          `
-        }}
-      >
+      <div className="w-full flex justify-center" style={{ background: '#F7FFF7' }}>
+        <div className="p-6" style={{ width: '1440px', maxWidth: '1440px', minWidth: '1440px' }}>
+          <div
+            className="w-full rounded-3xl backdrop-blur-lg p-8"
+            style={{
+              background: 'white',
+              backdropFilter: 'blur(20px)',
+              boxShadow: `
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9)
+              `,
+              border: '1px solid #E5E7EB'
+            }}
+          >
         {/* Main Scanning Container */}
         <div className="max-w-2xl mx-auto">
           {/* Scanning Header */}
@@ -619,23 +618,27 @@ export default function LoadingPage({
             </div>
           </div>
         </div>
+          </div>
+        </div>
       </div>
     )
   }
   return (
-    <div 
-      className="p-6 rounded-3xl backdrop-blur-lg"
-      style={{
-        background: '#F7FFF7',
-        backdropFilter: 'blur(20px)',
-        boxShadow: `
-          0 8px 32px rgba(0, 0, 0, 0.1),
-          inset 0 1px 0 rgba(255, 255, 255, 0.9)
-        `,
-        width: '100%',
-        overflow: 'visible'
-      }}
-    >
+    <div className="w-full flex justify-center" style={{ background: '#F7FFF7' }}>
+      <div className="p-6" style={{ width: '1440px', maxWidth: '1440px', minWidth: '1440px' }}>
+        <div
+          className="w-full rounded-3xl backdrop-blur-lg p-6"
+          style={{
+            background: 'white',
+            backdropFilter: 'blur(20px)',
+            boxShadow: `
+              0 8px 32px rgba(0, 0, 0, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.9)
+            `,
+            border: '1px solid #E5E7EB',
+            overflow: 'visible'
+          }}
+        >
       {/* Landing Page Header */}
       <div className="text-left mb-16 max-w-4xl mx-auto">
         <h1 className="text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
@@ -779,8 +782,8 @@ export default function LoadingPage({
           </div>
         </div>
       </div>
-
-
+        </div>
+      </div>
     </div>
   )
 }

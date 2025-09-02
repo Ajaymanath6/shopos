@@ -92,6 +92,54 @@ export default function AiDeployPage() {
             </div>
           </div>
         </div>
+
+        {/* What's Next Card */}
+        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm mt-6">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">What's Next?</h3>
+            <p className="text-sm text-gray-600 mb-4">Choose your next action after deployment completes</p>
+            
+            <hr className="border-gray-200 mb-4" />
+            
+            <div className="space-y-4">
+              <button
+                className="w-full py-3 px-6 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-md text-left"
+                onClick={() => {
+                  // Handle fix another issue
+                  console.log('Fix Another Issue clicked')
+                }}
+              >
+                Fix Another Issue
+              </button>
+
+              <button
+                className="w-full py-3 px-6 bg-white border-2 border-gray-200 hover:border-gray-300 text-gray-700 font-semibold rounded-xl transition-all duration-200 hover:shadow-md text-left"
+                onClick={() => {
+                  // Open store in new tab
+                  window.open('https://yourstore.myshopify.com', '_blank')
+                }}
+              >
+                View Live Store
+              </button>
+
+              <button
+                className="w-full py-3 px-6 bg-white border-2 border-gray-200 hover:border-gray-300 text-gray-700 font-semibold rounded-xl transition-all duration-200 hover:shadow-md text-left"
+                onClick={() => {
+                  // Handle schedule follow-up call
+                  console.log('Schedule Follow-up Call clicked')
+                }}
+              >
+                Schedule Follow-up Call
+              </button>
+            </div>
+
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <p className="text-sm text-gray-700 font-medium">
+                Deployment complete • Ready for next steps
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
