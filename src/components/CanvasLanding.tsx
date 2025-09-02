@@ -971,14 +971,7 @@ export default function CanvasLanding() {
   const [editingSection, setEditingSection] = useState<string | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
 
-  const scanningSteps = [
-    { progress: 15, message: "Connecting to your store..." },
-    { progress: 30, message: "Analyzing page load speeds..." },
-    { progress: 50, message: "Checking SEO optimization..." },
-    { progress: 70, message: "Reviewing conversion funnels..." },
-    { progress: 85, message: "Scanning for accessibility issues..." },
-    { progress: 100, message: "Calculating revenue impact..." }
-  ]
+
 
   // Handle mouse wheel zoom
   const handleWheel = (e: React.WheelEvent) => {
@@ -1038,53 +1031,7 @@ export default function CanvasLanding() {
 
 
 
-  // Handle store URL submission
-  const handleStoreSubmit = () => {
-    if (!storeUrl.trim()) return
 
-    // Update agent status to analyzing
-    setActiveAgent(prev => ({
-      ...prev,
-      status: 'analyzing',
-      statusText: `Analyzing ${storeUrl}...`,
-      subheading: 'Running comprehensive store diagnostics'
-    }))
-
-    // Analysis started
-    setScanProgress(0)
-
-    let stepIndex = 0
-    const interval = setInterval(() => {
-      stepIndex++
-      const nextStep = stepIndex
-        if (nextStep >= scanningSteps.length) {
-          clearInterval(interval)
-        console.log('Scan completed, setting scanProgress to 100')
-        setScanProgress(100)
-
-        // Update agent status to completed
-        setActiveAgent(prev => ({
-          ...prev,
-          status: 'completed',
-          statusText: 'Analysis complete - 78% health score',
-          subheading: 'Diagnostics finished, recommendations ready'
-        }))
-
-        // Health report will show automatically in LoadingPage when scanProgress reaches 100%
-
-        // Analysis complete
-        return
-        }
-        setScanProgress(scanningSteps[nextStep].progress)
-        // Update agent status with current step
-        setActiveAgent(prev => ({
-          ...prev,
-          status: 'analyzing',
-          statusText: scanningSteps[nextStep]?.message || 'Analyzing...',
-          subheading: 'Processing store data and running diagnostics'
-        }))
-    }, 2000)
-  }
 
   // Handle task card click
   const handleTaskClick = (taskId: string) => {
@@ -1585,8 +1532,6 @@ export default function CanvasLanding() {
                                 <LoadingPage
                                   storeUrl={storeUrl}
                                   setStoreUrl={setStoreUrl}
-                                  scanProgress={scanProgress}
-                                  handleStoreSubmit={handleStoreSubmit}
                                   onStartScan={handleLoadingPageScanReady}
                                 />
                               </div>
@@ -1854,8 +1799,6 @@ export default function CanvasLanding() {
                     <LoadingPage
                       storeUrl={storeUrl}
                       setStoreUrl={setStoreUrl}
-                      scanProgress={scanProgress}
-                      handleStoreSubmit={handleStoreSubmit}
                       onStartScan={handleLoadingPageScanReady}
                     />
                   </div>
