@@ -16,10 +16,10 @@ interface FixPreviewPageProps {
 
 export default function FixPreviewPage({ onBack, onDeployStart }: FixPreviewPageProps) {
   return (
-    <div className="w-full min-h-screen bg-white">
-      <div className="w-[1440px] mx-auto p-8">
+    <div className="w-full bg-white">
+      <div className="w-full p-6">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           {/* Back Button */}
           {onBack && (
                       <div className="flex justify-start mb-8">
@@ -45,21 +45,21 @@ export default function FixPreviewPage({ onBack, onDeployStart }: FixPreviewPage
             </div>
           </div>
 
-          <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
             Optimize Blurry Product Images
           </h1>
 
-          <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-700 leading-relaxed">
             AI has enhanced 23 product images using advanced upscaling and sharpening technology
           </p>
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Side - Hero Metrics */}
-          <div className="col-span-8 space-y-8">
+          <div className="lg:col-span-8 space-y-6">
             {/* Impact Summary */}
-            <div className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm">
+            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-14 h-14 rounded-2xl bg-gray-800 flex items-center justify-center">
                   <RiImageLine size={28} className="text-white" />
@@ -103,7 +103,7 @@ export default function FixPreviewPage({ onBack, onDeployStart }: FixPreviewPage
             </div>
 
             {/* Image Preview Grid */}
-            <div className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm">
+            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Image Enhancement Preview</h3>
 
               {/* Toggle */}
@@ -143,7 +143,7 @@ export default function FixPreviewPage({ onBack, onDeployStart }: FixPreviewPage
           </div>
 
           {/* Right Side - Actions & Details */}
-          <div className="col-span-4 space-y-6">
+          <div className="lg:col-span-4 space-y-6">
             {/* What Will Change */}
             <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
               <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
@@ -195,7 +195,7 @@ export default function FixPreviewPage({ onBack, onDeployStart }: FixPreviewPage
             </div>
 
             {/* Deploy Actions */}
-            <div className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm text-center">
+            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm text-center">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Deploy?</h3>
               <p className="text-gray-600 mb-8">Deploy all 23 image optimizations instantly</p>
 

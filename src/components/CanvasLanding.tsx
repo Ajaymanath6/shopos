@@ -14,7 +14,6 @@ import {
   RiHomeLine,
   RiCloseLine,
   RiDeleteBinLine,
-  RiLoader4Line,
   RiLoader4Fill,
   RiSparklingFill,
   RiLoader2Line,
@@ -58,6 +57,8 @@ const StarIcon = ({ size = 20 }: { size?: number }) => (
     <path d="M12 0.5L16 8L23.5 12L16 16L12 23.5L8 16L0.5 12L8 8L12 0.5Z" />
   </svg>
 )
+
+
 
 interface TaskCard {
   id: string
@@ -716,93 +717,7 @@ export default function CanvasLanding() {
     }
   }, [])
 
-  // AI Command Processing
-  const processAiCommand = async (query: string) => {
-    setIsProcessingAiCommand(true)
-    
-    try {
-      // Parse different command patterns
-      const lowerQuery = query.toLowerCase()
-      
-      // Extract URL from command if present
-      const urlMatch = query.match(/https?:\/\/[^\s]+/)
-      const storeUrl = urlMatch ? urlMatch[0] : ''
-      
-      let taskTitle = ''
-      let taskSubtitle = ''
-      let taskId = ''
-      
-      // Store health check commands - catch various ways users might ask for store analysis
-      if (lowerQuery.includes('store health') || 
-          lowerQuery.includes('health check') || 
-          lowerQuery.includes('store diagnostic') ||
-          lowerQuery.includes('analyze store') ||
-          lowerQuery.includes('check store') ||
-          lowerQuery.includes('store analysis') ||
-          lowerQuery.includes('optimize store') ||
-          lowerQuery.includes('audit store') ||
-          (lowerQuery.includes('store') && (lowerQuery.includes('scan') || lowerQuery.includes('check') || lowerQuery.includes('analyze')))) {
-        taskTitle = 'Store Health Check'
-        taskSubtitle = 'Connect your Shopify store for an instant AI diagnostic and optimization recommendations'
-        taskId = 'ai-store-health-' + Date.now()
-      }
-      // SEO analysis commands
-      else if (lowerQuery.includes('seo') || lowerQuery.includes('search optimization') || lowerQuery.includes('ranking')) {
-        taskTitle = 'SEO Analysis'
-        taskSubtitle = storeUrl ? `Optimizing ${storeUrl} for search rankings` : 'AI-powered SEO optimization and analysis'
-        taskId = 'ai-seo-' + Date.now()
-      }
-      // Performance commands
-      else if (lowerQuery.includes('performance') || lowerQuery.includes('speed') || lowerQuery.includes('load time')) {
-        taskTitle = 'Performance Optimization'
-        taskSubtitle = storeUrl ? `Analyzing ${storeUrl} performance metrics` : 'AI-powered performance analysis and optimization'
-        taskId = 'ai-performance-' + Date.now()
-      }
-      // Conversion optimization commands
-      else if (lowerQuery.includes('conversion') || lowerQuery.includes('sales funnel') || lowerQuery.includes('optimize sales')) {
-        taskTitle = 'Conversion Optimization'
-        taskSubtitle = storeUrl ? `Optimizing ${storeUrl} for higher conversions` : 'AI-powered conversion rate optimization'
-        taskId = 'ai-conversion-' + Date.now()
-      }
-      // Default/Generic task - default to Store Health Check
-      else {
-        taskTitle = 'Store Health Check'
-        taskSubtitle = 'Connect your Shopify store for an instant AI diagnostic and optimization recommendations'
-        taskId = 'ai-store-health-' + Date.now()
-      }
 
-      // Create new task card
-      const newTask: TaskCard = {
-        id: taskId,
-        title: taskTitle,
-        subtitle: taskSubtitle,
-        icon: RiPulseLine, // Default AI icon
-        iconBg: DARK_PALETTE.primary
-      }
-
-      // Add to task cards
-      setTaskCards(prev => [...prev, newTask])
-      
-      // If URL is provided, set it in storeUrl state
-      if (storeUrl) {
-        setStoreUrl(storeUrl)
-      }
-      
-      // Auto-open the task interface
-      setTimeout(() => {
-        setExpandedCards(prev => [...prev, taskId])
-      }, 500)
-      
-      // Clear search and close search bar
-      setAiSearchQuery('')
-      setShowAiSearch(false)
-      
-    } catch (error) {
-      console.error('Error processing AI command:', error)
-    } finally {
-      setIsProcessingAiCommand(false)
-    }
-  }
 
   const TEMPLATES: Array<{ id: string; title: string; subtitle: string; icon: TaskCard['icon']; iconBg: string }> = [
     { id: 'abandoned-cart', title: 'Abandoned Cart Recovery', subtitle: 'Automated outreach and incentives', icon: RiNotification3Line, iconBg: DARK_PALETTE.tertiary },
@@ -962,10 +877,8 @@ export default function CanvasLanding() {
     loadingPageScanRef.current = scanFn
   }
   
-
   const [showAiSearch, setShowAiSearch] = useState(false)
   const [aiSearchQuery, setAiSearchQuery] = useState('')
-  const [isProcessingAiCommand, setIsProcessingAiCommand] = useState(false)
 
   // Notification System State
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
@@ -1134,7 +1047,7 @@ export default function CanvasLanding() {
 
   // Handle task card click
   const handleTaskClick = (taskId: string) => {
-    if (taskId === 'store-health' || taskId.startsWith('ai-store-health')) {
+    if (taskId === 'store-health') {
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
         setScanProgress(0)
@@ -1148,12 +1061,9 @@ export default function CanvasLanding() {
           subheading: 'Store Health Analysis Agent',
           useLogo: true
         }))
-        // Don't reset storeUrl if it's an AI-created task with a URL already set
-        if (!taskId.startsWith('ai-')) {
         setStoreUrl('')
       }
-      }
-    } else if (taskId === 'seo-optimizer' || taskId.includes('seo') || taskId.startsWith('ai-seo')) {
+    } else if (taskId === 'seo-optimizer' || taskId.includes('seo')) {
       // Handle SEO optimizer (existing interface is built)
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
@@ -1168,28 +1078,8 @@ export default function CanvasLanding() {
           useLogo: true
         }))
       }
-    } else if (taskId.startsWith('ai-')) {
-      // Handle AI-created tasks - they all use the LoadingPage component
-      if (!expandedCards.includes(taskId)) {
-        setExpandedCards(prev => [...prev, taskId])
-        setScanProgress(0)
-        // Update to Claude Agent for custom task
-        const task = taskCards.find(t => t.id === taskId)
-        if (task) {
-          setActiveAgent(prev => ({
-            ...prev,
-            name: 'AI Agent: Claude',
-            icon: RiStarFill,
-            status: 'ready',
-            statusText: `Ready to ${task.subtitle.toLowerCase()}`,
-            subheading: `${task.title} Agent`,
-            useLogo: true
-          }))
-        }
-        // Don't reset storeUrl as it may have been set from the AI command
-      }
     } else {
-      // For now, expand other cards too - they'll show a basic interface
+      // Handle other custom tasks - they'll show a basic interface
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
         // Update to Claude Agent for generic task
@@ -1406,7 +1296,71 @@ export default function CanvasLanding() {
               )
             })}
 
+            {/* Add Task Card */}
+            <div
+              className="group rounded-3xl p-6 shadow-xl cursor-pointer border-2 border-dashed border-gray-300 hover:border-gray-400 backdrop-blur-2xl overflow-hidden relative transition-all duration-300"
+              onClick={() => setShowAddTask(true)}
+              style={{ 
+                width: '320px',
+                height: '380px',
+                background: `linear-gradient(135deg, rgba(248, 249, 250, 0.98) 0%, rgba(243, 244, 246, 0.92) 100%)`,
+                backdropFilter: 'blur(20px)',
+                boxShadow: `
+                  0 20px 60px rgba(0, 0, 0, 0.05),
+                  0 8px 32px rgba(0, 0, 0, 0.03),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.8)
+                `
+              }}
+            >
+              <div className="flex flex-col h-full relative z-10 items-center justify-center text-center">
+                {/* Plus Icon */}
+                <div className="flex justify-center mb-6">
+                  <div 
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center border-2 border-dashed border-gray-300 group-hover:border-gray-400 transition-colors"
+                    style={{ 
+                      color: '#6B7280'
+                    }}
+                  >
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                  </div>
+                </div>
 
+                {/* Title */}
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold text-gray-700 leading-tight group-hover:text-gray-900 transition-colors">
+                    Add Task
+                  </h3>
+                </div>
+                
+                {/* Subtitle */}
+                <div className="mb-8 flex-1">
+                  <p className="text-gray-500 text-sm leading-relaxed font-medium group-hover:text-gray-600 transition-colors">
+                    Create a new custom AI task or choose from templates
+                  </p>
+                </div>
+                
+                {/* Action section */}
+                <div className="pt-4 border-t border-dashed border-gray-200">
+                  <div className="flex items-center justify-center">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setShowAddTask(true)
+                      }}
+                      className="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
+                    >
+                      Get Started
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Gradient overlay for depth */}
+              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-gray-100/20 pointer-events-none"></div>
+            </div>
           </div>
 
 
@@ -1416,11 +1370,11 @@ export default function CanvasLanding() {
             const sectionProjects = sectionData.projects.filter(projectId => expandedCards.includes(projectId))
             if (sectionProjects.length === 0) return null
             
-            // Each project is 1400px wide. Gap between projects is 48px (gap-12).
+            // Each project is 1440px wide. Gap between projects is 48px (gap-12).
             // The section container also has horizontal padding p-6 (24px each side = 48px total).
             // Add an extra small buffer (24px) to avoid subpixel overflow at certain zoom levels.
             const sectionWidth =
-              sectionProjects.length * 1400 +
+              sectionProjects.length * 1440 +
               (sectionProjects.length - 1) * 48 +
               48 +
               24
@@ -1492,49 +1446,7 @@ export default function CanvasLanding() {
                 <div className="flex gap-12 mt-6">
                   {sectionProjects.map(projectId => (
                     <div key={projectId} className="contents">
-                      {/* AI-Created Tasks in Sections */}
-                      {taskCards.find(task => task.id === projectId && task.id.startsWith('ai-')) && expandedCards.includes(projectId) && (
-                        <div 
-                          className={`transition-all duration-300 ${
-                            sectionMode ? 'cursor-pointer' : ''
-                          } ${
-                            selectedProjects.includes(projectId) ? 'border-2 border-dashed border-gray-600' : ''
-                          }`}
-                          style={{ 
-                            width: '1400px',
-                            minWidth: '1400px',
-                            flexShrink: 0
-                          }}
-                          onClick={() => sectionMode && handleProjectSelection(projectId)}
-                        >
-                          <div 
-                            className="rounded-3xl overflow-hidden"
-                            style={{
-                              minHeight: '800px',
-                              background: 'rgba(255, 255, 255, 0.8)',
-                              backdropFilter: 'blur(20px)',
-                              boxShadow: `
-                                0 20px 60px rgba(0, 0, 0, 0.08),
-                                0 8px 32px rgba(0, 0, 0, 0.06),
-                                inset 0 1px 0 rgba(255, 255, 255, 0.8)
-                              `
-                            }}
-                          >
-                            <div className="p-6">
-                              {/* Full Width Section - Loading Page (100%) */}
-                              <div className="w-full">
-                                <LoadingPage
-                                  storeUrl={storeUrl}
-                                  setStoreUrl={setStoreUrl}
-                                  scanProgress={scanProgress}
-                                  handleStoreSubmit={handleStoreSubmit}
-                                  onStartScan={handleLoadingPageScanReady}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+
 
                       {projectId === 'store-health' && expandedCards.includes('store-health') && (
                         <div 
@@ -1544,8 +1456,8 @@ export default function CanvasLanding() {
                             selectedProjects.includes('store-health') ? 'border-2 border-dashed border-gray-600' : ''
                           }`}
                           style={{ 
-                            width: '1400px',
-                            minWidth: '1400px',
+                            width: '1440px',
+                            minWidth: '1440px',
                             flexShrink: 0
                           }}
                           onClick={() => handleProjectSelection('store-health')}
@@ -1572,8 +1484,9 @@ export default function CanvasLanding() {
                               background: 'rgba(255, 255, 255, 0.8)',
                               borderColor: '#E5E7EB',
                               backdropFilter: 'blur(10px)',
-                              width: '100%',
-                              minWidth: '1400px'
+                                                width: '1440px',
+                  maxWidth: '1440px',
+                  minWidth: '1440px'
                             }}
                           >
                             <div className="flex items-center gap-3">
@@ -1655,259 +1568,6 @@ export default function CanvasLanding() {
 
           {/* Projects Container - Full Canvas Layout */}
           <div className="mt-26 w-full flex flex-wrap gap-12 justify-center" style={{ minWidth: '100vw', padding: '0 2rem', marginBottom: '50px' }}>
-            {/* AI-Created Tasks using LoadingPage - Only when NOT in section */}
-            {taskCards.filter(task => 
-              task.id.startsWith('ai-') && 
-              expandedCards.includes(task.id) && 
-              !getProjectSection(task.id)
-            ).map(task => (
-              <div 
-                key={task.id}
-                className={`transition-all duration-300 ${
-                  sectionMode ? 'cursor-pointer' : ''
-                } ${
-                  selectedProjects.includes(task.id) ? 'border-2 border-dashed border-gray-600' : ''
-                }`}
-                style={{ 
-                  width: '1400px',
-                  minWidth: '1400px',
-                  flexShrink: 0,
-                  marginBottom: '50px'
-                }}
-                onClick={() => sectionMode && handleProjectSelection(task.id)}
-              >
-                {/* Main Heading - Outside Interface */}
-              <div className="text-left mb-6 relative" style={{ marginTop: '120px' }}>
-                <div className="flex items-center">
-                  <div>
-                    <h1 className="text-3xl font-bold mb-2 text-gray-900">
-                        {task.title}
-                    </h1>
-                    <p className="text-lg text-gray-600">
-                        {task.subtitle}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-                {/* Notification Banner - Outside Interface */}
-              <div
-                className="mb-8 p-4 rounded-2xl border flex items-center gap-4"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.8)',
-                  borderColor: '#E5E7EB',
-                  backdropFilter: 'blur(10px)',
-                  width: '100%',
-                  minWidth: '1400px'
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{
-                      backgroundColor: activeAgent.status === 'analyzing' ? '#DBEAFE' : '#F9FAFB',
-                      color: activeAgent.status === 'analyzing' ? DARK_PALETTE.primary : '#374151'
-                    }}
-                  >
-                    {activeAgent.status === 'analyzing' ? (
-                      <RiLoader4Fill size={16} className="animate-spin" />
-                    ) : activeAgent.useLogo ? (
-                      <>
-                        <img
-                          src="https://claude.ai/images/claude_app_icon.png"
-                          alt="Claude"
-                          className="w-9 h-8 object-contain rounded-lg"
-                          style={{
-                            borderRadius: '50% 40% 50% 40%',
-                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-                          }}
-                          onError={(e) => {
-                            const target = e.currentTarget as HTMLImageElement;
-                            target.style.display = 'none';
-                            const fallback = target.nextElementSibling as HTMLElement;
-                            if (fallback) fallback.style.display = 'flex';
-                          }}
-                        />
-                        <span className="text-xs font-bold text-purple-600 hidden">C</span>
-                      </>
-                    ) : (
-                      <activeAgent.icon size={16} />
-                    )}
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{activeAgent.name}</div>
-                    {activeAgent.subheading && (
-                      <div className="text-xs text-gray-500">{activeAgent.subheading}</div>
-                    )}
-                    <div className="text-xs text-gray-600">{activeAgent.statusText}</div>
-                  </div>
-                </div>
-                <div className="ml-auto flex items-center gap-2">
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      activeAgent.status === 'analyzing' ? 'bg-blue-500 animate-pulse' :
-                      activeAgent.status === 'completed' ? 'bg-green-500' :
-                      'bg-gray-400'
-                    }`}
-                  ></div>
-                  <span className="text-xs text-gray-500">
-                    {activeAgent.status === 'analyzing' ? 'Processing' :
-                     activeAgent.status === 'completed' ? 'Complete' :
-                     'Ready'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Interface with AI Card Layout */}
-              <div className="flex gap-6">
-                {/* AI Conversation Card & Agents - Left Side */}
-                <div 
-                  className="flex-shrink-0 space-y-4"
-                  style={{ 
-                    width: '320px'
-                  }}
-                >
-                  {/* AI Conversation Card */}
-                  <div style={{ height: '500px' }}>
-                    <AIConversationCard 
-                      taskCards={taskCards}
-                      expandedCards={[task.id]} // Only show this specific task
-                      scanProgress={scanProgress}
-                      isScanning={scanProgress > 0 && scanProgress < 100}
-                      onAutoEnterUrl={handleAutoEnterUrl}
-                      onAutoStartScan={handleAutoStartScan}
-                      onAddNotification={addNotification}
-                    />
-                  </div>
-
-                  {/* AI Agents Display */}
-                  <div 
-                    className="rounded-2xl p-4 border border-white/40 backdrop-blur-xl"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      backdropFilter: 'blur(25px)',
-                      boxShadow: `
-                        0 12px 40px rgba(0, 0, 0, 0.15),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.6),
-                        inset 0 -1px 0 rgba(255, 255, 255, 0.3)
-                      `
-                    }}
-                  >
-                    <div className="text-center mb-3">
-                      <h4 className="text-sm font-semibold text-gray-800">AI Agents Used</h4>
-                      <p className="text-xs text-gray-600">Powering this analysis</p>
-                    </div>
-                    
-                    <div className="flex justify-center gap-4">
-                      {/* Perplexity */}
-                      <div className="flex flex-col items-center">
-                        <div 
-                          className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
-                          style={{
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            backdropFilter: 'blur(10px)'
-                          }}
-                        >
-                          <img 
-                            src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/perplexity-ai-icon.png" 
-                            alt="Perplexity" 
-                            className="w-6 h-6 object-contain"
-                            onError={(e) => {
-                              const target = e.currentTarget as HTMLImageElement;
-                              target.style.display = 'none';
-                              const fallback = target.nextElementSibling as HTMLElement;
-                              if (fallback) fallback.style.display = 'flex';
-                            }}
-                          />
-                          <span className="text-xs font-bold text-blue-600 hidden">P</span>
-                        </div>
-                        <span className="text-xs text-gray-700 mt-1">Perplexity</span>
-                      </div>
-
-                      {/* ChatGPT */}
-                      <div className="flex flex-col items-center">
-                        <div 
-                          className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
-                          style={{
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            backdropFilter: 'blur(10px)'
-                          }}
-                        >
-                          <img 
-                            src="https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg" 
-                            alt="ChatGPT" 
-                            className="w-6 h-6 object-contain"
-                            onError={(e) => {
-                              const target = e.currentTarget as HTMLImageElement;
-                              target.style.display = 'none';
-                              const fallback = target.nextElementSibling as HTMLElement;
-                              if (fallback) fallback.style.display = 'flex';
-                            }}
-                          />
-                          <span className="text-xs font-bold text-green-600 hidden">GPT</span>
-                        </div>
-                        <span className="text-xs text-gray-700 mt-1">ChatGPT</span>
-                      </div>
-
-                      {/* Claude */}
-                      <div className="flex flex-col items-center">
-                        <div 
-                          className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-white/30 overflow-hidden"
-                          style={{
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            backdropFilter: 'blur(10px)'
-                          }}
-                        >
-                          <img 
-                            src="https://claude.ai/images/claude_app_icon.png" 
-                            alt="Claude" 
-                            className="w-6 h-6 object-contain"
-                            onError={(e) => {
-                              const target = e.currentTarget as HTMLImageElement;
-                              target.style.display = 'none';
-                              const fallback = target.nextElementSibling as HTMLElement;
-                              if (fallback) fallback.style.display = 'flex';
-                            }}
-                          />
-                          <span className="text-xs font-bold text-purple-600 hidden">C</span>
-                        </div>
-                        <span className="text-xs text-gray-700 mt-1">Claude</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Main Interface - Right Side */}
-                <div 
-                    className="rounded-3xl overflow-visible flex-1"
-                style={{ 
-                    minHeight: '800px',
-                    minWidth: '1000px', // Ensure minimum width for content
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(25px)',
-                  boxShadow: `
-                      0 20px 60px rgba(0, 0, 0, 0.08),
-                      0 8px 32px rgba(0, 0, 0, 0.06),
-                      inset 0 1px 0 rgba(255, 255, 255, 0.8)
-                    `
-                }}
-              >
-                <div className="p-2">
-                    {/* Full Width Section - Loading Page (100%) */}
-                    <div className="w-full">
-                      <LoadingPage
-                        storeUrl={storeUrl}
-                        setStoreUrl={setStoreUrl}
-                        scanProgress={scanProgress}
-                        handleStoreSubmit={handleStoreSubmit}
-                        onStartScan={handleLoadingPageScanReady}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            ))}
 
             {/* Store Health Check Expandable Interface (Original ONLY) - Only when NOT in section */}
             {expandedCards.includes('store-health') && !getProjectSection('store-health') && (
@@ -1918,8 +1578,8 @@ export default function CanvasLanding() {
                   selectedProjects.includes('store-health') ? 'border-2 border-dashed border-gray-600' : ''
                 }`}
                               style={{ 
-                  width: '1400px',
-                  minWidth: '1400px',
+                  width: '1440px',
+                  minWidth: '1440px',
                   flexShrink: 0,
                   marginBottom: '50px'
                 }}
@@ -1942,11 +1602,14 @@ export default function CanvasLanding() {
 
               {/* Notification Banner */}
               <div
-                className="mb-8 p-4 rounded-2xl border flex items-center gap-4 w-full"
+                className="mb-8 p-4 rounded-2xl border flex items-center gap-4"
                 style={{
                   background: 'rgba(255, 255, 255, 0.8)',
                   borderColor: '#E5E7EB',
-                  backdropFilter: 'blur(10px)'
+                  backdropFilter: 'blur(10px)',
+                  width: '1440px',
+                  maxWidth: '1440px',
+                  minWidth: '1440px'
                 }}
               >
                 <div className="flex items-center gap-3">
@@ -2129,7 +1792,7 @@ export default function CanvasLanding() {
                 <div className="flex-1">
                   {/* Two Section Layout - Fully Transparent Glassmorphism */}
                   <div 
-                    className="rounded-3xl shadow-2xl border border-white/40 backdrop-blur-xl overflow-visible"
+                    className="rounded-3xl shadow-2xl border border-white/40 backdrop-blur-xl overflow-hidden"
                 style={{ 
                   background: 'rgba(255, 255, 255, 0.1)',
                   backdropFilter: 'blur(25px)',
@@ -2141,7 +1804,7 @@ export default function CanvasLanding() {
                   minHeight: 'auto'
                 }}
               >
-                <div className="p-2">
+                <div className="p-4">
                   {/* Full Width Section - Loading Page (100%) */}
                   <div className="w-full">
                     <LoadingPage
@@ -2167,7 +1830,6 @@ export default function CanvasLanding() {
               task.id !== 'store-health' && 
               task.id !== 'seo-optimizer' && 
               !task.id.includes('seo') &&
-              !task.id.startsWith('ai-') &&
               !getProjectSection(task.id)
             ).map(task => {
               const iconMap: Record<string, React.ComponentType<{ size?: string | number }>> = {
@@ -2185,8 +1847,8 @@ export default function CanvasLanding() {
                   selectedProjects.includes(task.id) ? 'border-2 border-dashed border-gray-600' : ''
                 }`}
                 style={{ 
-                  width: '1400px',
-                  minWidth: '1400px',
+                  width: '1440px',
+                  minWidth: '1440px',
                   flexShrink: 0
                 }}
                 onClick={() => handleProjectSelection(task.id)}
@@ -2208,11 +1870,14 @@ export default function CanvasLanding() {
                 
                 {/* Notification Banner */}
                 <div
-                  className="mb-8 p-4 rounded-2xl border flex items-center gap-4 w-full"
+                  className="mb-8 p-4 rounded-2xl border flex items-center gap-4"
                   style={{
                     background: 'rgba(255, 255, 255, 0.8)',
                     borderColor: '#E5E7EB',
-                    backdropFilter: 'blur(10px)'
+                    backdropFilter: 'blur(10px)',
+                    width: '1440px',
+                    maxWidth: '1440px',
+                    minWidth: '1440px'
                   }}
                 >
                   <div className="flex items-center gap-3">
@@ -2350,8 +2015,8 @@ export default function CanvasLanding() {
                   selectedProjects.includes('seo-optimizer') ? 'border-2 border-dashed border-gray-600' : ''
                 }`}
                 style={{ 
-                  width: '1400px',
-                  minWidth: '1400px',
+                  width: '1440px',
+                  minWidth: '1440px',
                   flexShrink: 0
                 }}
                 onClick={() => handleProjectSelection('seo-optimizer')}
@@ -2372,11 +2037,14 @@ export default function CanvasLanding() {
               
               {/* Notification Banner */}
               <div
-                className="mb-8 p-4 rounded-2xl border flex items-center gap-4 w-full"
+                className="mb-8 p-4 rounded-2xl border flex items-center gap-4"
                 style={{
                   background: 'rgba(255, 255, 255, 0.8)',
                   borderColor: '#E5E7EB',
-                  backdropFilter: 'blur(10px)'
+                  backdropFilter: 'blur(10px)',
+                  width: '1440px',
+                  maxWidth: '1440px',
+                  minWidth: '1440px'
                 }}
               >
                 <div className="flex items-center gap-3">
@@ -2610,20 +2278,20 @@ export default function CanvasLanding() {
             <div className={`flex items-center gap-4 px-4 py-2 transition-all duration-300 ${
               aiSearchQuery.length > 20 ? 'min-w-[600px]' : aiSearchQuery.length > 0 ? 'min-w-[500px]' : 'min-w-96'
             }`}>
-              <RiSearchLine size={20} style={{ color: isProcessingAiCommand ? '#3B82F6' : DARK_PALETTE.tertiary }} />
+              <RiSearchLine size={20} style={{ color: DARK_PALETTE.tertiary }} />
               <input
                 type="text"
                 value={aiSearchQuery}
                 onChange={(e) => setAiSearchQuery(e.target.value)}
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter' && aiSearchQuery.trim() && !isProcessingAiCommand) {
-                    processAiCommand(aiSearchQuery.trim())
+                  if (e.key === 'Enter' && aiSearchQuery.trim()) {
+                    // Do nothing - just visual placeholder
+                    console.log('AI Search query:', aiSearchQuery.trim())
                   }
                 }}
-                placeholder={isProcessingAiCommand ? "Processing your request..." : "Ask AI anything... (e.g., 'check store health on https://mystore.com')"}
+                placeholder="Ask AI anything... (currently disabled)"
                 className="flex-1 outline-none text-gray-700 placeholder-gray-400 bg-transparent"
                 autoFocus
-                disabled={isProcessingAiCommand}
               />
               <div className="flex items-center gap-2">
                 <button className="p-1 hover:bg-gray-100 rounded-full transition-colors">
@@ -2634,21 +2302,18 @@ export default function CanvasLanding() {
                 </button>
                 <button 
                   onClick={() => {
-                    if (aiSearchQuery.trim() && !isProcessingAiCommand) {
-                      processAiCommand(aiSearchQuery.trim())
+                    if (aiSearchQuery.trim()) {
+                      // Do nothing - just visual placeholder
+                      console.log('AI Search query:', aiSearchQuery.trim())
                     }
                   }}
-                  disabled={!aiSearchQuery.trim() || isProcessingAiCommand}
+                  disabled={!aiSearchQuery.trim()}
                   className={`p-2 rounded-full text-white transition-colors hover:opacity-90 ${
-                    (!aiSearchQuery.trim() || isProcessingAiCommand) ? 'opacity-50 cursor-not-allowed' : ''
+                    !aiSearchQuery.trim() ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                   style={{ backgroundColor: DARK_PALETTE.primary }}
                 >
-                  {isProcessingAiCommand ? (
-                    <RiLoader4Line size={16} className="animate-spin" />
-                  ) : (
                   <RiArrowUpSLine size={16} />
-                  )}
                 </button>
                 <button 
                   className="p-2 rounded-full text-gray-600 hover:text-gray-800 transition-colors"
