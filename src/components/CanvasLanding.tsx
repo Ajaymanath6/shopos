@@ -20,12 +20,14 @@ import {
   RiPauseCircleFill,
   RiBrainLine,
   RiEditLine,
-  RiAlertLine
+  RiAlertLine,
+  RiImageLine,
+  RiBarChartLine,
+  RiToolsLine
 } from '@remixicon/react'
 import shopOSLogo from '../assets/shop-os-logo.svg'
 import LoadingPage from '../pages/LoadingPage'
 import { ShiningText } from '../components/ui/shining-text'
-import { ModernNotification } from '../components/ui/modern-notification'
 
 // Global window interface extension
 declare global {
@@ -899,7 +901,24 @@ export default function CanvasLanding() {
   }
 
   // Notification System State
-  const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const [notifications, setNotifications] = useState<NotificationItem[]>([
+    {
+      id: 'sample-1',
+      type: 'deployment_complete',
+      title: 'Image Optimization Complete',
+      message: '23 product images successfully optimized and deployed to your live store',
+      actionRequired: false,
+      timestamp: Date.now() - 300000 // 5 minutes ago
+    },
+    {
+      id: 'sample-2',
+      type: 'info',
+      title: 'Performance Scan Ready',
+      message: 'Your store health report is ready with 14 optimization recommendations',
+      actionRequired: false,
+      timestamp: Date.now() - 600000 // 10 minutes ago
+    }
+  ])
   const [showActionCenter, setShowActionCenter] = useState(false)
 
   // Notification System Functions
@@ -918,6 +937,10 @@ export default function CanvasLanding() {
 
   const removeNotification = useCallback((id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id))
+  }, [])
+
+  const markAllAsRead = useCallback(() => {
+    setNotifications([])
   }, [])
 
   // Deployment Flow Function - triggers AI conversation deployment
@@ -1246,8 +1269,8 @@ export default function CanvasLanding() {
                   }}
                 >
                   <div className="flex flex-col h-full relative z-10">
-                    {/* Icon at top */}
-                    <div className="flex justify-center mb-6">
+                    {/* Icon at top - left aligned */}
+                    <div className="flex justify-start mb-6">
                       <div 
                         className="w-16 h-16 rounded-2xl flex items-center justify-center"
                         style={{ 
@@ -1259,14 +1282,14 @@ export default function CanvasLanding() {
                     </div>
 
                     {/* Title below icon */}
-                    <div className="text-center mb-4">
+                    <div className="text-left mb-4">
                       <h3 className="text-xl font-bold text-gray-900 leading-tight">
                           {task.title}
                         </h3>
                     </div>
                     
                     {/* Subtitle below title */}
-                    <div className="text-center mb-8 flex-1">
+                    <div className="text-left mb-8 flex-1">
                       <p className="text-gray-700 text-sm leading-relaxed font-medium">
                       {task.subtitle}
                     </p>
@@ -1330,9 +1353,9 @@ export default function CanvasLanding() {
                 `
               }}
             >
-              <div className="flex flex-col h-full relative z-10 items-center justify-center text-center">
-                {/* Plus Icon */}
-                <div className="flex justify-center mb-6">
+              <div className="flex flex-col h-full relative z-10">
+                {/* Plus Icon - left aligned */}
+                <div className="flex justify-start mb-6">
                   <div 
                     className="w-16 h-16 rounded-2xl flex items-center justify-center border-2 border-dashed border-gray-300 group-hover:border-gray-400 transition-colors"
                     style={{ 
@@ -1348,21 +1371,21 @@ export default function CanvasLanding() {
 
                 {/* Title */}
                 <div className="mb-4">
-                  <h3 className="text-xl font-bold text-gray-700 leading-tight group-hover:text-gray-900 transition-colors">
-                    Add Task
+                  <h3 className="text-xl font-bold text-gray-700 leading-tight group-hover:text-gray-900 transition-colors text-left">
+                    Create a new task
                   </h3>
                 </div>
                 
                 {/* Subtitle */}
                 <div className="mb-8 flex-1">
-                  <p className="text-gray-500 text-sm leading-relaxed font-medium group-hover:text-gray-600 transition-colors">
+                  <p className="text-gray-500 text-sm leading-relaxed font-medium group-hover:text-gray-600 transition-colors text-left">
                     Create a new custom AI task or choose from templates
                   </p>
                 </div>
                 
                 {/* Action section */}
                 <div className="pt-4 border-t border-dashed border-gray-200">
-                  <div className="flex items-center justify-center">
+                  <div className="flex items-center justify-start">
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
@@ -2160,7 +2183,7 @@ export default function CanvasLanding() {
                       </div>
 
                       {/* SEO Recommendations */}
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <h3 className="text-lg font-semibold text-gray-900">Top Recommendations</h3>
                         <div className="space-y-2">
                           {[
@@ -2573,7 +2596,7 @@ export default function CanvasLanding() {
           >
             {/* Header */}
             <div className="p-6 border-b border-white/30">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">Action Center</h2>
                   <p className="text-sm text-gray-600">Tasks and notifications</p>
@@ -2585,6 +2608,17 @@ export default function CanvasLanding() {
                   <RiCloseLine size={20} />
                 </button>
               </div>
+              {notifications.length > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500">{notifications.length} notification{notifications.length > 1 ? 's' : ''}</span>
+                  <button
+                    onClick={markAllAsRead}
+                    className="text-sm text-gray-700 hover:text-gray-900 font-medium transition-colors"
+                  >
+                    Mark all as read
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Content */}
@@ -2599,39 +2633,50 @@ export default function CanvasLanding() {
                   <p className="text-gray-600">No notifications or actions required at the moment.</p>
                 </div>
               ) : (
-                <div className="p-6 space-y-6">
+                <div className="p-4 space-y-4">
                   {/* Section A: Action Required */}
                   {notifications.filter(n => n.actionRequired).length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <div className="mb-4">
+                      <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
                         <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                         Action Required
                       </h3>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {notifications.filter(n => n.actionRequired).map((notification) => (
-                          <div
-                            key={notification.id}
-                            className="p-4 bg-red-50 border border-red-200 rounded-xl"
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
-                                <RiAlertLine size={16} className="text-red-600" />
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="font-semibold text-gray-900 mb-1">{notification.title}</h4>
-                                <p className="text-sm text-gray-600 mb-3">{notification.message}</p>
-                                <button className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
-                                  Review & Approve
+                                                      <div
+                              key={notification.id}
+                              className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                                  <RiAlertLine size={12} className="text-red-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-start gap-2 mb-1">
+                                    <div className="w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0 mt-1.5"></div>
+                                    <h4 className="text-sm font-bold text-gray-900 leading-tight">{notification.title}</h4>
+                                  </div>
+                                  <p className="text-xs text-gray-600 mb-2 leading-relaxed">
+                                    {notification.message.replace(/(\b(?:failed|error|critical|urgent)\b)/gi, '<span class="font-bold text-red-600">$1</span>')
+                                      .split(/<span class="font-bold text-red-600">([^<]*)<\/span>/)
+                                      .map((part, index) => 
+                                        index % 2 === 1 ? (
+                                          <span key={index} className="font-bold text-red-600">{part}</span>
+                                        ) : part
+                                      )}
+                                  </p>
+                                  <button className="px-3 py-1.5 bg-gray-800 hover:bg-gray-900 text-white text-xs font-medium rounded-md transition-colors">
+                                    Review & Approve
+                                  </button>
+                                </div>
+                                <button
+                                  onClick={() => notification.id && removeNotification(notification.id)}
+                                  className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600 flex-shrink-0"
+                                >
+                                  <RiCloseLine size={12} />
                                 </button>
                               </div>
-                              <button
-                                onClick={() => notification.id && removeNotification(notification.id)}
-                                className="p-1 hover:bg-red-100 rounded-full transition-colors text-red-400 hover:text-red-600"
-                              >
-                                <RiCloseLine size={16} />
-                              </button>
                             </div>
-                          </div>
                         ))}
                       </div>
                     </div>
@@ -2640,26 +2685,77 @@ export default function CanvasLanding() {
                   {/* Section B: For Your Information */}
                   {notifications.filter(n => !n.actionRequired).length > 0 && (
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-4">Recent Activity</h3>
-                      <div className="space-y-3">
-                        {notifications.filter(n => !n.actionRequired).map((notification) => (
-                          <ModernNotification
-                            key={notification.id}
-                            title={notification.title}
-                            message={notification.message}
-                            timestamp={new Date(notification.timestamp).toLocaleTimeString([], { 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
-                            })}
-                            type={notification.type === 'deployment_complete' ? 'success' : 'info'}
-                            onDismiss={() => notification.id && removeNotification(notification.id)}
-                            onAction={() => {
-                              // Handle "Go to Task" action
-                              console.log('Navigate to task:', notification.title)
-                            }}
-                            actionLabel="Go to Task"
-                          />
-                        ))}
+                      <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                        Recent Activity
+                      </h3>
+                      <div className="space-y-2">
+                        {notifications.filter(n => !n.actionRequired).map((notification) => {
+                          const isSuccess = notification.type === 'deployment_complete'
+                          const iconBg = isSuccess ? 'bg-green-100' : 'bg-blue-100'
+                          const iconColor = isSuccess ? 'text-green-600' : 'text-blue-600'
+                          const dotColor = isSuccess ? 'bg-green-500' : 'bg-blue-500'
+                          
+                          // Choose appropriate icon based on notification type/title
+                          let IconComponent = RiCheckLine
+                          if (notification.title.toLowerCase().includes('image')) {
+                            IconComponent = RiImageLine
+                          } else if (notification.title.toLowerCase().includes('performance') || notification.title.toLowerCase().includes('scan')) {
+                            IconComponent = RiBarChartLine
+                          } else if (notification.title.toLowerCase().includes('optimization')) {
+                            IconComponent = RiToolsLine
+                          }
+                          
+                          return (
+                            <div
+                              key={notification.id}
+                              className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className={`w-6 h-6 rounded-full ${iconBg} flex items-center justify-center flex-shrink-0`}>
+                                  <IconComponent size={12} className={iconColor} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-start gap-2 mb-1">
+                                    <div className={`w-1.5 h-1.5 ${dotColor} rounded-full flex-shrink-0 mt-1.5`}></div>
+                                    <h4 className="text-sm font-bold text-gray-900 leading-tight">{notification.title}</h4>
+                                  </div>
+                                  <p className="text-xs text-gray-600 mb-2 leading-relaxed">
+                                    {notification.message.replace(/(\b(?:completed|success|deployed|optimized|finished|ready)\b)/gi, (match) => 
+                                      `<span class="font-bold text-green-600">${match}</span>`
+                                    ).replace(/(\b(?:failed|error|warning|issue)\b)/gi, (match) => 
+                                      `<span class="font-bold text-red-600">${match}</span>`
+                                    ).split(/(<span class="font-bold text-(?:green|red)-600">[^<]*<\/span>)/)
+                                      .map((part, index) => {
+                                        if (part.includes('font-bold text-green-600')) {
+                                          const text = part.replace(/<[^>]*>/g, '')
+                                          return <span key={index} className="font-bold text-green-600">{text}</span>
+                                        } else if (part.includes('font-bold text-red-600')) {
+                                          const text = part.replace(/<[^>]*>/g, '')
+                                          return <span key={index} className="font-bold text-red-600">{text}</span>
+                                        }
+                                        return part
+                                      })}
+                                  </p>
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-xs text-gray-500">
+                                      {new Date(notification.timestamp).toLocaleTimeString([], { 
+                                        hour: '2-digit', 
+                                        minute: '2-digit' 
+                                      })}
+                                    </span>
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => notification.id && removeNotification(notification.id)}
+                                  className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600 flex-shrink-0"
+                                >
+                                  <RiCloseLine size={12} />
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        })}
                       </div>
                     </div>
                   )}
