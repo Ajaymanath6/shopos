@@ -6,6 +6,11 @@ import { RiStarFill, RiSpeedUpLine, RiShieldCheckLine, RiSearchLine, RiArrowRigh
 export default function StoreHealthReport() {
   const [activeTab, setActiveTab] = useState<'before' | 'after'>('before')
 
+  const handleTabClick = (tab: 'before' | 'after') => {
+    console.log('Tab clicked:', tab, 'Current tab:', activeTab)
+    setActiveTab(tab)
+  }
+
   return (
     <div className="w-full h-full overflow-y-auto px-8 py-6">
       {/* Header Section - Minimal */}
@@ -26,8 +31,9 @@ export default function StoreHealthReport() {
         <div className="flex justify-center mb-8">
           <div className="bg-gray-50 rounded-full p-1 inline-flex">
             <button
-              onClick={() => setActiveTab('before')}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+              type="button"
+              onClick={() => handleTabClick('before')}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
                 activeTab === 'before' 
                   ? 'bg-white text-gray-900 shadow-sm' 
                   : 'text-gray-500 hover:text-gray-700'
@@ -36,8 +42,9 @@ export default function StoreHealthReport() {
               Before Enhancement
             </button>
             <button
-              onClick={() => setActiveTab('after')}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+              type="button"
+              onClick={() => handleTabClick('after')}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
                 activeTab === 'after' 
                   ? 'bg-white text-gray-900 shadow-sm' 
                   : 'text-gray-500 hover:text-gray-700'
@@ -47,22 +54,54 @@ export default function StoreHealthReport() {
             </button>
           </div>
         </div>
+        
+        {/* Debug indicator */}
+        <div className="text-center mb-4">
+          <span className="text-xs text-gray-400">
+            Current view: {activeTab === 'before' ? 'Before Enhancement (Low Quality)' : 'After Enhancement (Optimized)'}
+          </span>
+        </div>
 
         {/* Image Comparison */}
         <div className="grid grid-cols-3 gap-8 mb-12">
-          {[1, 2, 3].map((index) => (
+          {[
+            {
+              before: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=200&fit=crop&q=20',
+              after: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=200&fit=crop&q=90',
+              fallbackBefore: 'https://via.placeholder.com/300x200/E5E7EB/9CA3AF?text=Low+Quality+Headphones',
+              fallbackAfter: 'https://via.placeholder.com/300x200/10B981/FFFFFF?text=HD+Headphones',
+              name: 'Headphones'
+            },
+            {
+              before: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=200&fit=crop&q=20',
+              after: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=200&fit=crop&q=90',
+              fallbackBefore: 'https://via.placeholder.com/300x200/E5E7EB/9CA3AF?text=Low+Quality+Watch',
+              fallbackAfter: 'https://via.placeholder.com/300x200/10B981/FFFFFF?text=HD+Watch',
+              name: 'Smart Watch'
+            },
+            {
+              before: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=200&fit=crop&q=20',
+              after: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=200&fit=crop&q=90',
+              fallbackBefore: 'https://via.placeholder.com/300x200/E5E7EB/9CA3AF?text=Low+Quality+Sneakers',
+              fallbackAfter: 'https://via.placeholder.com/300x200/10B981/FFFFFF?text=HD+Sneakers',
+              name: 'Sneakers'
+            }
+          ].map((product, index) => (
             <div key={index} className="text-center">
               <div className="relative mb-4">
                 <img
-                  src={activeTab === 'before' 
-                    ? `https://picsum.photos/300/200?random=${index}&blur=2&quality=30`
-                    : `https://picsum.photos/300/200?random=${index}`
-                  }
-                  alt={`Product ${index} - ${activeTab}`}
-                  className="w-full h-48 object-cover rounded-lg shadow-sm"
+                  src={activeTab === 'before' ? product.before : product.after}
+                  alt={`${product.name} - ${activeTab}`}
+                  className="w-full h-48 object-cover rounded-lg shadow-sm transition-all duration-500"
+                  loading="eager"
+                  onError={(e) => {
+                    // Fallback to placeholder if Unsplash fails
+                    const target = e.currentTarget as HTMLImageElement;
+                    target.src = activeTab === 'before' ? product.fallbackBefore : product.fallbackAfter;
+                  }}
                 />
                 <div className="absolute top-2 right-2">
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full transition-all duration-300 ${
                     activeTab === 'before' 
                       ? 'bg-red-100 text-red-700' 
                       : 'bg-green-100 text-green-700'
@@ -72,7 +111,7 @@ export default function StoreHealthReport() {
                 </div>
               </div>
               <p className="text-sm text-gray-600 font-light">
-                Product Image {index}
+                {product.name}
               </p>
             </div>
           ))}
