@@ -720,8 +720,9 @@ export default function CanvasLanding() {
 
 
   const TEMPLATES: Array<{ id: string; title: string; subtitle: string; icon: TaskCard['icon']; iconBg: string }> = [
-    { id: 'abandoned-cart', title: 'Abandoned Cart Recovery', subtitle: 'Automated outreach and incentives', icon: RiNotification3Line, iconBg: DARK_PALETTE.tertiary },
-    { id: 'inventory-mentor', title: 'Inventory Mentor', subtitle: 'Forecasts and restock alerts', icon: RiUser3Line, iconBg: DARK_PALETTE.tertiary }
+    { id: 'store-health-template', title: 'Store Health Check', subtitle: 'Connect your Shopify store for an instant AI diagnostic and optimization recommendations', icon: RiPulseLine, iconBg: '#F3F4F6' },
+    { id: 'abandoned-cart', title: 'Abandoned Cart Recovery', subtitle: 'Automated outreach and incentives', icon: RiNotification3Line, iconBg: '#F3F4F6' },
+    { id: 'inventory-mentor', title: 'Inventory Mentor', subtitle: 'Forecasts and restock alerts', icon: RiUser3Line, iconBg: '#F3F4F6' }
   ]
 
   const addTemplateTask = (templateId: string) => {
@@ -1412,6 +1413,11 @@ export default function CanvasLanding() {
                           </div>
 
 
+                          {/* Notification Banner - Outside glassmorphism */}
+                          <div className="w-full mb-4">
+                            <NotificationBanner activeAgent={activeAgent} />
+                          </div>
+                          
                           {/* Two Section Layout */}
                           <div 
                             className="rounded-lg shadow-2xl border border-white/40 backdrop-blur-xl overflow-hidden"
@@ -1427,11 +1433,6 @@ export default function CanvasLanding() {
                             }}
                           >
                             <div className="p-6">
-                              {/* Notification Banner */}
-                              <div className="w-full mb-4">
-                                <NotificationBanner activeAgent={activeAgent} />
-                              </div>
-                              
                               {/* Full Width Section - Loading Page (100%) */}
                               <div className="w-full">
                                 <LoadingPage
@@ -1617,6 +1618,11 @@ export default function CanvasLanding() {
 
                 {/* Main Interface - Right Side */}
                 <div className="flex-1">
+                  {/* Notification Banner - Outside glassmorphism */}
+                  <div className="w-full mb-4">
+                    <NotificationBanner activeAgent={activeAgent} />
+                  </div>
+                  
                   {/* Two Section Layout - Fully Transparent Glassmorphism */}
                   <div 
                     className="rounded-lg shadow-2xl border border-white/40 backdrop-blur-xl overflow-hidden"
@@ -1632,11 +1638,6 @@ export default function CanvasLanding() {
                 }}
               >
                 <div className="p-4">
-                  {/* Notification Banner */}
-                  <div className="w-full mb-4">
-                    <NotificationBanner activeAgent={activeAgent} />
-                  </div>
-                  
                   {/* Full Width Section - Loading Page (100%) */}
                   <div className="w-full">
                     <LoadingPage
@@ -2116,8 +2117,8 @@ export default function CanvasLanding() {
                     {/* Icon and Title Row */}
                     <div className="flex items-center gap-4 mb-4">
                       <div 
-                        className="w-12 h-12 rounded-lg flex items-center justify-center text-white shadow-sm"
-                        style={{ backgroundColor: t.iconBg }}
+                        className="w-12 h-12 rounded-lg flex items-center justify-center shadow-sm"
+                        style={{ backgroundColor: t.iconBg, color: '#374151' }}
                       >
                         <TemplateIcon size={24} />
                       </div>
@@ -2137,7 +2138,22 @@ export default function CanvasLanding() {
                     <div className="space-y-1">
                       <div className="text-xs font-medium text-gray-800 mb-2">Key Features:</div>
                       <div className="space-y-1">
-                        {t.id === 'abandoned-cart' ? (
+                        {t.id === 'store-health-template' ? (
+                          <>
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                              <span>Complete store analysis</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                              <span>Performance optimization</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                              <span>Revenue improvement tips</span>
+                            </div>
+                          </>
+                        ) : t.id === 'abandoned-cart' ? (
                           <>
                             <div className="flex items-center gap-2 text-xs text-gray-600">
                               <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
