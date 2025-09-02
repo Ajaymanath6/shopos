@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { RiDownloadLine, RiStoreLine, RiCalendarLine, RiArrowRightSLine } from '@remixicon/react'
 
 interface LogEntry {
   timestamp: string
@@ -106,86 +107,102 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
             </div>
           </div>
         ) : (
-          /* Success Message Card */
+          /* Success Message with Next Steps Card */
           <div className="bg-white rounded-lg p-8 border border-gray-200 shadow-sm">
-            <div className="text-center">
+            <div className="text-center mb-8">
               <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
                 <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">Deployment Successful!</h2>
-              <p className="text-lg text-gray-600 mb-6">Your store improvements have been applied successfully</p>
-              
-              <div className="bg-green-50 rounded-lg p-4 mb-6">
-                <div className="flex items-center justify-center gap-2 text-green-700">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="font-medium">All changes deployed to your live store</span>
-                </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-3">Congratulations</h2>
+              <p className="text-lg text-gray-600 mb-6">You just deployed all your changes to https://yourstore.myshopify.com</p>
+            </div>
+
+            {/* Actions Section */}
+            <div className="pt-6">
+              <div className="space-y-3">
+                <button
+                  className="w-full flex items-center justify-between py-4 px-4 hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-medium rounded-lg transition-colors duration-200"
+                  onClick={() => {
+                    // Handle download report
+                    console.log('Download Report clicked')
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                      <RiDownloadLine size={20} className="text-gray-600" />
+                    </div>
+                    <span>Download Report</span>
+                  </div>
+                  <RiArrowRightSLine size={20} className="text-gray-400" />
+                </button>
+
+                <button
+                  className="w-full flex items-center justify-between py-4 px-4 hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-medium rounded-lg transition-colors duration-200"
+                  onClick={() => {
+                    if (onFixAnother) {
+                      onFixAnother()
+                    }
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                      <RiStoreLine size={20} className="text-gray-600" />
+                    </div>
+                    <span>Scan Another Store</span>
+                  </div>
+                  <RiArrowRightSLine size={20} className="text-gray-400" />
+                </button>
+
+                <button
+                  className="w-full flex items-center justify-between py-4 px-4 hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-medium rounded-lg transition-colors duration-200"
+                  onClick={() => {
+                    // Handle schedule follow-up call
+                    console.log('Schedule Call clicked')
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                      <RiCalendarLine size={20} className="text-gray-600" />
+                    </div>
+                    <span>Schedule Call</span>
+                  </div>
+                  <RiArrowRightSLine size={20} className="text-gray-400" />
+                </button>
+              </div>
+
+              <div className="mt-6">
+                <button
+                  className="py-2 px-4 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition-colors duration-200"
+                  onClick={() => {
+                    if (onFixAnother) {
+                      onFixAnother()
+                    }
+                  }}
+                >
+                  Back to Report
+                </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Next Steps Card */}
-        <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm mt-6">
-          <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Next Steps</h3>
-            <p className="text-sm text-gray-600 mb-6">Quick actions</p>
-            
-            <div className="space-y-3">
-              <button
-                className="w-full py-3 px-4 bg-white border border-gray-200 hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-medium rounded-lg transition-colors duration-200 text-left"
-                onClick={() => {
-                  // Handle download report
-                  console.log('Download Report clicked')
-                }}
-              >
-                Download Report
-              </button>
-
-              <button
-                className="w-full py-3 px-4 bg-white border border-gray-200 hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-medium rounded-lg transition-colors duration-200 text-left"
-                onClick={() => {
-                  if (onFixAnother) {
-                    onFixAnother()
-                  }
-                }}
-              >
-                Scan Another Store
-              </button>
-
-              <button
-                className="w-full py-3 px-4 bg-white border border-gray-200 hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-medium rounded-lg transition-colors duration-200 text-left"
-                onClick={() => {
-                  // Handle schedule follow-up call
-                  console.log('Schedule Call clicked')
-                }}
-              >
-                Schedule Call
-              </button>
-            </div>
-
-            <div className="mt-6 flex justify-between items-center">
-              <button
-                className="py-2 px-4 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition-colors duration-200"
-                onClick={() => {
-                  if (onFixAnother) {
-                    onFixAnother()
-                  }
-                }}
-              >
-                Back to Report
-              </button>
-              
-              <p className="text-sm text-gray-700 font-medium">
-                {isDeploymentComplete ? 'Deployment complete • Ready for next steps' : 'Choose your next action'}
-              </p>
-            </div>
+        {/* Continue to Store Health CTA */}
+        {isDeploymentComplete && (
+          <div className="mt-6 text-center">
+            <button
+              className="px-8 py-3 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-lg transition-colors duration-200"
+              onClick={() => {
+                if (onFixAnother) {
+                  onFixAnother()
+                }
+              }}
+            >
+              Continue to Store Health
+            </button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )

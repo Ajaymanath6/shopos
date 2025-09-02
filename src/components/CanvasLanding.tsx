@@ -319,7 +319,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         if (onAddNotification) {
           onAddNotification({
             type: 'deployment_complete',
-            title: 'Agent complete image optimisation',
+            title: 'Agent completed image optimization',
             message: '23 product images successfully optimized and deployed',
             actionRequired: false,
             timestamp: Date.now(),

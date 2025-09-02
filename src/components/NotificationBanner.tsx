@@ -25,7 +25,7 @@ interface NotificationBannerProps {
 export default function NotificationBanner({ activeAgent, className = '' }: NotificationBannerProps) {
   return (
     <div
-      className={`mb-8 p-4 rounded-lg border flex items-center gap-4 w-full ${className}`}
+      className={`mb-8 p-4 rounded-2xl border flex items-center gap-4 w-full ${className}`}
       style={{
         background: 'rgba(255, 255, 255, 0.8)',
         borderColor: '#E5E7EB',

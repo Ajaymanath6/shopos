@@ -628,7 +628,7 @@ export default function LoadingPage({
           <div className="text-center">
             <div
                   className="w-16 h-16 mx-auto mb-4 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: '#F3F4F6', color: DARK_PALETTE.secondary }}
+              style={{ backgroundColor: 'white', color: DARK_PALETTE.secondary }}
             >
               <RiSearchLine size={32} />
             </div>
@@ -642,7 +642,7 @@ export default function LoadingPage({
           <div className="text-center">
             <div
                   className="w-16 h-16 mx-auto mb-4 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: '#F3F4F6', color: DARK_PALETTE.secondary }}
+              style={{ backgroundColor: 'white', color: DARK_PALETTE.secondary }}
             >
               <RiSettings3Line size={32} />
             </div>
@@ -656,7 +656,7 @@ export default function LoadingPage({
           <div className="text-center">
             <div
                   className="w-16 h-16 mx-auto mb-4 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: '#F3F4F6', color: DARK_PALETTE.secondary }}
+              style={{ backgroundColor: 'white', color: DARK_PALETTE.secondary }}
             >
               <RiRocketLine size={32} />
             </div>
