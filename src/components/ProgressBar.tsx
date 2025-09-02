@@ -18,17 +18,20 @@ export default function ProgressBar({
       {(label || showPercentage) && (
         <div className="flex justify-between items-center">
           {label && (
-            <span className="text-sm font-medium text-polaris-text">{label}</span>
+            <span className="text-sm font-medium text-gray-900">{label}</span>
           )}
           {showPercentage && (
-            <span className="text-sm text-polaris-text-subdued">{Math.round(clampedProgress)}%</span>
+            <span className="text-sm text-gray-600">{Math.round(clampedProgress)}%</span>
           )}
         </div>
       )}
-      <div className="w-full bg-polaris-surface-subdued rounded-full h-2 border border-polaris-border">
+      <div className="w-full bg-gray-200 rounded-full h-2">
         <div 
-          className="bg-polaris-interactive h-full rounded-full transition-all duration-300 ease-out"
-          style={{ width: `${clampedProgress}%` }}
+          className="h-full rounded-full transition-all duration-300 ease-out"
+          style={{ 
+            width: `${clampedProgress}%`,
+            backgroundColor: '#1F2937' // Dark grey
+          }}
         />
       </div>
     </div>

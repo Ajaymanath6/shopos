@@ -28,6 +28,7 @@ import {
 import shopOSLogo from '../assets/shop-os-logo.svg'
 import LoadingPage from '../pages/LoadingPage'
 import { ShiningText } from '../components/ui/shining-text'
+import NotificationBanner from './NotificationBanner'
 
 // Global window interface extension
 declare global {
@@ -700,9 +701,6 @@ const DEFAULT_TASKS: TaskCard[] = [
 export default function CanvasLanding() {
   const [taskCards, setTaskCards] = useState<TaskCard[]>(DEFAULT_TASKS)
   const [showAddTask, setShowAddTask] = useState(false)
-  const [newTaskName, setNewTaskName] = useState('')
-  const [newTaskDesc, setNewTaskDesc] = useState('')
-  const [showTemplates, setShowTemplates] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null)
   const [showEditTask, setShowEditTask] = useState(false)
@@ -726,30 +724,6 @@ export default function CanvasLanding() {
     { id: 'inventory-mentor', title: 'Inventory Mentor', subtitle: 'Forecasts and restock alerts', icon: RiUser3Line, iconBg: DARK_PALETTE.tertiary }
   ]
 
-  const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-
-  const addCustomTask = (title: string, subtitle: string) => {
-    if (!title.trim()) return
-    let idBase = slugify(title)
-    if (!idBase) idBase = `task-${Date.now()}`
-    let id = idBase
-    let tries = 1
-    while (taskCards.find(t => t.id === id)) {
-      id = `${idBase}-${tries++}`
-    }
-    const newTask: TaskCard = {
-      id,
-      title,
-      subtitle,
-      icon: RiStarFill,
-      iconBg: DARK_PALETTE.tertiary
-    }
-    setTaskCards(prev => [...prev, newTask])
-    setShowAddTask(false)
-    setNewTaskName('')
-    setNewTaskDesc('')
-  }
-
   const addTemplateTask = (templateId: string) => {
     const tpl = TEMPLATES.find(t => t.id === templateId)
     if (!tpl) return
@@ -758,7 +732,6 @@ export default function CanvasLanding() {
     while (taskCards.find(t => t.id === id)) id = `${templateId}-${tries++}`
     setTaskCards(prev => [...prev, { id, title: tpl.title, subtitle: tpl.subtitle, icon: tpl.icon, iconBg: tpl.iconBg }])
     setShowAddTask(false)
-    setShowTemplates(false)
   }
 
   // Handle delete confirmation
@@ -847,13 +820,14 @@ export default function CanvasLanding() {
     subheading?: string
     useLogo?: boolean
   }>({
-    name: 'AI Agent: Claude',
+    name: 'Claude',
     icon: RiStarFill,
     status: 'ready',
     statusText: 'Ready to analyze your store',
     subheading: 'Store Health Analysis Agent',
     useLogo: true
   })
+
   
   // Auto functions for AI to control interface
   const handleAutoEnterUrl = (url: string) => {
@@ -1039,15 +1013,12 @@ export default function CanvasLanding() {
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
         setScanProgress(0)
-        // Update to Claude Agent for Store Health
         setActiveAgent(prev => ({
           ...prev,
-          name: 'AI Agent: Claude',
-          icon: RiStarFill,
-          status: 'ready',
+          name: 'Claude',
           statusText: 'Ready to analyze your store',
           subheading: 'Store Health Analysis Agent',
-          useLogo: true
+          status: 'ready'
         }))
         setStoreUrl('')
       }
@@ -1055,34 +1026,11 @@ export default function CanvasLanding() {
       // Handle SEO optimizer (existing interface is built)
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
-        // Update to Claude Agent for SEO
-        setActiveAgent(prev => ({
-          ...prev,
-          name: 'AI Agent: Claude',
-          icon: RiStarFill,
-          status: 'ready',
-          statusText: 'Ready to optimize your search rankings',
-          subheading: 'SEO Optimization Agent',
-          useLogo: true
-        }))
       }
     } else {
       // Handle other custom tasks - they'll show a basic interface
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
-        // Update to Claude Agent for generic task
-        const task = taskCards.find(t => t.id === taskId)
-        if (task) {
-          setActiveAgent(prev => ({
-            ...prev,
-            name: 'AI Agent: Claude',
-            icon: RiStarFill,
-            status: 'ready',
-            statusText: `Ready to ${task.subtitle.toLowerCase()}`,
-            subheading: `${task.title} Agent`,
-            useLogo: true
-          }))
-        }
       }
     }
   }
@@ -1321,7 +1269,7 @@ export default function CanvasLanding() {
                   <h3 className="text-xl font-bold text-gray-700 leading-tight group-hover:text-gray-900 transition-colors text-left">
                     Create a new task
                   </h3>
-          </div>
+        </div>
 
                 {/* Subtitle */}
                 <div className="mb-8 flex-1">
@@ -1350,8 +1298,6 @@ export default function CanvasLanding() {
               <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-gray-100/20 pointer-events-none"></div>
             </div>
           </div>
-
-
 
           {/* Section Headers */}
           {Object.entries(projectSections).map(([sectionId, sectionData]) => {
@@ -1464,54 +1410,11 @@ export default function CanvasLanding() {
 
                             </div>
                           </div>
-                          
-                          {/* Notification Banner */}
-                          <div
-                            className="mb-8 p-4 rounded-lg border flex items-center gap-4 w-full"
-                            style={{
-                              background: 'rgba(255, 255, 255, 0.8)',
-                              borderColor: '#E5E7EB',
-                              backdropFilter: 'blur(10px)'
-                            }}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                style={{
-                                  backgroundColor: activeAgent.status === 'analyzing' ? '#DBEAFE' : '#F9FAFB',
-                                  color: activeAgent.status === 'analyzing' ? DARK_PALETTE.primary : '#374151'
-                                }}
-                              >
-                                {activeAgent.status === 'analyzing' ? (
-                                  <RiLoader4Fill size={16} className="animate-spin" />
-                                ) : (
-                                  <activeAgent.icon size={16} />
-                                )}
-                              </div>
-                              <div>
-                                <div className="text-sm font-medium text-gray-900">AI Agent: {activeAgent.name}</div>
-                                <div className="text-xs text-gray-600">{activeAgent.statusText}</div>
-                              </div>
-                            </div>
-                            <div className="ml-auto flex items-center gap-2">
-                              <div
-                                className={`w-2 h-2 rounded-full ${
-                                  activeAgent.status === 'analyzing' ? 'bg-blue-500 animate-pulse' :
-                                  activeAgent.status === 'completed' ? 'bg-green-500' :
-                                  'bg-gray-400'
-                                }`}
-                              ></div>
-                              <span className="text-xs text-gray-500">
-                                {activeAgent.status === 'analyzing' ? 'Processing' :
-                                 activeAgent.status === 'completed' ? 'Complete' :
-                                 'Ready'}
-                              </span>
-                            </div>
-                          </div>
+
 
                           {/* Two Section Layout */}
                           <div 
-                            className="rounded-3xl shadow-2xl border border-white/40 backdrop-blur-xl overflow-hidden"
+                            className="rounded-lg shadow-2xl border border-white/40 backdrop-blur-xl overflow-hidden"
                             style={{ 
                               background: 'rgba(255, 255, 255, 0.1)',
                               backdropFilter: 'blur(25px)',
@@ -1524,6 +1427,11 @@ export default function CanvasLanding() {
                             }}
                           >
                             <div className="p-6">
+                              {/* Notification Banner */}
+                              <div className="w-full mb-4">
+                                <NotificationBanner activeAgent={activeAgent} />
+                              </div>
+                              
                               {/* Full Width Section - Loading Page (100%) */}
                               <div className="w-full">
                                 <LoadingPage
@@ -1583,72 +1491,7 @@ export default function CanvasLanding() {
                 </div>
                         </div>
 
-              {/* Notification Banner */}
-              <div
-                className="mb-8 p-4 rounded-lg border flex items-center gap-4 w-full"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.8)',
-                  borderColor: '#E5E7EB',
-                  backdropFilter: 'blur(10px)',
 
-                }}
-              >
-                <div className="flex items-center gap-3">
-                                    <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{
-                      backgroundColor: activeAgent.status === 'analyzing' ? '#DBEAFE' : '#F9FAFB',
-                      color: activeAgent.status === 'analyzing' ? DARK_PALETTE.primary : '#374151'
-                    }}
-                  >
-                    {activeAgent.status === 'analyzing' ? (
-                      <RiLoader4Fill size={16} className="animate-spin" />
-                    ) : activeAgent.useLogo ? (
-                      <>
-                        <img
-                          src="https://claude.ai/images/claude_app_icon.png"
-                          alt="Claude"
-                          className="w-9 h-8 object-contain rounded-lg"
-                          style={{
-                            borderRadius: '50% 40% 50% 40%',
-                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-                          }}
-                          onError={(e) => {
-                            const target = e.currentTarget as HTMLImageElement;
-                            target.style.display = 'none';
-                            const fallback = target.nextElementSibling as HTMLElement;
-                            if (fallback) fallback.style.display = 'flex';
-                          }}
-                        />
-                        <span className="text-xs font-bold text-purple-600 hidden">C</span>
-                      </>
-                    ) : (
-                      <activeAgent.icon size={16} />
-                    )}
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{activeAgent.name}</div>
-                    {activeAgent.subheading && (
-                      <div className="text-xs text-gray-500">{activeAgent.subheading}</div>
-                    )}
-                    <div className="text-xs text-gray-600">{activeAgent.statusText}</div>
-                  </div>
-                </div>
-                <div className="ml-auto flex items-center gap-2">
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      activeAgent.status === 'analyzing' ? 'bg-blue-500 animate-pulse' :
-                      activeAgent.status === 'completed' ? 'bg-green-500' :
-                      'bg-gray-400'
-                    }`}
-                  ></div>
-                  <span className="text-xs text-gray-500">
-                    {activeAgent.status === 'analyzing' ? 'Processing' :
-                     activeAgent.status === 'completed' ? 'Complete' :
-                     'Ready'}
-                  </span>
-                </div>
-              </div>
 
               {/* Interface with AI Card Layout */}
               <div className="flex gap-6">
@@ -1776,7 +1619,7 @@ export default function CanvasLanding() {
                 <div className="flex-1">
                   {/* Two Section Layout - Fully Transparent Glassmorphism */}
                   <div 
-                    className="rounded-3xl shadow-2xl border border-white/40 backdrop-blur-xl overflow-hidden"
+                    className="rounded-lg shadow-2xl border border-white/40 backdrop-blur-xl overflow-hidden"
                 style={{ 
                   background: 'rgba(255, 255, 255, 0.1)',
                   backdropFilter: 'blur(25px)',
@@ -1789,6 +1632,11 @@ export default function CanvasLanding() {
                 }}
               >
                 <div className="p-4">
+                  {/* Notification Banner */}
+                  <div className="w-full mb-4">
+                    <NotificationBanner activeAgent={activeAgent} />
+                  </div>
+                  
                   {/* Full Width Section - Loading Page (100%) */}
                   <div className="w-full">
                     <LoadingPage
@@ -1850,74 +1698,7 @@ export default function CanvasLanding() {
                   </div>
                 </div>
                 
-                {/* Notification Banner */}
-                <div
-                  className="mb-8 p-4 rounded-lg border flex items-center gap-4 w-full"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.8)',
-                    borderColor: '#E5E7EB',
-                    backdropFilter: 'blur(10px)',
-                    width: '1440px',
-                    maxWidth: '1440px',
-                    minWidth: '1440px'
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                                      <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{
-                      backgroundColor: activeAgent.status === 'analyzing' ? '#DBEAFE' : '#F9FAFB',
-                      color: activeAgent.status === 'analyzing' ? DARK_PALETTE.primary : '#374151'
-                    }}
-                  >
-                    {activeAgent.status === 'analyzing' ? (
-                      <RiLoader4Fill size={16} className="animate-spin" />
-                    ) : activeAgent.useLogo ? (
-                      <>
-                        <img
-                          src="https://claude.ai/images/claude_app_icon.png"
-                          alt="Claude"
-                          className="w-9 h-8 object-contain rounded-lg"
-                          style={{
-                            borderRadius: '50% 40% 50% 40%',
-                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-                          }}
-                          onError={(e) => {
-                            const target = e.currentTarget as HTMLImageElement;
-                            target.style.display = 'none';
-                            const fallback = target.nextElementSibling as HTMLElement;
-                            if (fallback) fallback.style.display = 'flex';
-                          }}
-                        />
-                        <span className="text-xs font-bold text-purple-600 hidden">C</span>
-                      </>
-                    ) : (
-                      <activeAgent.icon size={16} />
-                    )}
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{activeAgent.name}</div>
-                    {activeAgent.subheading && (
-                      <div className="text-xs text-gray-500">{activeAgent.subheading}</div>
-                    )}
-                    <div className="text-xs text-gray-600">{activeAgent.statusText}</div>
-                  </div>
-                </div>
-                <div className="ml-auto flex items-center gap-2">
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      activeAgent.status === 'analyzing' ? 'bg-blue-500 animate-pulse' :
-                      activeAgent.status === 'completed' ? 'bg-green-500' :
-                      'bg-gray-400'
-                    }`}
-                  ></div>
-                  <span className="text-xs text-gray-500">
-                    {activeAgent.status === 'analyzing' ? 'Processing' :
-                     activeAgent.status === 'completed' ? 'Complete' :
-                     'Ready'}
-                  </span>
-                  </div>
-                </div>
+                
 
                 {/* Two Section Layout */}
                 <div 
@@ -2017,33 +1798,7 @@ export default function CanvasLanding() {
                 </div>
               </div>
               
-              {/* Notification Banner */}
-              <div
-                className="mb-8 p-4 rounded-lg border flex items-center gap-4 w-full"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.8)',
-                  borderColor: '#E5E7EB',
-                  backdropFilter: 'blur(10px)',
 
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: DARK_PALETTE.secondary }}
-                  >
-                    <RiSearchEyeLine size={16} className="text-white" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">AI Agent: SEO Analyzer</div>
-                    <div className="text-xs text-gray-600">Ready to optimize your search rankings</div>
-                  </div>
-                </div>
-                <div className="ml-auto flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-gray-500">Active</span>
-                </div>
-              </div>
 
               {/* Two Section Layout - Fully Transparent Glassmorphism */}
               <div 
@@ -2338,78 +2093,108 @@ export default function CanvasLanding() {
       {showAddTask && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="absolute inset-0" onClick={() => setShowAddTask(false)} />
-          <div className="relative w-full max-w-xl mx-4 rounded-2xl border border-white/40 backdrop-blur-2xl p-6 shadow-2xl" style={{ background: 'rgba(255,255,255,0.95)' }}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Create Task</h3>
-              <button className="p-1 rounded-lg hover:bg-gray-100 text-gray-500" onClick={() => setShowAddTask(false)}>
-                <RiCloseLine size={18} />
+          <div className="relative w-full max-w-2xl mx-4 rounded-lg border border-white/40 backdrop-blur-2xl p-6 shadow-2xl" style={{ background: 'rgba(255,255,255,0.95)' }}>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900">Choose a Template</h3>
+                <p className="text-sm text-gray-600 mt-1">Select a pre-built AI agent to add to your workspace</p>
+              </div>
+              <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-500" onClick={() => setShowAddTask(false)}>
+                <RiCloseLine size={20} />
               </button>
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-gray-700 mb-1">Task name</label>
-                <input
-                  value={newTaskName}
-                  onChange={(e) => setNewTaskName(e.target.value)}
-                  placeholder="e.g., Conversion Uplift Assistant"
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2"
-                  style={{ '--tw-ring-color': '#A5D6A7' } as React.CSSProperties}
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-700 mb-1">Description</label>
-                <textarea
-                  value={newTaskDesc}
-                  onChange={(e) => setNewTaskDesc(e.target.value)}
-                  rows={3}
-                  placeholder="What should this agent do?"
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2"
-                  style={{ '--tw-ring-color': '#A5D6A7' } as React.CSSProperties}
-                />
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  className="px-4 py-2 rounded-lg text-white"
-                  style={{ backgroundColor: DARK_PALETTE.primary }}
-                  onClick={() => addCustomTask(newTaskName, newTaskDesc || 'Custom AI task')}
-                  disabled={!newTaskName.trim()}
-                >
-                  Save Task
-                </button>
-                <button
-                  className="px-4 py-2 rounded-lg text-gray-700 border"
-                  style={{ borderColor: '#E5E7EB', background: '#FFFFFF' }}
-                  onClick={() => setShowTemplates(v => !v)}
-                >
-                  {showTemplates ? 'Hide Templates' : 'Choose from Templates'}
-                </button>
-              </div>
-
-              {showTemplates && (
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {TEMPLATES.map(t => {
-                    const TemplateIcon = t.icon;
-                    return (
-                      <button
-                        key={t.id}
-                        className="text-left rounded-xl border p-3 hover:shadow transition bg-white"
-                        style={{ borderColor: '#E5E7EB' }}
-                        onClick={() => addTemplateTask(t.id)}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {TEMPLATES.map(t => {
+                const TemplateIcon = t.icon;
+                return (
+                  <button
+                    key={t.id}
+                    className="text-left rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:border-gray-300 transition-all duration-200 bg-white group"
+                    onClick={() => addTemplateTask(t.id)}
+                  >
+                    {/* Icon and Title Row */}
+                    <div className="flex items-center gap-4 mb-4">
+                      <div 
+                        className="w-12 h-12 rounded-lg flex items-center justify-center text-white shadow-sm"
+                        style={{ backgroundColor: t.iconBg }}
                       >
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white" style={{ backgroundColor: t.iconBg }}>
-                            <TemplateIcon size={16} />
-                          </div>
-                          <div className="font-medium text-gray-900">{t.title}</div>
+                        <TemplateIcon size={24} />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900 text-base group-hover:text-gray-700 transition-colors">
+                          {t.title}
+                        </h4>
+                      </div>
+                    </div>
+                    
+                    {/* Description */}
+                    <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                      {t.subtitle}
+                    </p>
+                    
+                    {/* Features List */}
+                    <div className="space-y-1">
+                      <div className="text-xs font-medium text-gray-800 mb-2">Key Features:</div>
+                      <div className="space-y-1">
+                        {t.id === 'abandoned-cart' ? (
+                          <>
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                              <span>Smart email campaigns</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                              <span>Dynamic incentives</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                              <span>Behavioral triggers</span>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                              <span>AI-powered forecasting</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                              <span>Smart restock alerts</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                              <span>Trend analysis</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Add Button */}
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500">Ready to deploy</span>
+                        <div className="px-3 py-1.5 bg-gray-100 group-hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-lg transition-colors">
+                          Add Task
                         </div>
-                        <div className="text-xs text-gray-600">{t.subtitle}</div>
-                      </button>
-                    );
-                  })}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <RiStarFill size={12} className="text-blue-600" />
                 </div>
-              )}
+                <div>
+                  <p className="text-sm text-gray-700 font-medium mb-1">Customize after creation</p>
+                  <p className="text-xs text-gray-600">You can edit the task name, description, and settings using the edit button after adding it to your workspace.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -2419,7 +2204,7 @@ export default function CanvasLanding() {
       {showDeleteConfirm && taskToDelete && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="absolute inset-0" onClick={cancelDeleteTask} />
-          <div className="relative w-full max-w-md mx-4 rounded-2xl border border-white/40 backdrop-blur-2xl p-6 shadow-2xl" style={{ background: 'rgba(255,255,255,0.95)' }}>
+          <div className="relative w-full max-w-md mx-4 rounded-lg border border-white/40 backdrop-blur-2xl p-6 shadow-2xl" style={{ background: 'rgba(255,255,255,0.95)' }}>
             <div className="text-center">
               {/* Icon */}
               <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
@@ -2458,7 +2243,7 @@ export default function CanvasLanding() {
       {showEditTask && taskToEdit && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="absolute inset-0" onClick={cancelEditTask} />
-          <div className="relative w-full max-w-xl mx-4 rounded-2xl border border-white/40 backdrop-blur-2xl p-6 shadow-2xl" style={{ background: 'rgba(255,255,255,0.95)' }}>
+          <div className="relative w-full max-w-xl mx-4 rounded-lg border border-white/40 backdrop-blur-2xl p-6 shadow-2xl" style={{ background: 'rgba(255,255,255,0.95)' }}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Edit Task</h3>
               <button className="p-1 rounded-lg hover:bg-gray-100 text-gray-500" onClick={cancelEditTask}>
