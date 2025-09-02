@@ -133,7 +133,11 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
                     <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
                       <RiDownloadLine size={20} className="text-gray-600" />
                     </div>
-                    <span>Download Report</span>
+                    <div>
+                      <div className="font-medium">Download Report</div>
+                      <div className="text-sm text-gray-500">Get a detailed PDF summary of all optimizations</div>
+                      <div className="text-sm text-gray-500">and performance improvements made to your store</div>
+                    </div>
                   </div>
                   <RiArrowRightSLine size={20} className="text-gray-400" />
                 </button>
@@ -150,7 +154,11 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
                     <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
                       <RiStoreLine size={20} className="text-gray-600" />
                     </div>
-                    <span>Scan Another Store</span>
+                    <div>
+                      <div className="font-medium">Scan Another Store</div>
+                      <div className="text-sm text-gray-500">Run a health check on a different Shopify store</div>
+                      <div className="text-sm text-gray-500">and identify new optimization opportunities</div>
+                    </div>
                   </div>
                   <RiArrowRightSLine size={20} className="text-gray-400" />
                 </button>
@@ -166,41 +174,30 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
                     <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
                       <RiCalendarLine size={20} className="text-gray-600" />
                     </div>
-                    <span>Schedule Call</span>
+                    <div>
+                      <div className="font-medium">Schedule Call</div>
+                      <div className="text-sm text-gray-500">Book a 15-minute call with our optimization experts</div>
+                      <div className="text-sm text-gray-500">to discuss advanced growth strategies for your store</div>
+                    </div>
                   </div>
                   <RiArrowRightSLine size={20} className="text-gray-400" />
                 </button>
               </div>
 
-              <div className="mt-6">
+              {/* Continue to Store Health CTA */}
+              <div className="mt-6 pt-6 border-t border-gray-100">
                 <button
-                  className="py-2 px-4 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition-colors duration-200"
+                  className="w-full px-8 py-3 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-lg transition-colors duration-200"
                   onClick={() => {
                     if (onFixAnother) {
                       onFixAnother()
                     }
                   }}
                 >
-                  Back to Report
+                  Continue to Store Health
                 </button>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Continue to Store Health CTA */}
-        {isDeploymentComplete && (
-          <div className="mt-6 text-center">
-            <button
-              className="px-8 py-3 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-lg transition-colors duration-200"
-              onClick={() => {
-                if (onFixAnother) {
-                  onFixAnother()
-                }
-              }}
-            >
-              Continue to Store Health
-            </button>
           </div>
         )}
       </div>

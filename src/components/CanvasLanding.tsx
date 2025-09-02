@@ -826,6 +826,8 @@ export default function CanvasLanding() {
       setExpandedCards(prev => prev.filter(id => id !== taskToDelete))
       // Remove from task cards
       setTaskCards(prev => prev.filter(t => t.id !== taskToDelete))
+      // Clear notifications related to this task
+      setNotifications(prev => prev.filter(n => n.taskId !== taskToDelete))
       // Remove from project sections if it's in any
       setProjectSections(prev => {
         const newSections = { ...prev }
@@ -1072,6 +1074,8 @@ export default function CanvasLanding() {
         } else {
           setExpandedCards([])
           setScanProgress(0)
+          // Clear notifications when closing all tasks
+          setNotifications([])
         }
       }
     }
@@ -1092,6 +1096,8 @@ export default function CanvasLanding() {
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
         setScanProgress(0)
+        // Clear notifications when opening a new task
+        setNotifications([])
         setActiveAgent(prev => ({
           ...prev,
           name: 'Claude',
@@ -1105,11 +1111,15 @@ export default function CanvasLanding() {
       // Handle SEO optimizer (existing interface is built)
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
+        // Clear notifications when opening a new task
+        setNotifications([])
       }
     } else {
       // Handle other custom tasks - they'll show a basic interface
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
+        // Clear notifications when opening a new task
+        setNotifications([])
       }
     }
   }
@@ -2578,6 +2588,8 @@ export default function CanvasLanding() {
                                         onClick={() => {
                                           zoomToTask(notification.taskId!)
                                           setShowActionCenter(false)
+                                          // Remove this notification when opening the task
+                                          removeNotification(notification.id!)
                                         }}
                                         className="px-2 py-1 bg-gray-800 hover:bg-gray-900 text-white text-xs font-medium rounded transition-colors"
                                       >
