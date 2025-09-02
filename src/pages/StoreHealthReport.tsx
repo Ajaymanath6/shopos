@@ -1,197 +1,216 @@
 
 
-// Dark Gray Monochromatic Palette
-const DARK_PALETTE = {
-  primary: '#1F2937',    // Dark gray
-  secondary: '#374151',  // Medium gray
-  tertiary: '#4B5563',   // Light gray
-  accent: '#6B7280',     // Lighter gray
-  light: '#9CA3AF'       // Very light gray
-}
+import { useState } from 'react'
+import { RiStarFill, RiSpeedUpLine, RiShieldCheckLine, RiSearchLine, RiArrowRightSLine } from '@remixicon/react'
 
 export default function StoreHealthReport() {
+  const [activeTab, setActiveTab] = useState<'before' | 'after'>('before')
+
   return (
-    <div
-      className="w-full h-full rounded-3xl backdrop-blur-lg overflow-y-auto"
-   
-    >
-      {/* Header Section */}
-      <div className="text-center mb-12">
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center"
-            style={{ backgroundColor: DARK_PALETTE.primary }}
-          >
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
+    <div className="w-full h-full overflow-y-auto px-8 py-6">
+      {/* Header Section - Minimal */}
+      <div className="text-center mb-16">
+        <div className="flex items-center justify-center mb-6">
+          <RiStarFill size={32} className="text-gray-400" />
         </div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <h1 className="text-3xl font-light text-gray-900 mb-3">
           Store Health Report
         </h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          We found several optimization opportunities to boost your store performance
+        <p className="text-lg text-gray-500 font-light">
+          Optimization opportunities to boost performance
         </p>
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-5 gap-6">
+      {/* Before/After Enhancement Tabs */}
+      <div className="mb-12">
+        <div className="flex justify-center mb-8">
+          <div className="bg-gray-50 rounded-full p-1 inline-flex">
+            <button
+              onClick={() => setActiveTab('before')}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                activeTab === 'before' 
+                  ? 'bg-white text-gray-900 shadow-sm' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Before Enhancement
+            </button>
+            <button
+              onClick={() => setActiveTab('after')}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                activeTab === 'after' 
+                  ? 'bg-white text-gray-900 shadow-sm' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              After Enhancement
+            </button>
+          </div>
+        </div>
+
+        {/* Image Comparison */}
+        <div className="grid grid-cols-3 gap-8 mb-12">
+          {[1, 2, 3].map((index) => (
+            <div key={index} className="text-center">
+              <div className="relative mb-4">
+                <img
+                  src={activeTab === 'before' 
+                    ? `https://picsum.photos/300/200?random=${index}&blur=2&quality=30`
+                    : `https://picsum.photos/300/200?random=${index}`
+                  }
+                  alt={`Product ${index} - ${activeTab}`}
+                  className="w-full h-48 object-cover rounded-lg shadow-sm"
+                />
+                <div className="absolute top-2 right-2">
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    activeTab === 'before' 
+                      ? 'bg-red-100 text-red-700' 
+                      : 'bg-green-100 text-green-700'
+                  }`}>
+                    {activeTab === 'before' ? 'Low Quality' : 'Optimized'}
+                  </span>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 font-light">
+                Product Image {index}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Minimal Content Layout */}
+      <div className="grid grid-cols-5 gap-12">
         {/* Left Column - 70% (3/5 columns) */}
-        <div className="col-span-3 space-y-6">
-          {/* Box 1 */}
-          <div className="p-6 rounded-2xl border border-gray-200 shadow-sm">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#10B981' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
+        <div className="col-span-3 space-y-12">
+          {/* Performance Section */}
+          <div className="border-l-2 border-gray-100 pl-6">
+            <div className="flex items-center gap-3 mb-6">
+              <RiSpeedUpLine size={20} className="text-gray-400" />
               <div>
-                <h3 className="text-xl font-bold text-gray-900">Performance Optimization</h3>
-                <p className="text-gray-600">Critical speed improvements identified</p>
+                <h3 className="text-lg font-medium text-gray-900">Performance</h3>
+                <p className="text-sm text-gray-500 font-light">Speed improvements identified</p>
               </div>
             </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm font-medium text-gray-700">Page Load Speed</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-24 h-2 bg-gray-200 rounded-full">
-                    <div className="w-16 h-2 bg-yellow-500 rounded-full"></div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-3">
+                <span className="text-sm text-gray-700">Page Load Speed</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-32 h-1 bg-gray-100 rounded-full">
+                    <div className="w-20 h-1 bg-gray-300 rounded-full"></div>
                   </div>
-                  <span className="text-sm text-gray-600">68%</span>
+                  <span className="text-sm text-gray-500 font-light w-8">68%</span>
                 </div>
               </div>
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm font-medium text-gray-700">Image Optimization</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-24 h-2 bg-gray-200 rounded-full">
-                    <div className="w-20 h-2 bg-green-500 rounded-full"></div>
+              <div className="flex items-center justify-between py-3">
+                <span className="text-sm text-gray-700">Image Optimization</span>
+                <div className="flex items-center gap-3">
+                  <div className="w-32 h-1 bg-gray-100 rounded-full">
+                    <div className="w-26 h-1 bg-gray-400 rounded-full"></div>
                   </div>
-                  <span className="text-sm text-gray-600">83%</span>
+                  <span className="text-sm text-gray-500 font-light w-8">83%</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Box 2 */}
-          <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#F59E0B' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
+          {/* SEO Section */}
+          <div className="border-l-2 border-gray-100 pl-6">
+            <div className="flex items-center gap-3 mb-6">
+              <RiSearchLine size={20} className="text-gray-400" />
               <div>
-                <h3 className="text-xl font-bold text-gray-900">SEO Improvements</h3>
-                <p className="text-gray-600">Search visibility enhancements</p>
+                <h3 className="text-lg font-medium text-gray-900">SEO</h3>
+                <p className="text-sm text-gray-500 font-light">Search visibility enhancements</p>
               </div>
             </div>
-            <div className="space-y-3">
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">Meta Tags Missing</span>
-                  <span className="text-sm text-red-600 font-medium">12 pages</span>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="text-sm text-gray-700 mb-1">Meta Tags Missing</div>
+                  <p className="text-xs text-gray-500 font-light">Add proper meta descriptions and title tags</p>
                 </div>
-                <p className="text-xs text-gray-600">Add proper meta descriptions and title tags to improve search rankings</p>
+                <span className="text-sm text-gray-600 bg-gray-50 px-2 py-1 rounded">12 pages</span>
               </div>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">Image Alt Tags</span>
-                  <span className="text-sm text-orange-600 font-medium">8 missing</span>
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="text-sm text-gray-700 mb-1">Image Alt Tags</div>
+                  <p className="text-xs text-gray-500 font-light">Add descriptive alt text for accessibility</p>
                 </div>
-                <p className="text-xs text-gray-600">Add descriptive alt text to improve accessibility and SEO</p>
+                <span className="text-sm text-gray-600 bg-gray-50 px-2 py-1 rounded">8 missing</span>
               </div>
             </div>
           </div>
 
-          {/* Box 3 */}
-          <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#EF4444' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
+          {/* Security Section */}
+          <div className="border-l-2 border-gray-100 pl-6">
+            <div className="flex items-center gap-3 mb-6">
+              <RiShieldCheckLine size={20} className="text-gray-400" />
               <div>
-                <h3 className="text-xl font-bold text-gray-900">Security & Performance</h3>
-                <p className="text-gray-600">Technical issues that need attention</p>
+                <h3 className="text-lg font-medium text-gray-900">Security</h3>
+                <p className="text-sm text-gray-500 font-light">Technical issues that need attention</p>
               </div>
             </div>
-            <div className="space-y-3">
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-red-700">Outdated SSL Certificate</span>
-                  <span className="text-sm text-red-600 font-medium">High Risk</span>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="text-sm text-gray-700 mb-1">SSL Certificate</div>
+                  <p className="text-xs text-gray-500 font-light">Update to maintain secure connections</p>
                 </div>
-                <p className="text-xs text-red-600">Update SSL certificate to maintain secure connections</p>
+                <span className="text-sm text-red-600 bg-red-50 px-2 py-1 rounded">High Risk</span>
               </div>
-              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-orange-700">Large JavaScript Files</span>
-                  <span className="text-sm text-orange-600 font-medium">3 files</span>
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="text-sm text-gray-700 mb-1">JavaScript Files</div>
+                  <p className="text-xs text-gray-500 font-light">Minify and compress for better performance</p>
                 </div>
-                <p className="text-xs text-orange-600">Minify and compress JavaScript for better performance</p>
+                <span className="text-sm text-gray-600 bg-gray-50 px-2 py-1 rounded">3 files</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Right Column - 30% (2/5 columns) */}
-        <div className="col-span-2 space-y-6">
-          {/* Box 1 */}
-          <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <div className="text-center mb-4">
-              <div className="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ backgroundColor: DARK_PALETTE.primary }}>
-                <span className="text-2xl font-bold text-white">78</span>
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Health Score</h3>
-              <p className="text-sm text-gray-600">Overall store performance</p>
+        <div className="col-span-2 space-y-12">
+          {/* Health Score */}
+          <div className="text-center">
+            <div className="mb-6">
+              <div className="text-4xl font-light text-gray-800 mb-2">78</div>
+              <div className="text-sm text-gray-500 font-light">Health Score</div>
             </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Performance</span>
-                <span className="font-medium text-gray-900">75%</span>
+            <div className="space-y-4 text-left">
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm text-gray-600">Performance</span>
+                <span className="text-sm text-gray-800 font-light">75%</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">SEO</span>
-                <span className="font-medium text-gray-900">82%</span>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm text-gray-600">SEO</span>
+                <span className="text-sm text-gray-800 font-light">82%</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Security</span>
-                <span className="font-medium text-gray-900">88%</span>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm text-gray-600">Security</span>
+                <span className="text-sm text-gray-800 font-light">88%</span>
               </div>
             </div>
           </div>
 
-          {/* Box 2 */}
-          <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <div className="text-center mb-4">
-              <div className="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ backgroundColor: '#10B981' }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Quick Wins</h3>
-              <p className="text-sm text-gray-600">Easy improvements</p>
+          {/* Quick Actions */}
+          <div>
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Quick Actions</h3>
+              <p className="text-sm text-gray-500 font-light">Easy improvements</p>
             </div>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-700">Enable browser caching</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-700">Compress images</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-700">Add meta descriptions</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-700">Fix broken links</span>
-              </div>
+            <div className="space-y-4">
+              {[
+                'Enable browser caching',
+                'Compress images',
+                'Add meta descriptions',
+                'Fix broken links'
+              ].map((action, index) => (
+                <div key={index} className="flex items-center justify-between py-2">
+                  <span className="text-sm text-gray-700">{action}</span>
+                  <RiArrowRightSLine size={16} className="text-gray-300" />
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -199,3 +218,5 @@ export default function StoreHealthReport() {
     </div>
   )
 }
+
+

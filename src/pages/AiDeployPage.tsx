@@ -130,10 +130,10 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
                   }}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center">
                       <RiDownloadLine size={20} className="text-gray-600" />
                     </div>
-                    <div>
+                    <div className="text-left">
                       <div className="font-medium">Download Report</div>
                       <div className="text-sm text-gray-500">Get a detailed PDF summary of all optimizations</div>
                       <div className="text-sm text-gray-500">and performance improvements made to your store</div>
@@ -151,10 +151,10 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
                   }}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center">
                       <RiStoreLine size={20} className="text-gray-600" />
                     </div>
-                    <div>
+                    <div className="text-left">
                       <div className="font-medium">Scan Another Store</div>
                       <div className="text-sm text-gray-500">Run a health check on a different Shopify store</div>
                       <div className="text-sm text-gray-500">and identify new optimization opportunities</div>
@@ -171,10 +171,10 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
                   }}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center">
                       <RiCalendarLine size={20} className="text-gray-600" />
                     </div>
-                    <div>
+                    <div className="text-left">
                       <div className="font-medium">Schedule Call</div>
                       <div className="text-sm text-gray-500">Book a 15-minute call with our optimization experts</div>
                       <div className="text-sm text-gray-500">to discuss advanced growth strategies for your store</div>

@@ -794,17 +794,34 @@ export default function CanvasLanding() {
     { id: 'inventory-mentor', title: 'Inventory Mentor', subtitle: 'Forecasts and restock alerts', icon: RiUser3Line, iconBg: '#F3F4F6' }
   ]
 
-  const addTemplateTask = (templateId: string) => {
+    const addTemplateTask = (templateId: string) => {
     const tpl = TEMPLATES.find(t => t.id === templateId)
     if (!tpl) return
     
-    // Handle Store Health template specially - trigger the same flow as clicking the first card
+    // Handle Store Health template specially - create a new instance
     if (templateId === 'store-health-template') {
       setShowAddTask(false)
-      handleTaskClick('store-health')
+      
+      // Create a new unique store health task
+      const newTaskId = `store-health-${Date.now()}`
+      const newTask: TaskCard = {
+        id: newTaskId,
+        title: 'Store Health Check',
+        subtitle: 'Connect your Shopify store for an instant AI diagnostic and optimization recommendations',
+        icon: RiPulseLine,
+        iconBg: DARK_PALETTE.primary
+      }
+      
+      // Add the new task to taskCards
+      setTaskCards(prev => [...prev, newTask])
+      
+      // Trigger the new task
+      setTimeout(() => {
+        handleTaskClick(newTaskId)
+      }, 100) // Small delay to ensure task is added first
       return
     }
-    
+
     // For other templates, add as new task cards
     let id = templateId
     let tries = 1
@@ -937,22 +954,40 @@ export default function CanvasLanding() {
   const [showAiSearch, setShowAiSearch] = useState(false)
   const [aiSearchQuery, setAiSearchQuery] = useState('')
 
-  // Handle AI search submission - trigger Store Health Check flow
+  // Handle AI search submission - create new Store Health Check instance
   const handleAiSearchSubmit = () => {
     if (!aiSearchQuery.trim()) return
     
     // Extract URL from query if present
     const urlMatch = aiSearchQuery.match(/https?:\/\/[^\s]+/)
-    if (urlMatch) {
-      setStoreUrl(urlMatch[0])
+    const extractedUrl = urlMatch ? urlMatch[0] : ''
+    
+    // Create a new unique store health task
+    const newTaskId = `store-health-${Date.now()}`
+    const newTask: TaskCard = {
+      id: newTaskId,
+      title: 'Store Health Check',
+      subtitle: `Analysis for: ${extractedUrl || 'New Store'}`,
+      icon: RiPulseLine,
+      iconBg: DARK_PALETTE.primary
+    }
+    
+    // Add the new task to taskCards
+    setTaskCards(prev => [...prev, newTask])
+    
+    // Set the URL for this specific instance
+    if (extractedUrl) {
+      setStoreUrl(extractedUrl)
     }
     
     // Clear search and close search bar
     setAiSearchQuery('')
     setShowAiSearch(false)
     
-    // Trigger Store Health Check flow
-    handleTaskClick('store-health')
+    // Trigger the new task
+    setTimeout(() => {
+      handleTaskClick(newTaskId)
+    }, 100) // Small delay to ensure task is added first
   }
 
   // Notification System State
@@ -1092,7 +1127,7 @@ export default function CanvasLanding() {
 
   // Handle task card click
   const handleTaskClick = (taskId: string) => {
-    if (taskId === 'store-health') {
+    if (taskId === 'store-health' || taskId.startsWith('store-health-')) {
       if (!expandedCards.includes(taskId)) {
         setExpandedCards(prev => [...prev, taskId])
         setScanProgress(0)
@@ -1105,7 +1140,7 @@ export default function CanvasLanding() {
           subheading: 'Store Health Analysis Agent',
           status: 'ready'
         }))
-        setStoreUrl('')
+        // Don't clear storeUrl here - it should be set from AI search if provided
       }
     } else if (taskId === 'seo-optimizer' || taskId.includes('seo')) {
       // Handle SEO optimizer (existing interface is built)
@@ -1482,7 +1517,7 @@ export default function CanvasLanding() {
                     <div key={projectId} className="contents">
 
 
-                      {projectId === 'store-health' && expandedCards.includes('store-health') && (
+                      {(projectId === 'store-health' || projectId.startsWith('store-health-')) && expandedCards.includes(projectId) && (
                         <div 
                           className={`transition-all duration-300 ${
                             sectionMode ? 'cursor-pointer' : ''
@@ -1560,13 +1595,14 @@ export default function CanvasLanding() {
           {/* Projects Container - Full Canvas Layout */}
           <div className="mt-26 w-full flex flex-wrap gap-12 justify-center" style={{ minWidth: '100vw', padding: '0 2rem', marginBottom: '50px' }}>
 
-            {/* Store Health Check Expandable Interface (Original ONLY) - Only when NOT in section */}
-            {expandedCards.includes('store-health') && !getProjectSection('store-health') && (
+            {/* Store Health Check Expandable Interfaces - Only when NOT in section */}
+            {expandedCards.filter(cardId => (cardId === 'store-health' || cardId.startsWith('store-health-')) && !getProjectSection(cardId)).map(storeHealthId => (
               <div 
+                key={storeHealthId}
                 className={`transition-all duration-300 ${
                   sectionMode ? 'cursor-pointer' : ''
                 } ${
-                  selectedProjects.includes('store-health') ? 'border-2 border-dashed border-gray-600' : ''
+                  selectedProjects.includes(storeHealthId) ? 'border-2 border-dashed border-gray-600' : ''
                 }`}
                               style={{ 
                   width: '1440px',
@@ -1574,7 +1610,7 @@ export default function CanvasLanding() {
                   flexShrink: 0,
                   marginBottom: '50px'
                 }}
-                onClick={() => handleProjectSelection('store-health')}
+                onClick={() => handleProjectSelection(storeHealthId)}
               >
               {/* Main Heading */}
               <div className="text-left mb-6 relative" style={{ marginTop: '120px' }}>
@@ -1606,7 +1642,7 @@ export default function CanvasLanding() {
                   <div style={{ height: '500px' }}>
                     <AIConversationCard 
                       taskCards={taskCards}
-                      expandedCards={['store-health']} // Only show store health task
+                      expandedCards={[storeHealthId]} // Show the specific store health task
                       scanProgress={scanProgress}
                       isScanning={scanProgress > 0 && scanProgress < 100}
                       onAutoEnterUrl={handleAutoEnterUrl}
@@ -1752,12 +1788,14 @@ export default function CanvasLanding() {
                 </div>
               </div>
             </div>
-                        )}
+                        )
+            )}
 
             {/* Generic Task Expandable Interface - Only when NOT in section */}
             {taskCards.filter(task => 
               expandedCards.includes(task.id) && 
               task.id !== 'store-health' && 
+              !task.id.startsWith('store-health-') &&
               task.id !== 'seo-optimizer' && 
               !task.id.includes('seo') &&
               !getProjectSection(task.id)
