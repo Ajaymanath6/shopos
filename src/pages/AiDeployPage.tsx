@@ -129,13 +129,23 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
           </div>
         )}
 
-        {/* What's Next Card */}
+        {/* Next Steps Card */}
         <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm mt-6">
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">What's Next?</h3>
-            <p className="text-sm text-gray-600 mb-6">Choose your next action</p>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Next Steps</h3>
+            <p className="text-sm text-gray-600 mb-6">Quick actions</p>
             
             <div className="space-y-3">
+              <button
+                className="w-full py-3 px-4 bg-white border border-gray-200 hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-medium rounded-lg transition-colors duration-200 text-left"
+                onClick={() => {
+                  // Handle download report
+                  console.log('Download Report clicked')
+                }}
+              >
+                Download Report
+              </button>
+
               <button
                 className="w-full py-3 px-4 bg-white border border-gray-200 hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-medium rounded-lg transition-colors duration-200 text-left"
                 onClick={() => {
@@ -144,31 +154,32 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
                   }
                 }}
               >
-                Fix Another Issue
-              </button>
-
-              <button
-                className="w-full py-3 px-4 bg-white border border-gray-200 hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-medium rounded-lg transition-colors duration-200 text-left"
-                onClick={() => {
-                  // Open store in new tab
-                  window.open('https://yourstore.myshopify.com', '_blank')
-                }}
-              >
-                View Live Store
+                Scan Another Store
               </button>
 
               <button
                 className="w-full py-3 px-4 bg-white border border-gray-200 hover:bg-gray-50 active:bg-gray-100 text-gray-700 font-medium rounded-lg transition-colors duration-200 text-left"
                 onClick={() => {
                   // Handle schedule follow-up call
-                  console.log('Schedule Follow-up Call clicked')
+                  console.log('Schedule Call clicked')
                 }}
               >
-                Schedule Follow-up Call
+                Schedule Call
               </button>
             </div>
 
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+            <div className="mt-6 flex justify-between items-center">
+              <button
+                className="py-2 px-4 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-lg transition-colors duration-200"
+                onClick={() => {
+                  if (onFixAnother) {
+                    onFixAnother()
+                  }
+                }}
+              >
+                Back to Report
+              </button>
+              
               <p className="text-sm text-gray-700 font-medium">
                 {isDeploymentComplete ? 'Deployment complete • Ready for next steps' : 'Choose your next action'}
               </p>

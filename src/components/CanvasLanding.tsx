@@ -46,6 +46,7 @@ interface NotificationItem {
   actionRequired: boolean
   timestamp: number
   id?: string
+  taskId?: string
 }
 
 // Custom SVG Icons
@@ -187,7 +188,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         type: 'summary',
         content: "On it! I'm being deployed to optimize your 23 blurry product images. I'll process each image using advanced AI upscaling and deploy them to your live store. Your store will remain safe until you approve each change.",
         icon: RiLoader4Fill,
-        statusIndicator: 'AGGO_DEPLOYING'
+        statusIndicator: 'SHOPOS_DEPLOYING'
       })
 
       // Hide the summary after 4 seconds and show progress
@@ -203,7 +204,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         type: 'summary',
         content: "Analyzing image quality patterns and determining optimal enhancement algorithms for each product image type.",
         icon: RiBrainLine,
-        statusIndicator: 'AGGO_THINKING'
+        statusIndicator: 'SHOPOS_THINKING'
       })
 
       setTimeout(() => {
@@ -218,7 +219,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         type: 'summary',
         content: "Planning deployment sequence: batch processing 23 images, applying super-resolution AI, optimizing file formats, and preparing rollback procedures.",
         icon: RiBrainLine,
-        statusIndicator: 'AGGO_PLANNING'
+        statusIndicator: 'SHOPOS_PLANNING'
       })
 
       setTimeout(() => {
@@ -233,7 +234,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         type: 'executing',
         content: "Processing images using deep learning upscaling model... 8/23 complete",
         icon: RiLoader4Fill,
-        statusIndicator: 'AGGO_PROCESSING'
+        statusIndicator: 'SHOPOS_PROCESSING'
       })
     }, messageDelay)
     messageDelay += 3000
@@ -244,29 +245,98 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
         type: 'executing',
         content: "Excellent progress! 18/23 images enhanced. File sizes reduced by 72% while maintaining quality.",
         icon: RiLoader4Fill,
-        statusIndicator: 'AGGO_OPTIMIZING'
+        statusIndicator: 'SHOPOS_OPTIMIZING'
       })
     }, messageDelay)
-    messageDelay += 4000
+    messageDelay += 2000
 
-    // Message 6: Deployment Complete
+    // Message 6: 19/23 complete
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'executing',
+        content: "19/23 images complete...",
+        icon: RiCheckLine,
+        statusIndicator: 'SHOPOS_PROCESSING'
+      })
+    }, messageDelay)
+    messageDelay += 1500
+
+    // Message 7: 20/23 complete
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'executing',
+        content: "20/23 images complete...",
+        icon: RiCheckLine,
+        statusIndicator: 'SHOPOS_PROCESSING'
+      })
+    }, messageDelay)
+    messageDelay += 1500
+
+    // Message 8: 21/23 complete
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'executing',
+        content: "21/23 images complete...",
+        icon: RiCheckLine,
+        statusIndicator: 'SHOPOS_PROCESSING'
+      })
+    }, messageDelay)
+    messageDelay += 1500
+
+    // Message 9: 22/23 complete
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'executing',
+        content: "22/23 images complete...",
+        icon: RiCheckLine,
+        statusIndicator: 'SHOPOS_PROCESSING'
+      })
+    }, messageDelay)
+    messageDelay += 1500
+
+    // Message 10: 23/23 complete
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'executing',
+        content: "23/23 images complete - finalizing deployment...",
+        icon: RiCheckLine,
+        statusIndicator: 'SHOPOS_FINALIZING'
+      })
+    }, messageDelay)
+    messageDelay += 2000
+
+    // Message 11: Deployment Complete
     setTimeout(() => {
       addTypingMessage({
         type: 'result',
         content: "All done! Successfully deployed 23 optimized images to your live store. Your customers will now see crisp, fast-loading product photos. Page load speed improved by 1.9 seconds!",
         icon: RiCheckLine,
-        statusIndicator: 'AGGO_COMPLETED'
+        statusIndicator: 'SHOPOS_COMPLETED'
       })
+
+      // Trigger notification system after deployment completes
+      setTimeout(() => {
+        if (onAddNotification) {
+          onAddNotification({
+            type: 'deployment_complete',
+            title: 'Agent complete image optimisation',
+            message: '23 product images successfully optimized and deployed',
+            actionRequired: false,
+            timestamp: Date.now(),
+            taskId: 'store-health' // Add task ID for zoom functionality
+          })
+        }
+      }, 2000)
     }, messageDelay)
     messageDelay += 3000
 
-    // Message 7: Thinking About Next Steps with ShiningText
+    // Message 12: Thinking About Next Steps with ShiningText
     setTimeout(() => {
       addTypingMessage({
         type: 'summary',
         content: "Analyzing remaining optimization opportunities and prioritizing next actions based on revenue impact and implementation complexity.",
         icon: RiBrainLine,
-        statusIndicator: 'AGGO_ANALYZING_NEXT'
+        statusIndicator: 'SHOPOS_ANALYZING_NEXT'
       })
 
       setTimeout(() => {
@@ -275,26 +345,13 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
     }, messageDelay)
     messageDelay += 2000
 
-    // Message 8: Next Steps Recommendation
+    // Message 13: Next Steps Recommendation
     setTimeout(() => {
       addTypingMessage({
         type: 'result',
         content: "What's next? I found 2 more high-impact issues: slow page loading (potential +$8,400/month) and mobile layout problems. Ready to tackle those?",
         icon: RiBrainLine
       })
-
-      // Trigger notification system after AI finishes
-      setTimeout(() => {
-        if (onAddNotification) {
-          onAddNotification({
-            type: 'deployment_complete',
-            title: 'Image Optimization Complete',
-            message: '23 product images successfully optimized and deployed',
-            actionRequired: false,
-            timestamp: Date.now()
-          })
-        }
-      }, 2000)
     }, messageDelay)
   }, [addTypingMessage, onAddNotification])
 
@@ -473,11 +530,23 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
           }
           return msg
         }))
+
+        // Trigger notification for scanning completion
+        if (onAddNotification) {
+          onAddNotification({
+            type: 'info',
+            title: 'Store Scan Complete',
+            message: 'Your store health analysis is ready with optimization recommendations',
+            actionRequired: false,
+            timestamp: Date.now(),
+            taskId: 'store-health' // Add task ID for zoom functionality
+          })
+        }
       }, 4000)
       
       // Health report will show automatically in LoadingPage when scanProgress reaches 100%
     }
-  }, [currentTask, addTypingMessage, scanProgress, scanningMessageShown, completionMessageShown])
+  }, [currentTask, addTypingMessage, scanProgress, scanningMessageShown, completionMessageShown, onAddNotification])
 
 
 
@@ -728,6 +797,15 @@ export default function CanvasLanding() {
   const addTemplateTask = (templateId: string) => {
     const tpl = TEMPLATES.find(t => t.id === templateId)
     if (!tpl) return
+    
+    // Handle Store Health template specially - trigger the same flow as clicking the first card
+    if (templateId === 'store-health-template') {
+      setShowAddTask(false)
+      handleTaskClick('store-health')
+      return
+    }
+    
+    // For other templates, add as new task cards
     let id = templateId
     let tries = 1
     while (taskCards.find(t => t.id === id)) id = `${templateId}-${tries++}`
@@ -1039,6 +1117,17 @@ export default function CanvasLanding() {
   // Reset view
   const resetView = () => {
     // Only normalize zoom/pan; keep all canvas state (open projects, sections, selections)
+    setZoom(1)
+    setPan({ x: 0, y: 0 })
+  }
+
+  // Zoom to specific task
+  const zoomToTask = (taskId: string) => {
+    // Make sure the task is expanded if it's not already
+    if (!expandedCards.includes(taskId)) {
+      setExpandedCards(prev => [...prev, taskId])
+    }
+    // Reset zoom and pan to center on the task
     setZoom(1)
     setPan({ x: 0, y: 0 })
   }
@@ -2484,6 +2573,17 @@ export default function CanvasLanding() {
                               minute: '2-digit' 
                             })}
                                     </span>
+                                    {notification.taskId && (
+                                      <button
+                                        onClick={() => {
+                                          zoomToTask(notification.taskId!)
+                                          setShowActionCenter(false)
+                                        }}
+                                        className="px-2 py-1 bg-gray-800 hover:bg-gray-900 text-white text-xs font-medium rounded transition-colors"
+                                      >
+                                        Open Task
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
                                 <button
