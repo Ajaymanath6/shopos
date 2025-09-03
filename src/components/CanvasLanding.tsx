@@ -1327,14 +1327,14 @@ export default function CanvasLanding() {
                         <div className="flex gap-2">
                           <button
                             onClick={(e) => handleEditClick(task.id, e)}
-                            className="p-2 rounded-lg bg-blue-100"
+                            className="p-2 rounded-full bg-blue-100"
                             title="Edit task"
                           >
                             <RiEditLine size={16} className="text-blue-500" />
                           </button>
                           <button
                             onClick={(e) => handleDeleteClick(task.id, e)}
-                            className="p-2 rounded-lg bg-red-100"
+                            className="p-2 rounded-full bg-red-100"
                             title="Delete task"
                           >
                             <RiDeleteBinLine size={16} className="text-red-500" />
