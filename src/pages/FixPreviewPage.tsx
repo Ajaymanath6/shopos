@@ -169,10 +169,10 @@ export default function FixPreviewPage({ onBack, onDeployStart }: FixPreviewPage
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Deployment Progress</span>
-                    <span className="text-gray-500">{isDeploying ? 'Processing...' : 'Ready to Deploy'}</span>
+                    <span className={isDeploying ? 'text-gray-500' : 'text-green-700 font-medium'}>{isDeploying ? 'Processing...' : 'Ready to Deploy'}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className={`h-2 bg-gray-400 rounded-full transition-all duration-300 ${isDeploying ? 'w-1/3' : 'w-0'}`}></div>
+                    <div className={`h-2 bg-green-500 rounded-full transition-all duration-300 ${isDeploying ? 'w-1/3' : 'w-0'}`}></div>
                   </div>
                 </div>
 

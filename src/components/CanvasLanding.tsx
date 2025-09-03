@@ -273,7 +273,7 @@ function AIConversationCard({ taskCards, expandedCards, scanProgress, isScanning
     messageDelay += 1500
 
     // Message 8: 21/23 complete
-    setTimeout(() => {
+      setTimeout(() => {
       addTypingMessage({
         type: 'executing',
         content: "21/23 images complete...",
@@ -804,7 +804,7 @@ export default function CanvasLanding() {
       
       // Create a new unique store health task
       const newTaskId = `store-health-${Date.now()}`
-      const newTask: TaskCard = {
+    const newTask: TaskCard = {
         id: newTaskId,
         title: 'Store Health Check',
         subtitle: 'Connect your Shopify store for an instant AI diagnostic and optimization recommendations',
@@ -813,7 +813,7 @@ export default function CanvasLanding() {
       }
       
       // Add the new task to taskCards
-      setTaskCards(prev => [...prev, newTask])
+    setTaskCards(prev => [...prev, newTask])
       
       // Trigger the new task
       setTimeout(() => {
@@ -1387,7 +1387,7 @@ export default function CanvasLanding() {
                   <h3 className="text-xl font-bold text-gray-700 leading-tight group-hover:text-gray-900 transition-colors text-left">
                     Create a new task
                   </h3>
-        </div>
+          </div>
 
                 {/* Subtitle */}
                 <div className="mb-8 flex-1">
@@ -1528,13 +1528,13 @@ export default function CanvasLanding() {
 
                             </div>
                           </div>
-
+                          
 
                           {/* Notification Banner - Outside glassmorphism */}
                           <div className="w-full mb-4">
                             <NotificationBanner activeAgent={activeAgent} />
                           </div>
-                          
+
                           {/* Two Section Layout */}
                           <div 
                             className="rounded-lg shadow-2xl border border-white/40 backdrop-blur-xl overflow-hidden"
@@ -1772,7 +1772,7 @@ export default function CanvasLanding() {
               </div>
             </div>
                         )
-            )}
+                        )}
 
             {/* Generic Task Expandable Interface - Only when NOT in section */}
             {taskCards.filter(task => 
@@ -2222,18 +2222,18 @@ export default function CanvasLanding() {
               </div>
               <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-500" onClick={() => setShowAddTask(false)}>
                 <RiCloseLine size={20} />
-              </button>
-            </div>
+                </button>
+              </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {TEMPLATES.map(t => {
-                const TemplateIcon = t.icon;
-                return (
-                  <button
-                    key={t.id}
+                  {TEMPLATES.map(t => {
+                    const TemplateIcon = t.icon;
+                    return (
+                      <button
+                        key={t.id}
                     className="text-left rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:border-gray-300 transition-all duration-200 bg-white group"
-                    onClick={() => addTemplateTask(t.id)}
-                  >
+                        onClick={() => addTemplateTask(t.id)}
+                      >
                     {/* Icon and Title Row */}
                     <div className="flex items-center gap-4 mb-4">
                       <div 
@@ -2241,12 +2241,12 @@ export default function CanvasLanding() {
                         style={{ backgroundColor: t.iconBg, color: '#374151' }}
                       >
                         <TemplateIcon size={24} />
-                      </div>
+                          </div>
                       <div className="flex-1">
                         <h4 className="font-semibold text-gray-900 text-base group-hover:text-gray-700 transition-colors">
                           {t.title}
                         </h4>
-                      </div>
+                        </div>
                     </div>
                     
                     {/* Description */}
@@ -2316,10 +2316,10 @@ export default function CanvasLanding() {
                         </div>
                       </div>
                     </div>
-                  </button>
-                );
-              })}
-            </div>
+                      </button>
+                    );
+                  })}
+                </div>
             
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <div className="flex items-start gap-3">

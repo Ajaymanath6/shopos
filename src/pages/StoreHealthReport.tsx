@@ -14,17 +14,21 @@ export default function StoreHealthReport() {
   return (
     <div className="w-full h-full overflow-y-auto px-8 py-6">
       {/* Header Section - Minimal */}
-      <div className="text-center mb-16">
-        <div className="flex items-center justify-center mb-6">
-          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
-            <RiBarChartBoxLine size={32} className="text-gray-700" />
+      <div className="text-center mb-12">
+        <div className="flex items-center justify-center mb-4">
+          <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center">
+            <RiBarChartBoxLine size={20} className="text-green-600" />
           </div>
         </div>
-        <h1 className="text-3xl font-light text-gray-900 mb-3">
+        <h1 className="text-2xl font-medium text-gray-900 mb-2">
           Store Health Report
         </h1>
-        <p className="text-lg text-gray-500 font-light">
-          Optimization opportunities to boost performance
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-sm font-medium text-green-600">Ready to Deploy</span>
+        </div>
+        <p className="text-sm text-gray-500">
+          Optimization opportunities identified and ready for implementation
         </p>
       </div>
 
@@ -138,18 +142,18 @@ export default function StoreHealthReport() {
                 <span className="text-sm text-gray-700">Page Load Speed</span>
                 <div className="flex items-center gap-3">
                   <div className="w-32 h-1 bg-gray-100 rounded-full">
-                    <div className="w-20 h-1 bg-gray-300 rounded-full"></div>
+                    <div className="w-20 h-1 bg-green-500 rounded-full"></div>
                   </div>
-                  <span className="text-sm text-gray-500 font-light w-8">68%</span>
+                  <span className="text-sm text-green-600 font-medium w-8">68%</span>
                 </div>
               </div>
               <div className="flex items-center justify-between py-3">
                 <span className="text-sm text-gray-700">Image Optimization</span>
                 <div className="flex items-center gap-3">
                   <div className="w-32 h-1 bg-gray-100 rounded-full">
-                    <div className="w-26 h-1 bg-gray-400 rounded-full"></div>
+                    <div className="w-26 h-1 bg-green-500 rounded-full"></div>
                   </div>
-                  <span className="text-sm text-gray-500 font-light w-8">83%</span>
+                  <span className="text-sm text-green-600 font-medium w-8">83%</span>
                 </div>
               </div>
             </div>

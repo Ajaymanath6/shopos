@@ -156,7 +156,7 @@ export default function LoadingPage({
   // Show store health report after scanning completes
   if (scanComplete) {
       return (
-      <div className="w-full flex justify-center rounded-lg" style={{ background: '#F4FBF2' }}>
+      <div className="w-full flex justify-center rounded-lg" style={{ background: '#f8f9fb' }}>
           <div className="p-6" style={{ width: '1440px', maxWidth: '1440px', minWidth: '1440px' }}>
             <div
             className="w-full rounded-lg backdrop-blur-lg p-8"
@@ -167,20 +167,15 @@ export default function LoadingPage({
             {/* Header Section */}
             <div className="text-center mb-12">
               <div className="flex items-center justify-center gap-4 mb-6">
-                <div
-                    className="w-16 h-16 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: DARK_PALETTE.primary }}
-                >
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                <div className="w-20 h-20 rounded-lg flex items-center justify-center">
+                  <RiBarChartLine size={40} className="text-gray-600" />
                 </div>
               </div>
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
                 Store Health Report
               </h1>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                We found several optimization opportunities to boost your store performance
+                Optimization opportunities identified and ready for implementation
               </p>
             </div>
 
@@ -211,17 +206,32 @@ export default function LoadingPage({
                   <div className="space-y-3">
                     <div className="flex items-center justify-between py-2">
                       <span className="text-sm text-gray-700">Performance</span>
-                      <span className="text-sm font-medium text-gray-900">75%</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-1 bg-gray-100 rounded-full">
+                          <div className="w-3/4 h-1 bg-green-500 rounded-full"></div>
+                        </div>
+                        <span className="text-sm font-medium text-green-600">75%</span>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between py-2">
                       <span className="text-sm text-gray-700">SEO</span>
-                      <span className="text-sm font-medium text-gray-900">82%</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-1 bg-gray-100 rounded-full">
+                          <div className="w-4/5 h-1 bg-green-500 rounded-full"></div>
+                        </div>
+                        <span className="text-sm font-medium text-green-600">82%</span>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between py-2">
                       <span className="text-sm text-gray-700">Security</span>
-                      <span className="text-sm font-medium text-gray-900">88%</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-1 bg-gray-100 rounded-full">
+                          <div className="w-5/6 h-1 bg-green-500 rounded-full"></div>
+                        </div>
+                        <span className="text-sm font-medium text-green-600">88%</span>
+                      </div>
                     </div>
                   </div>
 
@@ -245,10 +255,12 @@ export default function LoadingPage({
                   <div className="space-y-6">
                     {/* Issue 1 - Image Quality */}
                       <div>
-                        <div className="flex items-start gap-3 mb-4">
-                          <RiImageLine size={20} style={{ color: DARK_PALETTE.primary }} />
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">Blurry Product Images</h3>
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <RiImageLine size={20} style={{ color: DARK_PALETTE.primary }} />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">Blurry Product Images</h3>
                             <p className="text-sm text-gray-600">23 product images are low resolution and need enhancement</p>
                           </div>
                         </div>
@@ -299,17 +311,19 @@ export default function LoadingPage({
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div className={`h-2 bg-gray-400 rounded-full transition-all duration-300 ${isFixingImages ? 'w-1/3' : 'w-0'}`}></div>
+                          <div className={`h-2 bg-green-500 rounded-full transition-all duration-300 ${isFixingImages ? 'w-1/3' : 'w-0'}`}></div>
                         </div>
                       </div>
                     </div>
 
                     {/* Issue 2 - Page Speed */}
                       <div>
-                        <div className="flex items-start gap-3 mb-4">
-                          <RiSpeedUpLine size={20} style={{ color: DARK_PALETTE.primary }} />
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">Slow Page Loading</h3>
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <RiSpeedUpLine size={20} style={{ color: DARK_PALETTE.primary }} />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">Slow Page Loading</h3>
                             <p className="text-sm text-gray-600">Homepage loads in 4.2s, needs optimization</p>
                           </div>
                         </div>
@@ -358,17 +372,19 @@ export default function LoadingPage({
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div className={`h-2 bg-gray-400 rounded-full transition-all duration-300 ${isFixingSpeed ? 'w-1/3' : 'w-0'}`}></div>
+                          <div className={`h-2 bg-green-500 rounded-full transition-all duration-300 ${isFixingSpeed ? 'w-1/3' : 'w-0'}`}></div>
                         </div>
                       </div>
                     </div>
 
                     {/* Issue 3 - Mobile UX */}
                       <div>
-                        <div className="flex items-start gap-3 mb-4">
-                          <RiSmartphoneLine size={20} style={{ color: DARK_PALETTE.primary }} />
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">Mobile Layout Issues</h3>
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <RiSmartphoneLine size={20} style={{ color: DARK_PALETTE.primary }} />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">Mobile Layout Issues</h3>
                             <p className="text-sm text-gray-600">Product grid breaks on small screens</p>
                           </div>
                         </div>
@@ -417,7 +433,7 @@ export default function LoadingPage({
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div className={`h-2 bg-gray-400 rounded-full transition-all duration-300 ${isFixingMobile ? 'w-1/3' : 'w-0'}`}></div>
+                          <div className={`h-2 bg-green-500 rounded-full transition-all duration-300 ${isFixingMobile ? 'w-1/3' : 'w-0'}`}></div>
                         </div>
                       </div>
                     </div>
@@ -535,7 +551,7 @@ export default function LoadingPage({
   // Show scanning progress if scanning
   if (isScanning) {
     return (
-      <div className="w-full flex justify-center" style={{ background: '#F4FBF2' }}>
+      <div className="w-full flex justify-center" style={{ background: '#f8f9fb' }}>
         <div className="p-8" style={{ width: '1440px', maxWidth: '1440px', minWidth: '1440px' }}>
           <div className="flex items-center justify-center min-h-screen">
             <div className="w-full max-w-lg">
@@ -552,7 +568,7 @@ export default function LoadingPage({
   }
 
   return (
-    <div className="w-full flex justify-center rounded-lg" style={{ background: '#F4FBF2' }}>
+    <div className="w-full flex justify-center rounded-lg" style={{ background: '#f8f9fb' }}>
       <div className="p-6" style={{ width: '1440px', maxWidth: '1440px', minWidth: '1440px' }}>
         <div className="w-full p-6">
       {/* Landing Page Header */}
