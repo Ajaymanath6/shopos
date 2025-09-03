@@ -17,7 +17,9 @@ import {
   RiLoader4Line,
   RiImageLine,
   RiSpeedUpLine,
-  RiSmartphoneLine
+  RiSmartphoneLine,
+  RiLineChartLine,
+  RiFireFill
 } from '@remixicon/react'
 import FixPreviewPage from './FixPreviewPage'
 import AiDeployPage from './AiDeployPage'
@@ -247,11 +249,16 @@ export default function LoadingPage({
 
                 {/* Box 2 - Top Priority Issues */}
                   <div className="p-6 rounded-lg border border-gray-200 bg-white shadow-sm">
+                  <div className="mb-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Priority Store Issues</h3>
+                    <p className="text-sm text-gray-600 mb-4">Critical issues affecting your store performance and customer experience</p>
+                    <hr className="border-gray-200" />
+                  </div>
                   <div className="space-y-6">
                     {/* Issue 1 - Image Quality */}
                       <div>
                         <div className="flex items-start gap-4 mb-4">
-                          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <RiImageLine size={20} style={{ color: DARK_PALETTE.primary }} />
                           </div>
                           <div className="flex-1">
@@ -314,7 +321,7 @@ export default function LoadingPage({
                     {/* Issue 2 - Page Speed */}
                       <div>
                         <div className="flex items-start gap-4 mb-4">
-                          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <RiSpeedUpLine size={20} style={{ color: DARK_PALETTE.primary }} />
                           </div>
                           <div className="flex-1">
@@ -375,7 +382,7 @@ export default function LoadingPage({
                     {/* Issue 3 - Mobile UX */}
                       <div>
                         <div className="flex items-start gap-4 mb-4">
-                          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                             <RiSmartphoneLine size={20} style={{ color: DARK_PALETTE.primary }} />
                           </div>
                           <div className="flex-1">
@@ -442,7 +449,7 @@ export default function LoadingPage({
                   <div className="p-6 rounded-lg border border-gray-200 bg-white shadow-sm">
                   <div className="text-center mb-6">
                     <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center bg-gray-100">
-                      <RiBarChartLine size={24} className="text-gray-700" />
+                      <RiLineChartLine size={24} className="text-gray-700" />
                     </div>
                     <h3 className="text-lg font-bold text-gray-900 mb-1">Potential Impact</h3>
                     <p className="text-sm text-gray-600">Estimated improvements</p>
@@ -502,7 +509,7 @@ export default function LoadingPage({
                   <div className="p-6 rounded-lg border border-gray-200 bg-white shadow-sm">
                   <div className="text-center mb-6">
                     <div className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center bg-gray-100">
-                      <RiRocketLine size={24} className="text-gray-700" />
+                      <RiFireFill size={24} className="text-gray-700" />
                     </div>
                     <h3 className="text-lg font-bold text-gray-900 mb-1">Quick Actions</h3>
                     <p className="text-sm text-gray-600">Next steps</p>
