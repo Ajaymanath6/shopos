@@ -1145,7 +1145,7 @@ export default function CanvasLanding() {
   // Reset view
   const resetView = () => {
     // Only normalize zoom/pan; keep all canvas state (open projects, sections, selections)
-    setZoom(1)
+    setZoom(0.3) // Reset to minimum zoom (30%)
     setPan({ x: 0, y: 0 })
   }
 
@@ -2210,110 +2210,90 @@ export default function CanvasLanding() {
         </div>
       )}
 
-      {/* Add Task Modal - Full Viewport Overlay */}
+      {/* Add Task Modal - 60% Viewport Coverage */}
       {showAddTask && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="absolute inset-0" onClick={() => setShowAddTask(false)} />
-          <div className="relative w-full max-w-2xl mx-4 rounded-lg border border-white/40 backdrop-blur-2xl p-6 shadow-2xl" style={{ background: 'rgba(255,255,255,0.95)' }}>
-            <div className="flex items-center justify-between mb-6">
+          <div 
+            className="relative rounded-lg border border-white/40 backdrop-blur-2xl p-4 shadow-2xl flex flex-col" 
+            style={{ 
+              background: 'rgba(255,255,255,0.95)',
+              width: '50vw',
+              height: '40vh',
+              minWidth: '500px',
+              minHeight: '280px'
+            }}
+          >
+            <div className="flex items-center justify-between mb-3">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900">Choose a Template</h3>
-                <p className="text-sm text-gray-600 mt-1">Select a pre-built AI agent to add to your workspace</p>
+                <h3 className="text-base font-semibold text-gray-900">Choose a Template</h3>
+                <p className="text-xs text-gray-600">Select a pre-built AI agent</p>
               </div>
-              <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-500" onClick={() => setShowAddTask(false)}>
-                <RiCloseLine size={20} />
-                </button>
-              </div>
+              <button className="p-1 rounded hover:bg-gray-100 text-gray-500" onClick={() => setShowAddTask(false)}>
+                <RiCloseLine size={16} />
+              </button>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-3 flex-1">
                   {TEMPLATES.map(t => {
                     const TemplateIcon = t.icon;
                     return (
                       <button
                         key={t.id}
-                    className="text-left rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:border-gray-300 transition-all duration-200 bg-white group"
+                    className="flex flex-col items-center text-center rounded-lg border border-gray-200 p-2 hover:shadow-md hover:border-gray-300 transition-all duration-200 bg-white group h-full justify-between"
                         onClick={() => addTemplateTask(t.id)}
                       >
-                    {/* Icon and Title Row */}
-                    <div className="flex items-center gap-4 mb-4">
+                    {/* Icon */}
+                    <div className="mb-2">
                       <div 
-                        className="w-12 h-12 rounded-lg flex items-center justify-center shadow-sm"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center"
                         style={{ backgroundColor: t.iconBg, color: '#374151' }}
                       >
-                        <TemplateIcon size={24} />
-                          </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 text-base group-hover:text-gray-700 transition-colors">
-                          {t.title}
-                        </h4>
-                        </div>
-                    </div>
-                    
-                    {/* Description */}
-                    <p className="text-sm text-gray-600 leading-relaxed mb-4">
-                      {t.subtitle}
-                    </p>
-                    
-                    {/* Features List */}
-                    <div className="space-y-1">
-                      <div className="text-xs font-medium text-gray-800 mb-2">Key Features:</div>
-                      <div className="space-y-1">
-                        {t.id === 'store-health-template' ? (
-                          <>
-                            <div className="flex items-center gap-2 text-xs text-gray-600">
-                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                              <span>Complete store analysis</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-gray-600">
-                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                              <span>Performance optimization</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-gray-600">
-                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                              <span>Revenue improvement tips</span>
-                            </div>
-                          </>
-                        ) : t.id === 'abandoned-cart' ? (
-                          <>
-                            <div className="flex items-center gap-2 text-xs text-gray-600">
-                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                              <span>Smart email campaigns</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-gray-600">
-                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                              <span>Dynamic incentives</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-gray-600">
-                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                              <span>Behavioral triggers</span>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex items-center gap-2 text-xs text-gray-600">
-                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                              <span>AI-powered forecasting</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-gray-600">
-                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                              <span>Smart restock alerts</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-gray-600">
-                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                              <span>Trend analysis</span>
-                            </div>
-                          </>
-                        )}
+                        <TemplateIcon size={16} />
                       </div>
                     </div>
                     
+                    {/* Title */}
+                    <h4 className="font-medium text-gray-900 text-xs mb-1 group-hover:text-gray-700 transition-colors leading-tight">
+                      {t.title}
+                    </h4>
+                    
+                    {/* Features List - Detailed */}
+                    <div className="text-xs text-gray-600 space-y-1 flex-1 flex flex-col justify-center text-left px-2">
+                      {t.id === 'store-health-template' ? (
+                        <>
+                          <div>• Complete store analysis</div>
+                          <div>• Performance optimization</div>
+                          <div>• SEO improvements</div>
+                          <div>• Revenue enhancement tips</div>
+                          <div>• Security vulnerability checks</div>
+                          <div>• Mobile responsiveness audit</div>
+                        </>
+                      ) : t.id === 'abandoned-cart' ? (
+                        <>
+                          <div>• Smart email sequences</div>
+                          <div>• Dynamic discount offers</div>
+                          <div>• Behavioral trigger setup</div>
+                          <div>• Conversion tracking</div>
+                          <div>• A/B test campaigns</div>
+                          <div>• Customer segmentation</div>
+                        </>
+                      ) : (
+                        <>
+                          <div>• AI-powered forecasting</div>
+                          <div>• Automated restock alerts</div>
+                          <div>• Demand trend analysis</div>
+                          <div>• Seasonal planning</div>
+                          <div>• Supplier optimization</div>
+                          <div>• Cost reduction insights</div>
+                        </>
+                      )}
+                    </div>
+                    
                     {/* Add Button */}
-                    <div className="mt-4 pt-4 border-t border-gray-100">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500">Ready to deploy</span>
-                        <div className="px-3 py-1.5 bg-gray-100 group-hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-lg transition-colors">
-                          Add Task
-                        </div>
+                    <div className="mt-2 w-full">
+                      <div className="px-2 py-1 bg-gray-100 group-hover:bg-gray-200 text-gray-700 text-xs font-medium rounded text-center transition-colors">
+                        Add
                       </div>
                     </div>
                       </button>
@@ -2321,17 +2301,7 @@ export default function CanvasLanding() {
                   })}
                 </div>
             
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <RiStarFill size={12} className="text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-700 font-medium mb-1">Customize after creation</p>
-                  <p className="text-xs text-gray-600">You can edit the task name, description, and settings using the edit button after adding it to your workspace.</p>
-                </div>
-              </div>
-            </div>
+
           </div>
         </div>
       )}
