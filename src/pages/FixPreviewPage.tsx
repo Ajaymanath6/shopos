@@ -10,7 +10,7 @@ export default function FixPreviewPage({ onBack, onDeployStart }: FixPreviewPage
   const [isDeploying, setIsDeploying] = useState(false)
   const [activeTab, setActiveTab] = useState<'before' | 'after'>('after')
   return (
-    <div className="w-full flex justify-center rounded-xl" style={{ background: '#F7FFF7' }}>
+    <div className="w-full flex justify-center rounded-xl" style={{ background: '#f8f9fb' }}>
       <div className="p-6" style={{ width: '1440px', maxWidth: '1440px', minWidth: '1440px' }}>
         {/* Back Button */}
         {onBack && (

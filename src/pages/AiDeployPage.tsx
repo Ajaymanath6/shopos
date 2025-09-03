@@ -62,7 +62,7 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
   }, [logEntries.length, isDeploymentComplete])
 
   return (
-    <div className="w-full flex justify-center rounded-lg" style={{ background: '#F7FFF7' }}>
+    <div className="w-full flex justify-center rounded-lg" style={{ background: '#f8f9fb' }}>
       <div className="p-6" style={{ width: '1440px', maxWidth: '1440px', minWidth: '1440px' }}>
         {!isDeploymentComplete ? (
           /* Real-time Deployment Logs Card */

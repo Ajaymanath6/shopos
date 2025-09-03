@@ -30,7 +30,7 @@ export default function ProgressBar({
           className="h-full rounded-full transition-all duration-300 ease-out"
           style={{ 
             width: `${clampedProgress}%`,
-            backgroundColor: '#1F2937' // Dark grey
+            backgroundColor: '#10B981' // Green
           }}
         />
       </div>

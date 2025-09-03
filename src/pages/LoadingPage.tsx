@@ -4,11 +4,6 @@ import {
   RiSettings3Line,
   RiRocketLine,
   RiCheckLine,
-  RiAppleLine,
-  RiGoogleLine,
-  RiMicrosoftLine,
-  RiAmazonLine,
-  RiNetflixLine,
   RiBarChartLine,
   RiMoneyDollarCircleLine,
   RiArrowUpLine,
@@ -639,29 +634,7 @@ export default function LoadingPage({
         </div>
       </div>
 
-      {/* Trusted By Section */}
-      <div className="max-w-4xl mx-auto mb-16">
-        <div className="flex items-center gap-6">
-          <p className="text-sm text-gray-500">Trusted by leading technology companies</p>
-          <div className="flex items-center gap-4 opacity-60">
-            <div className="flex items-center justify-center w-8 h-8 rounded bg-white">
-              <RiAppleLine size={16} className="text-gray-600" />
-            </div>
-            <div className="flex items-center justify-center w-8 h-8 rounded bg-white">
-              <RiGoogleLine size={16} className="text-gray-600" />
-            </div>
-            <div className="flex items-center justify-center w-8 h-8 rounded bg-white">
-              <RiMicrosoftLine size={16} className="text-gray-600" />
-            </div>
-            <div className="flex items-center justify-center w-8 h-8 rounded bg-white">
-              <RiAmazonLine size={16} className="text-gray-600" />
-            </div>
-            <div className="flex items-center justify-center w-8 h-8 rounded bg-white">
-              <RiNetflixLine size={16} className="text-gray-600" />
-            </div>
-          </div>
-        </div>
-      </div>
+
 
       {/* How It Works Section */}
       <div className="mb-16 max-w-4xl mx-auto">
