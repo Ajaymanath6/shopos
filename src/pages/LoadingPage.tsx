@@ -285,7 +285,18 @@ export default function LoadingPage({
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600">Task Progress</span>
-                          <span className="text-gray-500">Not Started</span>
+                          <span 
+                            className="text-green-700 cursor-pointer hover:text-green-800 font-medium"
+                            onClick={() => {
+                              setIsFixingImages(true)
+                              setTimeout(() => {
+                                setIsFixingImages(false)
+                                setShowFixPreview(true)
+                              }, 2000)
+                            }}
+                          >
+                            Click to Fix
+                          </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div className={`h-2 bg-gray-400 rounded-full transition-all duration-300 ${isFixingImages ? 'w-1/3' : 'w-0'}`}></div>
@@ -334,7 +345,17 @@ export default function LoadingPage({
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600">Task Progress</span>
-                          <span className="text-gray-500">Not Started</span>
+                          <span 
+                            className="text-green-700 cursor-pointer hover:text-green-800 font-medium"
+                            onClick={() => {
+                              setIsFixingSpeed(true)
+                              setTimeout(() => {
+                                setIsFixingSpeed(false)
+                              }, 2000)
+                            }}
+                          >
+                            Click to Fix
+                          </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div className={`h-2 bg-gray-400 rounded-full transition-all duration-300 ${isFixingSpeed ? 'w-1/3' : 'w-0'}`}></div>
@@ -383,7 +404,17 @@ export default function LoadingPage({
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600">Task Progress</span>
-                          <span className="text-gray-500">Not Started</span>
+                          <span 
+                            className="text-green-700 cursor-pointer hover:text-green-800 font-medium"
+                            onClick={() => {
+                              setIsFixingMobile(true)
+                              setTimeout(() => {
+                                setIsFixingMobile(false)
+                              }, 2000)
+                            }}
+                          >
+                            Click to Fix
+                          </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div className={`h-2 bg-gray-400 rounded-full transition-all duration-300 ${isFixingMobile ? 'w-1/3' : 'w-0'}`}></div>

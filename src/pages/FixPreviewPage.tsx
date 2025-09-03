@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { RiArrowLeftLine, RiCloseLine, RiToolsLine, RiLoader4Line } from '@remixicon/react'
+import { RiArrowLeftLine, RiCloseLine, RiRocketLine, RiLoader4Line } from '@remixicon/react'
 
 interface FixPreviewPageProps {
   onBack?: () => void
@@ -161,7 +161,7 @@ export default function FixPreviewPage({ onBack, onDeployStart }: FixPreviewPage
                     {isDeploying ? (
                       <RiLoader4Line size={16} className="text-gray-500 animate-spin" />
                     ) : (
-                      <RiToolsLine size={16} className="text-gray-500" />
+                      <RiRocketLine size={16} className="text-gray-500" />
                     )}
                   </button>
                 </div>

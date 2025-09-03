@@ -1,7 +1,7 @@
 
 
 import { useState } from 'react'
-import { RiStarFill, RiSpeedUpLine, RiShieldCheckLine, RiSearchLine, RiArrowRightSLine } from '@remixicon/react'
+import { RiBarChartBoxLine, RiSpeedUpLine, RiShieldCheckLine, RiSearchLine, RiArrowRightSLine } from '@remixicon/react'
 
 export default function StoreHealthReport() {
   const [activeTab, setActiveTab] = useState<'before' | 'after'>('before')
@@ -16,7 +16,9 @@ export default function StoreHealthReport() {
       {/* Header Section - Minimal */}
       <div className="text-center mb-16">
         <div className="flex items-center justify-center mb-6">
-          <RiStarFill size={32} className="text-gray-400" />
+          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+            <RiBarChartBoxLine size={32} className="text-gray-700" />
+          </div>
         </div>
         <h1 className="text-3xl font-light text-gray-900 mb-3">
           Store Health Report

@@ -991,24 +991,7 @@ export default function CanvasLanding() {
   }
 
   // Notification System State
-  const [notifications, setNotifications] = useState<NotificationItem[]>([
-    {
-      id: 'sample-1',
-      type: 'deployment_complete',
-      title: 'Image Optimization Complete',
-      message: '23 product images successfully optimized and deployed to your live store',
-      actionRequired: false,
-      timestamp: Date.now() - 300000 // 5 minutes ago
-    },
-    {
-      id: 'sample-2',
-      type: 'info',
-      title: 'Performance Scan Ready',
-      message: 'Your store health report is ready with 14 optimization recommendations',
-      actionRequired: false,
-      timestamp: Date.now() - 600000 // 10 minutes ago
-    }
-  ])
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [showActionCenter, setShowActionCenter] = useState(false)
 
   // Notification System Functions

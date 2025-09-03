@@ -116,7 +116,7 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
                 </svg>
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-3">Congratulations</h2>
-              <p className="text-lg text-gray-600 mb-6">You just deployed all your changes to https://yourstore.myshopify.com</p>
+              <p className="text-lg text-gray-600 mb-6">You just deployed all your changes to <span className="text-green-700 font-medium">https://yourstore.myshopify.com</span></p>
             </div>
 
             {/* Actions Section */}
