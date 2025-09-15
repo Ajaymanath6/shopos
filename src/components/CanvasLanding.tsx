@@ -23,7 +23,10 @@ import {
   RiAlertLine,
   RiImageLine,
   RiBarChartLine,
-  RiToolsLine
+  RiToolsLine,
+  RiTruckLine,
+  RiArrowGoBackLine,
+  RiPlantLine
 } from '@remixicon/react'
 import shopOSLogo from '../assets/shop-os-logo.svg'
 import LoadingPage from '../pages/LoadingPage'
@@ -2000,15 +2003,15 @@ export default function CanvasLanding() {
                                 {/* Trust indicators */}
                                 <div className="border-t border-gray-200 pt-4 space-y-2 text-sm text-gray-600">
                                   <div className="flex items-center gap-2">
-                                    <span>🚚</span>
+                                    <RiTruckLine size={16} className="text-green-600" />
                                     <span>Free shipping on orders over $50</span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span>↩️</span>
+                                    <RiArrowGoBackLine size={16} className="text-green-600" />
                                     <span>30-day return policy</span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span>🌱</span>
+                                    <RiPlantLine size={16} className="text-green-600" />
                                     <span>Organic certified & ethically sourced</span>
                                   </div>
                                 </div>

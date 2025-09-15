@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { RiDownloadLine, RiStoreLine, RiCalendarLine, RiArrowRightSLine } from '@remixicon/react'
 import SmartSuggestOrb from '../components/SmartSuggestOrb'
 
@@ -23,7 +23,9 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
   ])
   const [isDeploymentComplete, setIsDeploymentComplete] = useState(false)
   const [showOrb, setShowOrb] = useState(false)
-  const [hoverTimeout, setHoverTimeout] = useState<number | null>(null)
+  const [scrollTimeout, setScrollTimeout] = useState<number | null>(null)
+  const scrollPositionRef = useRef(0)
+  const lastScrollTimeRef = useRef(Date.now())
 
   // Simulate real-time log updates
   useEffect(() => {
@@ -64,36 +66,55 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
     return () => clearInterval(interval)
   }, [logEntries.length, isDeploymentComplete])
 
-  // AI Orb hover handlers
-  const handleCardHover = () => {
-    // Clear any existing timeout
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout)
+  // AI Orb scroll handlers - appears during idle scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      const currentTime = Date.now()
+      
+      // Update refs
+      scrollPositionRef.current = currentScrollY
+      lastScrollTimeRef.current = currentTime
+      
+      // Clear existing timeout
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout)
+      }
+      
+      // Hide orb while actively scrolling
+      setShowOrb(false)
+      
+      // Only show orb if user has scrolled and then stopped scrolling for a bit
+      // and if they've scrolled past the initial view (more than 200px)
+      if (currentScrollY > 200) {
+        const timeout = setTimeout(() => {
+          // Double check user is still in scrolled state and not actively scrolling
+          if (window.scrollY > 200 && Date.now() - lastScrollTimeRef.current > 1500) {
+            setShowOrb(true)
+          }
+        }, 1500) // Show orb 1.5s after user stops scrolling
+        
+        setScrollTimeout(timeout)
+      }
     }
 
-    // Set new timeout for orb to appear
-    const timeout = setTimeout(() => {
-      setShowOrb(true)
-    }, 800) // Appear after 800ms of hovering
+    // Add scroll listener
+    window.addEventListener('scroll', handleScroll)
     
-    setHoverTimeout(timeout)
-  }
-
-  const handleCardLeave = () => {
-    // Clear timeout if user moves away before orb appears
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout)
-      setHoverTimeout(null)
+    // Cleanup
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout)
+      }
     }
-    // Hide orb immediately when leaving
-    setShowOrb(false)
-  }
+  }, [scrollTimeout])
 
   const handleCloseOrb = () => {
     setShowOrb(false)
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout)
-      setHoverTimeout(null)
+    if (scrollTimeout) {
+      clearTimeout(scrollTimeout)
+      setScrollTimeout(null)
     }
   }
 
@@ -104,8 +125,6 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
           /* Real-time Deployment Logs Card */
           <div 
             className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm relative"
-            onMouseEnter={handleCardHover}
-            onMouseLeave={handleCardLeave}
           >
             <div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">Real-time Deployment Logs</h3>
@@ -150,8 +169,6 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
           /* Success Message with Next Steps Card */
           <div 
             className="bg-white rounded-lg p-8 border border-gray-200 shadow-sm relative"
-            onMouseEnter={handleCardHover}
-            onMouseLeave={handleCardLeave}
           >
             <div className="text-center mb-8">
               <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
@@ -245,13 +262,15 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
           </div>
         )}
         
-        {/* AI Orb - shows on both cards */}
+        {/* AI Orb - shows during scroll behavior */}
         <SmartSuggestOrb
           isVisible={showOrb}
           onClose={handleCloseOrb}
           userLocation="Kerala"
           productCategory="deployment"
           isOnProduct={true}
+          mode="help"
+          showTooltipImmediately={true}
         />
       </div>
     </div>

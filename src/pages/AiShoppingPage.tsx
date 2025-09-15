@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import SmartSuggestOrb from '../components/SmartSuggestOrb'
 import Badge from '../components/Badge'
-import { RiArrowLeftLine, RiSparklingFill } from '@remixicon/react'
+import { RiArrowLeftLine, RiSparklingFill, RiTruckLine, RiArrowGoBackLine, RiPlantLine } from '@remixicon/react'
 
 export default function AiShoppingPage() {
   const [showOrb, setShowOrb] = useState(false)
@@ -28,6 +28,11 @@ export default function AiShoppingPage() {
 
   // Smart Suggest Orb hover handlers
   const handleProductImageHover = () => {
+    // Hide help orb when product orb might show
+    if (showHelpOrb && !helpOrbExpanded) {
+      setShowHelpOrb(false)
+    }
+    
     // Clear any existing timeout
     if (hoverTimeout) {
       clearTimeout(hoverTimeout)
@@ -82,11 +87,14 @@ export default function AiShoppingPage() {
       idleTimerRef.current = null
     }
     
-    // Set new idle timer
+    // Set new idle timer - only if no product hover orb is active
     idleTimerRef.current = setTimeout(() => {
-      setShowHelpOrb(true)
+      // Only show help orb if product hover orb is not active
+      if (!showOrb) {
+        setShowHelpOrb(true)
+      }
     }, 4000) // 4 seconds
-  }, [helpOrbExpanded])
+  }, [helpOrbExpanded, showOrb])
 
   // Handle help orb click
   const handleHelpOrbClick = () => {
@@ -358,15 +366,15 @@ export default function AiShoppingPage() {
               {/* Trust indicators */}
               <div className="border-t border-gray-200 pt-6 space-y-2 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
-                  <span>🚚</span>
+                  <RiTruckLine size={16} className="text-green-600" />
                   <span>Free shipping on orders over $50</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span>↩️</span>
+                  <RiArrowGoBackLine size={16} className="text-green-600" />
                   <span>30-day return policy</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span>🌱</span>
+                  <RiPlantLine size={16} className="text-green-600" />
                   <span>Organic certified & ethically sourced</span>
                 </div>
               </div>
@@ -406,10 +414,10 @@ export default function AiShoppingPage() {
       </div>
 
       {/* Help Orb - Right Side (Transforms in place like first orb) */}
-      {showHelpOrb && (
+      {showHelpOrb && !showOrb && (
         <div className="fixed top-1/2 right-8 z-50 transform -translate-y-1/2" 
              style={{ 
-               right: helpOrbExpanded ? '408px' : '78px', // When expanded: adjusted for taller chat box, when orb: 78px from right edge
+               right: helpOrbExpanded ? '408px' : '78px', // When expanded: adjusted for h-96 chat box, when orb: 78px from right edge
                transition: 'right 0.3s ease-out'
              }}>
           <SmartSuggestOrb 

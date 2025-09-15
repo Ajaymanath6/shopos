@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { RiSparklingFill, RiCloseLine, RiSearchLine, RiMicLine, RiSendPlaneLine, RiEyeLine, RiHeartLine, RiStarLine } from '@remixicon/react'
+import { RiSparklingFill, RiCloseLine, RiSearchLine, RiMicLine, RiSendPlaneLine, RiEyeLine, RiHeartLine, RiStarLine, RiBrainLine, RiLoader4Fill, RiCheckLine } from '@remixicon/react'
 
 // Custom bouncing keyframes for smooth animation
 const bounceInAnimation = `
@@ -112,6 +112,16 @@ interface SuggestionProduct {
   description: string
 }
 
+interface ConversationMessage {
+  id: string
+  type: 'thinking' | 'analyzing' | 'result'
+  content: string
+  timestamp: number
+  isTyping: boolean
+  icon?: React.ComponentType<{ size?: string | number }>
+  statusIndicator?: string
+}
+
 const KERALA_TEA_SUGGESTIONS: SuggestionProduct[] = [
   {
     id: 'kerala-mural-tea-set',
@@ -153,7 +163,148 @@ export default function SmartSuggestOrb({
   const [isListening, setIsListening] = useState(false)
   const [inputMode, setInputMode] = useState<'search' | 'voice' | null>(null)
   const [showTooltip, setShowTooltip] = useState(false)
+  const [isInConversation, setIsInConversation] = useState(false)
+  const [conversationMessages, setConversationMessages] = useState<ConversationMessage[]>([])
+  const [showConversationSkeleton, setShowConversationSkeleton] = useState(false)
   const orbRef = useRef<HTMLDivElement>(null)
+
+  // Add typing message function
+  const addTypingMessage = ({ type, content, icon, statusIndicator }: {
+    type: 'thinking' | 'analyzing' | 'result'
+    content: string
+    icon?: React.ComponentType<{ size?: string | number }>
+    statusIndicator?: string
+  }) => {
+    const newMessage: ConversationMessage = {
+      id: Date.now().toString(),
+      type,
+      content: '',
+      timestamp: Date.now(),
+      isTyping: true,
+      icon,
+      statusIndicator
+    }
+
+    setConversationMessages(prev => [...prev, newMessage])
+
+    // Update status indicator first if provided
+    if (statusIndicator) {
+      setConversationMessages(prev => prev.map(msg => 
+        msg.id === newMessage.id 
+          ? { ...msg, content: statusIndicator, icon: RiLoader4Fill }
+          : msg
+      ))
+      
+      // Wait before starting typing animation
+      setTimeout(() => {
+        let currentIndex = 0
+        const fullContent = content
+        
+        const typeChar = () => {
+          if (currentIndex < fullContent.length) {
+            setConversationMessages(prev => prev.map(msg => 
+              msg.id === newMessage.id 
+                ? { ...msg, content: fullContent.substring(0, currentIndex + 1), icon: icon || RiBrainLine }
+                : msg
+            ))
+            currentIndex++
+            setTimeout(typeChar, 30) // 30ms per character for smooth typing
+          } else {
+            // Finished typing
+            setConversationMessages(prev => prev.map(msg => 
+              msg.id === newMessage.id 
+                ? { ...msg, isTyping: false }
+                : msg
+            ))
+          }
+        }
+        typeChar()
+      }, 1000)
+    } else {
+      // Direct typing without status indicator
+      let currentIndex = 0
+      const fullContent = content
+      
+      const typeChar = () => {
+        if (currentIndex < fullContent.length) {
+          setConversationMessages(prev => prev.map(msg => 
+            msg.id === newMessage.id 
+              ? { ...msg, content: fullContent.substring(0, currentIndex + 1) }
+              : msg
+          ))
+          currentIndex++
+          setTimeout(typeChar, 30)
+        } else {
+          setConversationMessages(prev => prev.map(msg => 
+            msg.id === newMessage.id 
+              ? { ...msg, isTyping: false }
+              : msg
+          ))
+        }
+      }
+      setTimeout(typeChar, 300)
+    }
+  }
+
+  // Ingredients analysis sequence
+  const startIngredientsAnalysis = () => {
+    setIsInConversation(true)
+    setShowSuggestions(false)
+    setShowConversationSkeleton(true)
+    setConversationMessages([])
+
+    // Hide skeleton after short delay
+    setTimeout(() => {
+      setShowConversationSkeleton(false)
+    }, 800)
+
+    // Analysis sequence with progressive messages
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'thinking',
+        content: "Analyzing Earl Grey tea composition and identifying key botanical ingredients...",
+        icon: RiBrainLine,
+        statusIndicator: 'SHOPOS_ANALYZING'
+      })
+    }, 1200)
+
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'analyzing',
+        content: "Scanning flavor profiles, bergamot oil concentrations, and brewing parameters...",
+        icon: RiSearchLine,
+        statusIndicator: 'SHOPOS_PROCESSING'
+      })
+    }, 3000)
+
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'result',
+        content: `**Earl Grey Premium Tea Analysis Complete**
+
+**Primary Ingredients:**
+• **Black Tea Base**: Ceylon & Indian Assam blend (85%)
+• **Bergamot Oil**: Natural bergamot extract from Calabria (12%)
+• **Cornflower Petals**: Dried blue cornflowers for visual appeal (3%)
+
+**Brewing Specifications:**
+• **Water Temperature**: 95°C (203°F)
+• **Steeping Time**: 3-5 minutes
+• **Tea-to-Water Ratio**: 1 tsp per 200ml
+
+**Nutritional Profile:**
+• **Caffeine Content**: 40-70mg per cup
+• **Antioxidants**: Rich in theaflavins and catechins
+• **Calories**: 2-4 per cup (without additives)
+
+**Flavor Notes**: Citrusy bergamot aroma with robust black tea base, floral finish from cornflower petals.
+
+**Best Served**: With honey or lemon, avoid milk to preserve bergamot essence.`,
+        icon: RiCheckLine,
+        statusIndicator: 'SHOPOS_COMPLETE'
+      })
+    }, 6500)
+  }
 
   const handleOrbClick = () => {
     if (mode === 'help' && showTooltip) {
@@ -173,26 +324,12 @@ export default function SmartSuggestOrb({
   useEffect(() => {
     if (isVisible && !showSeeMore && !isExpanded) {
       if (mode === 'help') {
-        // Help mode: show tooltip immediately, then expand after user sees it
+        // Help mode: show tooltip immediately, but don't auto-expand
         if (showTooltipImmediately) {
           setShowTooltip(true)
-          // Auto-hide tooltip and show expanded chat after 3 seconds
-          setTimeout(() => {
-            setShowTooltip(false)
-            setIsExpanded(true)
-            onExpanded?.(true)
-            setTimeout(() => {
-              setShowSuggestions(true)
-            }, 300)
-          }, 3000)
-        } else {
-          // Expand immediately if no tooltip needed
-          setIsExpanded(true)
-          onExpanded?.(true)
-          setTimeout(() => {
-            setShowSuggestions(true)
-          }, 300)
+          // Just show tooltip, wait for user click to expand
         }
+        // Don't auto-expand - wait for user interaction
       } else {
         // Discovery mode: show prompt first
         const autoExpandTimeout = setTimeout(() => {
@@ -220,6 +357,9 @@ export default function SmartSuggestOrb({
     setInputMode(null)
     setInputText('')
     setIsListening(false)
+    setIsInConversation(false)
+    setConversationMessages([])
+    setShowConversationSkeleton(false)
     onExpanded?.(false) // Notify parent that orb is no longer expanded
     setTimeout(() => {
       onClose()
@@ -261,6 +401,9 @@ export default function SmartSuggestOrb({
       setInputMode(null)
       setInputText('')
       setIsListening(false)
+      setIsInConversation(false)
+      setConversationMessages([])
+      setShowConversationSkeleton(false)
       onExpanded?.(false) // Notify parent that orb is no longer expanded
     }
   }, [isVisible, onExpanded])
@@ -290,7 +433,7 @@ export default function SmartSuggestOrb({
         <div
           className={`transition-all duration-300 ease-out transform ${
             isExpanded 
-              ? 'w-96 h-80 rounded-3xl scale-100' // Increased height to show 2 options properly
+              ? 'w-96 h-96 rounded-3xl scale-100' // Increased height to show all 3 options properly
               : showSeeMore
                 ? 'w-80 h-16 rounded-full scale-100' // Keep same line height with fully rounded corners
                 : `w-12 h-12 rounded-full ${isVisible ? 'scale-100 opacity-100 bounce-in' : 'scale-0 opacity-0 bounce-in-reverse'}` // Bouncing animation in both directions
@@ -439,7 +582,69 @@ export default function SmartSuggestOrb({
 
               {/* Scrollable Content Area */}
               <div className="flex-1 p-3 overflow-y-auto" style={{ background: '#ffffff' }}>
-                {mode === 'discovery' ? (
+                {isInConversation ? (
+                  /* Conversation Mode: Show AI analysis messages */
+                  <div className="space-y-3">
+                    {showConversationSkeleton ? (
+                      /* Skeleton Loader */
+                      <div className="space-y-4 animate-pulse">
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-lg bg-gray-200"></div>
+                          <div className="flex-1 space-y-2">
+                            <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-lg bg-gray-200"></div>
+                          <div className="flex-1 space-y-2">
+                            <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                            <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      conversationMessages.map((message) => {
+                        let IconComponent = message.icon || RiSparklingFill
+                        const iconStyle = { color: '#374151' }
+
+                        return (
+                          <div key={message.id} className="flex items-start gap-3 animate-fadeIn">
+                            <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                              <IconComponent 
+                                size={14} 
+                                style={iconStyle} 
+                                className={IconComponent === RiLoader4Fill ? 'animate-spin' : ''}
+                              />
+                            </div>
+                            <div className="flex-1 text-sm" style={{ color: '#374151', lineHeight: '1.6' }}>
+                              {message.content.includes('**') ? (
+                                /* Render markdown-style bold text */
+                                <div 
+                                  dangerouslySetInnerHTML={{
+                                    __html: message.content
+                                      .split('\n').map(line => line.trim()).join('<br/>')
+                                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                      .replace(/•/g, '•')
+                                  }}
+                                />
+                              ) : (
+                                <>
+                                  {message.content.split('').map((char, index) => (
+                                    <span key={index}>{char}</span>
+                                  ))}
+                                  {message.isTyping && (
+                                    <span className="inline-block w-0.5 h-4 ml-1 animate-pulse" style={{ backgroundColor: '#374151' }}></span>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })
+                    )}
+                  </div>
+                ) : mode === 'discovery' ? (
                   /* Discovery Mode: Show Kerala recommendations */
                   <div className="space-y-2">
                     {KERALA_TEA_SUGGESTIONS.map((product, index) => (
@@ -491,7 +696,7 @@ export default function SmartSuggestOrb({
                   /* Help Mode: Show welcome message and default options */
                   <div className="flex-1 flex flex-col py-4">
                     {/* Welcome Message */}
-                    <div className="text-center mb-4">
+                    <div className="text-center mb-6">
                       <div 
                         className="w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center"
                         style={{
@@ -509,7 +714,7 @@ export default function SmartSuggestOrb({
                     </div>
 
                     {/* Default Options */}
-                    <div className="space-y-3 px-1">
+                    <div className="space-y-3 px-1 flex-1">
                       {[
                         { 
                           text: "Buy this product", 
@@ -531,26 +736,25 @@ export default function SmartSuggestOrb({
                           text: "Learn about ingredients", 
                           icon: RiStarLine, 
                           action: () => {
-                            setInputText("Tell me about the ingredients and brewing instructions")
-                            handleSendInput()
+                            startIngredientsAnalysis()
                           }
                         }
                       ].map((option, index) => (
                         <button
                           key={index}
                           onClick={option.action}
-                          className="w-full p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 cursor-pointer group text-left"
+                          className="w-full p-3 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer group text-left"
                           style={{
-                            background: 'rgba(249, 250, 251, 0.7)',
-                            border: '1px solid rgba(229, 231, 235, 0.4)',
+                            background: '#f9fafb',
+                            border: '1px solid #e5e7eb',
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(249, 250, 251, 1)'
-                            e.currentTarget.style.borderColor = '#047857'
+                            e.currentTarget.style.background = '#f3f4f6'
+                            e.currentTarget.style.borderColor = '#d1d5db'
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'rgba(249, 250, 251, 0.7)'
-                            e.currentTarget.style.borderColor = 'rgba(229, 231, 235, 0.4)'
+                            e.currentTarget.style.background = '#f9fafb'
+                            e.currentTarget.style.borderColor = '#e5e7eb'
                           }}
                         >
                           <div className="flex items-center gap-3">
