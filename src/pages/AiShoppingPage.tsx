@@ -7,9 +7,11 @@ export default function AiShoppingPage() {
   const [showOrb, setShowOrb] = useState(false)
   const [hoverTimeout, setHoverTimeout] = useState<number | null>(null)
   const [isOrbExpanded, setIsOrbExpanded] = useState(false)
+  const [orbMode, setOrbMode] = useState<'discovery' | 'help'>('discovery')
   
   // Idle state nudge
   const [showHelpOrb, setShowHelpOrb] = useState(false)
+  const [helpOrbExpanded, setHelpOrbExpanded] = useState(false)
   const idleTimerRef = useRef<number | null>(null)
   const [lastActivity, setLastActivity] = useState(Date.now())
   
@@ -33,6 +35,7 @@ export default function AiShoppingPage() {
 
     // Set new timeout for 800 milliseconds  
     const timeout = setTimeout(() => {
+      setOrbMode('discovery')  // Set to discovery mode
       setShowOrb(true)
     }, 800) // 0.8 second delay for intentional interaction
     
@@ -54,6 +57,7 @@ export default function AiShoppingPage() {
   const handleCloseSmartOrb = () => {
     setShowOrb(false)
     setIsOrbExpanded(false)
+    setOrbMode('discovery')   // Reset to discovery mode
     if (hoverTimeout) {
       clearTimeout(hoverTimeout)
       setHoverTimeout(null)
@@ -67,7 +71,10 @@ export default function AiShoppingPage() {
   // Handle user activity for idle detection  
   const handleActivity = useCallback(() => {
     setLastActivity(Date.now())
-    setShowHelpOrb(false)
+    // Only hide help orb if not expanded (respect user's active engagement)
+    if (!helpOrbExpanded) {
+      setShowHelpOrb(false)
+    }
     
     // Clear existing idle timer
     if (idleTimerRef.current) {
@@ -79,13 +86,22 @@ export default function AiShoppingPage() {
     idleTimerRef.current = setTimeout(() => {
       setShowHelpOrb(true)
     }, 4000) // 4 seconds
-  }, [])
+  }, [helpOrbExpanded])
 
   // Handle help orb click
   const handleHelpOrbClick = () => {
+    setHelpOrbExpanded(true)  // Expand the help orb in place
+  }
+
+  // Handle help orb close
+  const handleCloseHelpOrb = () => {
     setShowHelpOrb(false)
-    setShowOrb(true)
-    setIsOrbExpanded(true)
+    setHelpOrbExpanded(false)
+  }
+
+  // Handle help orb expansion
+  const handleHelpOrbExpanded = (expanded: boolean) => {
+    setHelpOrbExpanded(expanded)
   }
 
   // Set up activity listeners
@@ -188,6 +204,7 @@ export default function AiShoppingPage() {
                     userLocation="Kerala"
                     productCategory="tea"
                     isOnProduct={true}
+                    mode={orbMode}
                   />
                 </div>
                 
@@ -353,49 +370,23 @@ export default function AiShoppingPage() {
         </div>
       </div>
 
-      {/* Help Orb - Center Right Side */}
+      {/* Help Orb - Right Side (Transforms in place like first orb) */}
       {showHelpOrb && (
-        <div className="fixed top-1/2 right-6 transform -translate-y-1/2 z-50 group">
-          <div 
-            className="w-12 h-12 rounded-full cursor-pointer transition-all duration-500 ease-out hover:scale-110 bounce-in"
-            style={{
-              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-              boxShadow: '0 4px 16px rgba(4, 120, 87, 0.4)'
-            }}
-            onClick={handleHelpOrbClick}
-          >
-            <div className="w-full h-full flex items-center justify-center">
-              <RiSparklingFill size={20} className="text-white" />
-            </div>
-          </div>
-          
-          {/* Hover Tooltip */}
-          <div className="absolute top-0 right-14 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-            <div 
-              className="bg-white px-4 py-3 rounded-xl shadow-lg border border-gray-200 whitespace-nowrap"
-              style={{
-                minWidth: '250px',
-                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
-              }}
-            >
-              <p className="text-sm font-medium text-gray-900 mb-1">
-                {currentPrompt}
-              </p>
-              <p className="text-xs text-gray-500">
-                Click to chat with our AI assistant
-              </p>
-              
-              {/* Tooltip Arrow */}
-              <div 
-                className="absolute top-1/2 left-full transform -translate-y-1/2 w-0 h-0"
-                style={{
-                  borderTop: '6px solid transparent',
-                  borderBottom: '6px solid transparent',
-                  borderLeft: '6px solid white'
-                }}
-              />
-            </div>
-          </div>
+        <div className="fixed top-1/2 right-8 z-50 transform -translate-y-1/2" 
+             style={{ 
+               right: helpOrbExpanded ? '70px' : '78px', // When expanded: closer to edge, when orb: moved left by 46px
+               transition: 'right 0.3s ease-out'
+             }}>
+          <SmartSuggestOrb 
+            isVisible={showHelpOrb}
+            onClose={handleCloseHelpOrb}
+            onExpanded={handleHelpOrbExpanded}
+            userLocation="Kerala"
+            productCategory="tea"
+            isOnProduct={false}  // Not on product, it's standalone
+            mode="help"         // Always help mode
+            showTooltipImmediately={true} // Show tooltip immediately with orb
+          />
         </div>
       )}
 
