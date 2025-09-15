@@ -271,7 +271,7 @@ export default function SmartSuggestOrb({
     <>
       {/* Container positioning - different for canvas vs product image */}
       <div 
-        className={`${isOnProduct ? 'absolute' : 'fixed'} z-50 pointer-events-none inset-0`}
+          className={`${isOnProduct ? 'absolute' : 'fixed'} z-50 pointer-events-none inset-0`}
         style={{ background: 'transparent' }}
       >
         <div 
@@ -282,7 +282,7 @@ export default function SmartSuggestOrb({
                 ? 'top-3 right-3 transform origin-top-right' // Stay anchored to top-right corner when expanded
                 : 'top-3 right-3' // Always stay in same position, just expand in place
               : isExpanded
-                ? 'transform origin-top-right' // Help mode: expand from top-right corner, keeping within viewport
+                ? 'transform origin-top-left' // Help mode: expand from top-left corner, expanding to the left
                 : '' // Help mode orb: no special positioning (handled by parent)
           }`}
         >
@@ -290,7 +290,7 @@ export default function SmartSuggestOrb({
         <div
           className={`transition-all duration-300 ease-out transform ${
             isExpanded 
-              ? 'w-96 h-64 rounded-3xl scale-100' // Smaller height with fully rounded corners
+              ? 'w-96 h-80 rounded-3xl scale-100' // Increased height to show 2 options properly
               : showSeeMore
                 ? 'w-80 h-16 rounded-full scale-100' // Keep same line height with fully rounded corners
                 : `w-12 h-12 rounded-full ${isVisible ? 'scale-100 opacity-100 bounce-in' : 'scale-0 opacity-0 bounce-in-reverse'}` // Bouncing animation in both directions
@@ -348,7 +348,6 @@ export default function SmartSuggestOrb({
                   <div 
                     className="bg-white px-4 py-3 rounded-xl shadow-lg border border-gray-200 whitespace-nowrap animate-fadeIn"
                     style={{
-                      minWidth: '250px',
                       boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
                     }}
                   >
@@ -490,7 +489,7 @@ export default function SmartSuggestOrb({
                   </div>
                 ) : (
                   /* Help Mode: Show welcome message and default options */
-                  <div className="flex-1 flex flex-col py-3">
+                  <div className="flex-1 flex flex-col py-4">
                     {/* Welcome Message */}
                     <div className="text-center mb-4">
                       <div 
@@ -510,7 +509,7 @@ export default function SmartSuggestOrb({
                     </div>
 
                     {/* Default Options */}
-                    <div className="space-y-2 px-1">
+                    <div className="space-y-3 px-1">
                       {[
                         { 
                           text: "Buy this product", 

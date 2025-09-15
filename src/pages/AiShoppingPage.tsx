@@ -211,18 +211,53 @@ export default function AiShoppingPage() {
                 {/* Thumbnail images */}
                 <div className="grid grid-cols-4 gap-3">
                   {[
-                    'https://images.unsplash.com/photo-1553978297-833d24732ef6?w=200&h=200&fit=crop&crop=center',
-                    'https://images.unsplash.com/photo-1594736797933-d0b22ba4e3d2?w=200&h=200&fit=crop&crop=center',
-                    'https://images.unsplash.com/photo-1586444248902-2f64eddc13df?w=200&h=200&fit=crop&crop=center',
-                    'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200&h=200&fit=crop&crop=center'
-                  ].map((src, idx) => (
+                    {
+                      src: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=200&h=200&fit=crop&crop=center',
+                      alt: 'Earl Grey tea leaves close-up view',
+                      label: 'Tea Leaves'
+                    },
+                    {
+                      src: 'https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=200&h=200&fit=crop&crop=center', 
+                      alt: 'Brewed Earl Grey tea in elegant cup',
+                      label: 'Brewed Tea'
+                    },
+                    {
+                      src: 'https://images.unsplash.com/photo-1563822249548-9a72b6353cd1?w=200&h=200&fit=crop&crop=center',
+                      alt: 'Premium tea packaging and bergamot',
+                      label: 'Packaging'
+                    },
+                    {
+                      src: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&h=200&fit=crop&crop=center',
+                      alt: 'Tea ceremony setup with Earl Grey',
+                      label: 'Tea Setup'
+                    }
+                  ].map((image, idx) => (
                     <button 
                       key={idx} 
-                      className="aspect-square bg-gray-100 rounded-lg overflow-hidden hover:ring-2 hover:ring-gray-300 transition-all"
+                      className="aspect-square bg-gray-100 rounded-lg overflow-hidden hover:ring-2 hover:ring-gray-300 transition-all group relative"
                       onMouseEnter={handleProductImageHover}
                       onMouseLeave={handleProductImageLeave}
+                      title={image.label}
                     >
-                      <img src={src} alt={`Tea product view ${idx + 1}`} className="w-full h-full object-cover" />
+                      <img 
+                        src={image.src} 
+                        alt={image.alt}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          // Fallback placeholder if image fails to load
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzZiNzI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkVhcmwgR3JleSBUZWE8L3RleHQ+PC9zdmc+';
+                          target.alt = `${image.label} - Earl Grey Tea`;
+                        }}
+                        loading="lazy"
+                      />
+                      
+                      {/* Subtle label overlay on hover */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="p-2">
+                          <span className="text-white text-xs font-medium">{image.label}</span>
+                        </div>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -374,7 +409,7 @@ export default function AiShoppingPage() {
       {showHelpOrb && (
         <div className="fixed top-1/2 right-8 z-50 transform -translate-y-1/2" 
              style={{ 
-               right: helpOrbExpanded ? '70px' : '78px', // When expanded: closer to edge, when orb: moved left by 46px
+               right: helpOrbExpanded ? '408px' : '78px', // When expanded: adjusted for taller chat box, when orb: 78px from right edge
                transition: 'right 0.3s ease-out'
              }}>
           <SmartSuggestOrb 
