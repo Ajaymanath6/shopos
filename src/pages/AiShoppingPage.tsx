@@ -15,10 +15,10 @@ export default function AiShoppingPage() {
       clearTimeout(hoverTimeout)
     }
 
-    // Set new timeout for 800 milliseconds
+    // Set new timeout for 800 milliseconds  
     const timeout = setTimeout(() => {
       setShowOrb(true)
-    }, 300) // Fast response for better UX
+    }, 800) // 0.8 second delay for intentional interaction
     
     setHoverTimeout(timeout)
   }
