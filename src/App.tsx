@@ -6,6 +6,7 @@ import HealthReportPage from './pages/HealthReportPage'
 import FixPage from './pages/FixPage'
 import FixPreviewPage from './pages/FixPreviewPage'
 import ConfirmationPage from './pages/ConfirmationPage'
+import AiShoppingPage from './pages/AiShoppingPage'
 
 function App() {
 
@@ -48,6 +49,7 @@ function App() {
             </div>
           </MainLayout>
         } />
+        <Route path="/ai-shopping" element={<AiShoppingPage />} />
       </Routes>
     </>
   )
