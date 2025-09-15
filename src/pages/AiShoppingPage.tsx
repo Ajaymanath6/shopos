@@ -1,12 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import SmartSuggestOrb from '../components/SmartSuggestOrb'
 import Badge from '../components/Badge'
-import { RiArrowLeftLine } from '@remixicon/react'
+import { RiArrowLeftLine, RiSparklingFill } from '@remixicon/react'
 
 export default function AiShoppingPage() {
   const [showOrb, setShowOrb] = useState(false)
   const [hoverTimeout, setHoverTimeout] = useState<number | null>(null)
   const [isOrbExpanded, setIsOrbExpanded] = useState(false)
+  
+  // Idle state nudge
+  const [showHelpOrb, setShowHelpOrb] = useState(false)
+  const idleTimerRef = useRef<number | null>(null)
+  const [lastActivity, setLastActivity] = useState(Date.now())
+  
+  // Help prompts for idle state
+  const helpPrompts = [
+    "Any questions about the Premium Earl Grey Tea?",
+    "Need help choosing a size or format?", 
+    "Can I help you compare this with other teas?"
+  ]
+  
+  const [currentPrompt] = useState(() => 
+    helpPrompts[Math.floor(Math.random() * helpPrompts.length)]
+  )
 
   // Smart Suggest Orb hover handlers
   const handleProductImageHover = () => {
@@ -47,6 +63,61 @@ export default function AiShoppingPage() {
   const handleOrbExpanded = (expanded: boolean) => {
     setIsOrbExpanded(expanded)
   }
+
+  // Handle user activity for idle detection  
+  const handleActivity = useCallback(() => {
+    setLastActivity(Date.now())
+    setShowHelpOrb(false)
+    
+    // Clear existing idle timer
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current)
+      idleTimerRef.current = null
+    }
+    
+    // Set new idle timer
+    idleTimerRef.current = setTimeout(() => {
+      setShowHelpOrb(true)
+    }, 4000) // 4 seconds
+  }, [])
+
+  // Handle help orb click
+  const handleHelpOrbClick = () => {
+    setShowHelpOrb(false)
+    setShowOrb(true)
+    setIsOrbExpanded(true)
+  }
+
+  // Set up activity listeners
+  useEffect(() => {
+    const events = ['scroll', 'click', 'keydown'] // Removed mousemove - let mouse movement be allowed during idle
+    
+    events.forEach(event => {
+      document.addEventListener(event, handleActivity)
+    })
+
+    // Start initial timer
+    handleActivity()
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, handleActivity)
+      })
+      
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current)
+      }
+    }
+  }, [handleActivity])
+
+  // Clean up timers on unmount
+  useEffect(() => {
+    return () => {
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current)
+      }
+    }
+  }, [])
 
 
   return (
@@ -281,6 +352,87 @@ export default function AiShoppingPage() {
           </p>
         </div>
       </div>
+
+      {/* Help Orb - Center Right Side */}
+      {showHelpOrb && (
+        <div className="fixed top-1/2 right-6 transform -translate-y-1/2 z-50 group">
+          <div 
+            className="w-12 h-12 rounded-full cursor-pointer transition-all duration-500 ease-out hover:scale-110 bounce-in"
+            style={{
+              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+              boxShadow: '0 4px 16px rgba(4, 120, 87, 0.4)'
+            }}
+            onClick={handleHelpOrbClick}
+          >
+            <div className="w-full h-full flex items-center justify-center">
+              <RiSparklingFill size={20} className="text-white" />
+            </div>
+          </div>
+          
+          {/* Hover Tooltip */}
+          <div className="absolute top-0 right-14 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+            <div 
+              className="bg-white px-4 py-3 rounded-xl shadow-lg border border-gray-200 whitespace-nowrap"
+              style={{
+                minWidth: '250px',
+                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
+              }}
+            >
+              <p className="text-sm font-medium text-gray-900 mb-1">
+                {currentPrompt}
+              </p>
+              <p className="text-xs text-gray-500">
+                Click to chat with our AI assistant
+              </p>
+              
+              {/* Tooltip Arrow */}
+              <div 
+                className="absolute top-1/2 left-full transform -translate-y-1/2 w-0 h-0"
+                style={{
+                  borderTop: '6px solid transparent',
+                  borderBottom: '6px solid transparent',
+                  borderLeft: '6px solid white'
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes bounceIn {
+          0% {
+            opacity: 0;
+            transform: scale3d(0.3, 0.3, 0.3);
+          }
+          
+          20% {
+            transform: scale3d(1.1, 1.1, 1.1);
+          }
+          
+          40% {
+            transform: scale3d(0.9, 0.9, 0.9);
+          }
+          
+          60% {
+            opacity: 1;
+            transform: scale3d(1.03, 1.03, 1.03);
+          }
+          
+          80% {
+            transform: scale3d(0.97, 0.97, 0.97);
+          }
+          
+          100% {
+            opacity: 1;
+            transform: scale3d(1, 1, 1);
+          }
+        }
+
+        .bounce-in {
+          animation: bounceIn 0.75s;
+        }
+      `}</style>
     </div>
   )
 }
