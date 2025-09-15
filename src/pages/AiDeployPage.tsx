@@ -89,10 +89,10 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
       if (currentScrollY > 200) {
         const timeout = setTimeout(() => {
           // Double check user is still in scrolled state and not actively scrolling
-          if (window.scrollY > 200 && Date.now() - lastScrollTimeRef.current > 1500) {
+          if (window.scrollY > 200 && Date.now() - lastScrollTimeRef.current > 2000) {
             setShowOrb(true)
           }
-        }, 1500) // Show orb 1.5s after user stops scrolling
+        }, 2000) // Show orb 2s after user stops scrolling
         
         setScrollTimeout(timeout)
       }

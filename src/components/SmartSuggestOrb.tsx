@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { RiSparklingFill, RiCloseLine, RiSearchLine, RiMicLine, RiSendPlaneLine, RiEyeLine, RiHeartLine, RiStarLine, RiBrainLine, RiLoader4Fill, RiCheckLine } from '@remixicon/react'
+import { RiSparklingFill, RiCloseLine, RiSearchLine, RiMicLine, RiSendPlaneLine, RiEyeLine, RiHeartLine, RiStarLine, RiBrainLine, RiLoader4Fill, RiCheckLine, RiUser3Line } from '@remixicon/react'
 
 // Custom bouncing keyframes for smooth animation
 const bounceInAnimation = `
@@ -146,6 +146,28 @@ const KERALA_TEA_SUGGESTIONS: SuggestionProduct[] = [
   }
 ]
 
+const VOICE_RESPONSES = [
+  "How much caffeine is in this Earl Grey tea? I'm trying to cut back on my coffee intake.",
+
+  "What's the best way to brew this tea? Should I use boiling water or let it cool down a bit?",
+
+  "Can I add milk to Earl Grey or will that ruin the bergamot flavor?",
+
+  "Is this tea good for beginners? I'm new to drinking tea and want to start with something good.",
+
+  "How long should I steep this Earl Grey? I don't want it to become too bitter.",
+
+  "What makes Earl Grey different from regular black tea? Is it just the bergamot?",
+
+  "Can I drink this tea in the evening or will it keep me awake?",
+
+  "Do I need to add sugar or honey, or is it good on its own?",
+
+  "How many cups of this tea can I safely drink per day?",
+
+  "What are those blue petals in the tea? Are they just for decoration?"
+]
+
 export default function SmartSuggestOrb({ 
   isVisible, 
   onClose, 
@@ -166,7 +188,11 @@ export default function SmartSuggestOrb({
   const [isInConversation, setIsInConversation] = useState(false)
   const [conversationMessages, setConversationMessages] = useState<ConversationMessage[]>([])
   const [showConversationSkeleton, setShowConversationSkeleton] = useState(false)
+  const [isVoiceRecording, setIsVoiceRecording] = useState(false)
+  const [showVoiceAnimation, setShowVoiceAnimation] = useState(false)
+  const [isAiResponding, setIsAiResponding] = useState(false)
   const orbRef = useRef<HTMLDivElement>(null)
+  const voiceTimeoutRef = useRef<number | null>(null)
 
   // Add typing message function
   const addTypingMessage = ({ type, content, icon, statusIndicator }: {
@@ -360,6 +386,16 @@ export default function SmartSuggestOrb({
     setIsInConversation(false)
     setConversationMessages([])
     setShowConversationSkeleton(false)
+    setIsVoiceRecording(false)
+    setShowVoiceAnimation(false)
+    setIsAiResponding(false)
+    
+    // Clear voice timeout
+    if (voiceTimeoutRef.current) {
+      clearTimeout(voiceTimeoutRef.current)
+      voiceTimeoutRef.current = null
+    }
+    
     onExpanded?.(false) // Notify parent that orb is no longer expanded
     setTimeout(() => {
       onClose()
@@ -372,23 +408,132 @@ export default function SmartSuggestOrb({
   }
 
   const handleVoiceClick = () => {
+    if (!isVoiceRecording) {
+      // Start voice recording
+      setIsVoiceRecording(true)
+      setShowVoiceAnimation(true)
     setInputMode('voice')
-    setIsListening(!isListening)
-    // Voice recognition would be implemented here
-    if (!isListening) {
-      // Start voice recognition
-      console.log('Starting voice recognition...')
+      
+      // Auto-stop after 3 seconds
+      voiceTimeoutRef.current = window.setTimeout(() => {
+        stopVoiceRecording()
+      }, 3000)
     } else {
-      // Stop voice recognition
-      console.log('Stopping voice recognition...')
+      // Stop voice recording early
+      stopVoiceRecording()
     }
+  }
+
+  const stopVoiceRecording = () => {
+    setIsVoiceRecording(false)
+    setShowVoiceAnimation(false)
+    setInputMode(null)
+    
+    // Clear timeout if exists
+    if (voiceTimeoutRef.current) {
+      clearTimeout(voiceTimeoutRef.current)
+      voiceTimeoutRef.current = null
+    }
+    
+    // Simulate voice transcription - select random response
+    const randomResponse = VOICE_RESPONSES[Math.floor(Math.random() * VOICE_RESPONSES.length)]
+    setInputText(randomResponse)
+    
+    // Auto-send to chat after brief delay
+    setTimeout(() => {
+      if (randomResponse.trim()) {
+        // Create user message
+        const userMessage: ConversationMessage = {
+          id: `user-${Date.now()}`,
+          type: 'result',
+          content: randomResponse.trim(),
+          timestamp: Date.now(),
+          isTyping: false,
+          icon: RiUser3Line
+        }
+        
+        // Add user message to conversation
+        setIsInConversation(true)
+        setShowSuggestions(false)
+        setConversationMessages(prev => [...prev, userMessage])
+        
+        // Clear input
+        setInputText('')
+        
+        // Generate AI response after delay
+        setTimeout(() => {
+          setIsAiResponding(true)
+          
+          const teaResponses = [
+            "Great question! Earl Grey contains 40-70mg of caffeine per cup, which is about half the amount in coffee. It's perfect for reducing caffeine intake while still getting a nice energy boost.",
+            "For the best flavor, use water heated to 95°C (just below boiling). Pour over the tea and steep for 3-5 minutes. Avoid boiling water as it can make the tea bitter and overpower the bergamot.",
+            "You can definitely add milk to Earl Grey! Many people love it that way. The milk mellows the bergamot slightly but doesn't ruin it. Try it both ways to see your preference.",
+            "Earl Grey is excellent for beginners! The bergamot gives it a lovely citrusy aroma that's very approachable. Start with 3 minutes steeping time and adjust to taste.",
+            "Steep for 3-5 minutes depending on how strong you like it. Start with 3 minutes for a lighter taste, or go up to 5 for full flavor. Any longer might make it too bitter."
+          ]
+          
+          const randomResponse = teaResponses[Math.floor(Math.random() * teaResponses.length)]
+          
+          addTypingMessage({
+            type: 'result',
+            content: randomResponse,
+            icon: RiBrainLine
+          })
+          
+          // Clear AI responding state after typing finishes
+          setTimeout(() => {
+            setIsAiResponding(false)
+          }, 2000 + randomResponse.length * 30) // Account for typing animation duration
+        }, 1500)
+      }
+    }, 500)
   }
 
   const handleSendInput = () => {
     if (inputText.trim()) {
-      setShowSuggestions(true)
-      // Process the input and show relevant suggestions
-      console.log('Processing input:', inputText)
+      // Create user message
+      const userMessage: ConversationMessage = {
+        id: `user-${Date.now()}`,
+        type: 'result',
+        content: inputText.trim(),
+        timestamp: Date.now(),
+        isTyping: false,
+        icon: RiUser3Line
+      }
+      
+      // Add user message to conversation
+      setIsInConversation(true)
+      setShowSuggestions(false)
+      setConversationMessages(prev => [...prev, userMessage])
+      
+      // Clear input
+      setInputText('')
+      
+      // Generate AI response after delay
+      setTimeout(() => {
+        setIsAiResponding(true)
+        
+        const teaResponses = [
+          "Great question! Earl Grey contains 40-70mg of caffeine per cup, which is about half the amount in coffee. It's perfect for reducing caffeine intake while still getting a nice energy boost.",
+          "For the best flavor, use water heated to 95°C (just below boiling). Pour over the tea and steep for 3-5 minutes. Avoid boiling water as it can make the tea bitter and overpower the bergamot.",
+          "You can definitely add milk to Earl Grey! Many people love it that way. The milk mellows the bergamot slightly but doesn't ruin it. Try it both ways to see your preference.",
+          "Earl Grey is excellent for beginners! The bergamot gives it a lovely citrusy aroma that's very approachable. Start with 3 minutes steeping time and adjust to taste.",
+          "Steep for 3-5 minutes depending on how strong you like it. Start with 3 minutes for a lighter taste, or go up to 5 for full flavor. Any longer might make it too bitter."
+        ]
+        
+        const randomResponse = teaResponses[Math.floor(Math.random() * teaResponses.length)]
+        
+        addTypingMessage({
+          type: 'result',
+          content: randomResponse,
+          icon: RiBrainLine
+        })
+        
+        // Clear AI responding state after typing finishes
+        setTimeout(() => {
+          setIsAiResponding(false)
+        }, 2000 + randomResponse.length * 30) // Account for typing animation duration
+      }, 1500)
     }
   }
 
@@ -404,6 +549,16 @@ export default function SmartSuggestOrb({
       setIsInConversation(false)
       setConversationMessages([])
       setShowConversationSkeleton(false)
+      setIsVoiceRecording(false)
+      setShowVoiceAnimation(false)
+      setIsAiResponding(false)
+      
+      // Clear voice timeout
+      if (voiceTimeoutRef.current) {
+        clearTimeout(voiceTimeoutRef.current)
+        voiceTimeoutRef.current = null
+      }
+      
       onExpanded?.(false) // Notify parent that orb is no longer expanded
     }
   }, [isVisible, onExpanded])
@@ -435,12 +590,12 @@ export default function SmartSuggestOrb({
             isExpanded 
               ? 'w-96 h-96 rounded-3xl scale-100' // Increased height to show all 3 options properly
               : showSeeMore
-                ? 'w-80 h-16 rounded-full scale-100' // Keep same line height with fully rounded corners
+                ? 'min-w-80 h-16 rounded-full scale-100' // Keep same line height with fully rounded corners, allow content to expand
                 : `w-12 h-12 rounded-full ${isVisible ? 'scale-100 opacity-100 bounce-in' : 'scale-0 opacity-0 bounce-in-reverse'}` // Bouncing animation in both directions
           }`}
           style={{
             background: isExpanded 
-              ? '#ffffff' // White background
+              ? 'rgba(255, 255, 255, 0.98)' // Slightly more opaque white
               : showSeeMore 
                 ? 'rgba(255, 255, 255, 0.95)' // White with transparency
                 : 'transparent', // Transparent for glass-morphism orb
@@ -495,10 +650,10 @@ export default function SmartSuggestOrb({
                     }}
                   >
                     <p className="text-sm font-medium text-gray-900 mb-1">
-                      Need help?
+                      Tea questions?
                     </p>
                     <p className="text-xs text-gray-500">
-                      Click to chat
+                      AI assistant ready
                     </p>
                     
                     {/* Tooltip Arrow - Points right toward orb */}
@@ -516,17 +671,17 @@ export default function SmartSuggestOrb({
                 /* Discovery Mode: Side Text on Hover */
                 <div className="absolute left-10 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
                   <div className="text-black text-sm font-medium whitespace-nowrap">
-                    Hey Ajay! Want to see more?
+                    Hey Ajay! Need help with tea selection?
                   </div>
                 </div>
               ) : null}
             </div>
           ) : showSeeMore && !isExpanded ? (
             /* Orb with Side Text State - Same Line */
-            <div className="w-full h-full flex items-center justify-between p-2">
+            <div className="w-full h-full flex items-center justify-between p-3" style={{ minWidth: 'max-content' }}>
               {/* AI Orb */}
               <div 
-                className="w-12 h-12 rounded-full backdrop-blur-xl border border-white/20 flex items-center justify-center relative overflow-hidden cursor-pointer"
+                className="w-12 h-12 rounded-full backdrop-blur-xl border border-white/20 flex items-center justify-center relative overflow-hidden cursor-pointer mr-1"
                 style={{
                   background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                   boxShadow: `
@@ -541,14 +696,14 @@ export default function SmartSuggestOrb({
               
               {/* Text beside orb */}
               <div className="flex items-center gap-1">
-                <span className="text-sm font-medium" style={{ color: '#374151' }}>
-                  Hey Ajay! More regional mugs 
+                <span className="text-xs font-medium" style={{ color: '#374151' }}>
+                  Hey Ajay! Found regional tea designs —
                   <button
                     onClick={handleSeeMoreClick}
                     className="ml-1 underline underline-offset-2 hover:no-underline transition-all"
                     style={{ color: '#059669' }} 
                   >
-                    for you
+                    see more
                   </button>
                 </span>
               </div>
@@ -567,6 +722,9 @@ export default function SmartSuggestOrb({
                   >
                     <RiSparklingFill size={16} className="text-white" />
                   </div>
+                  {isAiResponding && (
+                    <RiLoader4Fill size={16} className="animate-spin" style={{ color: '#374151' }} />
+                  )}
                 </div>
                 <button 
                   onClick={handleClose}
@@ -608,16 +766,18 @@ export default function SmartSuggestOrb({
                         let IconComponent = message.icon || RiSparklingFill
                         const iconStyle = { color: '#374151' }
 
+                        const isUserMessage = message.id.startsWith('user-')
+
                         return (
-                          <div key={message.id} className="flex items-start gap-3 animate-fadeIn">
-                            <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                          <div key={message.id} className={`flex items-start gap-3 animate-fadeIn ${isUserMessage ? 'flex-row-reverse' : ''}`}>
+                            <div className={`w-6 h-6 flex items-center justify-center flex-shrink-0 rounded-full ${isUserMessage ? 'bg-green-100' : ''}`}>
                               <IconComponent 
                                 size={14} 
-                                style={iconStyle} 
+                                style={isUserMessage ? { color: '#059669' } : { color: '#374151' }} 
                                 className={IconComponent === RiLoader4Fill ? 'animate-spin' : ''}
                               />
                             </div>
-                            <div className="flex-1 text-sm" style={{ color: '#374151', lineHeight: '1.6' }}>
+                            <div className={`flex-1 text-sm ${isUserMessage ? 'text-right' : ''}`} style={{ color: '#374151', lineHeight: '1.6' }}>
                               {message.content.includes('**') ? (
                                 /* Render markdown-style bold text */
                                 <div 
@@ -778,23 +938,43 @@ export default function SmartSuggestOrb({
                       type="text"
                       value={inputText}
                       onChange={(e) => setInputText(e.target.value)}
-                      placeholder={mode === 'discovery' ? "Ask me anything, Ajay..." : "Ask about this Earl Grey tea..."}
+                      placeholder={isVoiceRecording ? "Listening..." : (mode === 'discovery' ? "Ask me anything, Ajay..." : "Ask about this Earl Grey tea...")}
                       className="w-full px-3 py-2.5 rounded-xl focus:outline-none focus:ring-2 text-sm"
                       style={{
-                        background: 'rgba(249, 250, 251, 0.8)', // Cleaner input background
+                        background: 'rgba(249, 250, 251, 0.8)',
                         border: '1px solid rgba(209, 213, 219, 0.5)',
-                        color: '#111827' // Darker text
+                        color: '#111827',
+                        paddingLeft: showVoiceAnimation ? '60px' : '12px' // Make room for voice bars
                       }}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendInput()}
                       onFocus={(e) => {
-                        e.currentTarget.style.borderColor = '#047857' // Darker green focus
+                        e.currentTarget.style.borderColor = '#047857'
                         e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 120, 87, 0.1)'
                       }}
                       onBlur={(e) => {
                         e.currentTarget.style.borderColor = 'rgba(209, 213, 219, 0.5)'
                         e.currentTarget.style.boxShadow = 'none'
                       }}
+                      disabled={isVoiceRecording}
                     />
+                    
+                    {/* Voice Animation - 8 Purple Bars */}
+                    {showVoiceAnimation && (
+                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center gap-0.5">
+                        {[...Array(8)].map((_, i) => (
+                          <div
+                            key={i}
+                            className="w-0.5 bg-green-600 rounded-full animate-pulse"
+                            style={{
+                              height: '16px',
+                              animationDelay: `${i * 0.1}s`,
+                              animationDuration: '1s',
+                              animationIterationCount: 'infinite'
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <button
                     onClick={handleSendInput}
@@ -817,22 +997,32 @@ export default function SmartSuggestOrb({
                   </button>
                   <button
                     onClick={handleVoiceClick}
-                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 relative group"
                     style={{
-                      background: 'rgba(249, 250, 251, 0.8)',
-                      border: '1px solid rgba(209, 213, 219, 0.5)',
-                      color: '#059669'
+                      background: isVoiceRecording ? '#059669' : 'rgba(249, 250, 251, 0.8)', // Green when recording
+                      border: `1px solid ${isVoiceRecording ? '#059669' : 'rgba(209, 213, 219, 0.5)'}`,
+                      color: isVoiceRecording ? '#ffffff' : '#059669'
                     }}
                     onMouseEnter={(e) => {
+                      if (!isVoiceRecording) {
                       e.currentTarget.style.borderColor = '#047857'
                       e.currentTarget.style.background = 'rgba(249, 250, 251, 1)'
+                      }
                     }}
                     onMouseLeave={(e) => {
+                      if (!isVoiceRecording) {
                       e.currentTarget.style.borderColor = 'rgba(209, 213, 219, 0.5)'
                       e.currentTarget.style.background = 'rgba(249, 250, 251, 0.8)'
+                      }
                     }}
+                    title={isVoiceRecording ? "Stop recording" : "Voice input"}
                   >
                     <RiMicLine size={16} />
+                    
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                      {isVoiceRecording ? "Stop recording" : "Voice input"}
+                    </div>
                   </button>
                 </div>
               </div>
