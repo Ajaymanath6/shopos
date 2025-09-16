@@ -171,10 +171,10 @@ export default function AiShoppingPage() {
         clearTimeout(timeoutRef.current)
       }
 
-      // Set new timeout for responsive delay
+      // Set new timeout for 1 second delay
       timeoutRef.current = setTimeout(() => {
         setShow(true)
-      }, 400) // Reduced delay for more responsive feel
+      }, 1000) // 1 second delay as requested
     },
     onMouseLeave: () => {
       // Mark that user is no longer hovering over this section
@@ -391,10 +391,34 @@ export default function AiShoppingPage() {
             {/* Product Details - 5 columns */}
             <div className="lg:col-span-5 space-y-6">
               {/* Product title and price */}
-              <div
+              <div className="relative p-4 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer"
                 {...pricingHandlers}
               >
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Premium Earl Grey Tea</h1>
+                  <div className="flex items-center mb-2">
+                  <h1 className="text-3xl font-bold text-gray-900">Premium Earl Grey Tea</h1>
+                  {/* Inline Pricing Orb - positioned right after heading text */}
+                  {showPricingOrb && (
+                    <div className="ml-4 flex items-center" style={{position: 'relative'}}>
+                      <SmartSuggestOrb 
+                        isVisible={showPricingOrb}
+                        onClose={() => {
+                          setShowPricingOrb(false)
+                          if (pricingHoverTimeout.current) {
+                            clearTimeout(pricingHoverTimeout.current)
+                            pricingHoverTimeout.current = null
+                          }
+                        }}
+                        onExpanded={() => {}}
+                        userLocation="Kerala"
+                        productCategory="tea"
+                        isOnProduct={true}
+                        mode="agent"
+                        showTooltipImmediately={true}
+                        customMessage="Price comparison help!"
+                      />
+                    </div>
+                  )}
+                </div>
                 <p className="text-sm text-gray-600 mb-4">Organic Ceylon black tea with natural bergamot</p>
                 <div className="flex items-center gap-4 mb-6">
                   <span className="text-3xl font-bold text-gray-900">$24.99</span>
@@ -403,65 +427,119 @@ export default function AiShoppingPage() {
                 </div>
               </div>
 
-              {/* Product options */}
-              <div 
-                className="space-y-4"
+              {/* Product options - Unified hover area */}
+              <div className="relative p-4 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer"
                 {...optionsHandlers}
               >
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Size</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {['50g', '100g', '250g'].map((size, idx) => (
-                      <button 
-                        key={size} 
-                        className={`p-3 border rounded-lg text-sm font-medium transition-colors ${
-                          idx === 1 ? 'border-gray-800 bg-gray-50' : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                      >
-                        {size}
-                      </button>
-                    ))}
-                  </div>
+                <div className="flex items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Product Options</h3>
+                  {/* Inline Options Orb - positioned right after heading text */}
+                  {showOptionsOrb && (
+                    <div className="ml-3 flex items-center" style={{position: 'relative'}}>
+                      <SmartSuggestOrb 
+                        isVisible={showOptionsOrb}
+                        onClose={() => {
+                          setShowOptionsOrb(false)
+                          if (optionsHoverTimeout.current) {
+                            clearTimeout(optionsHoverTimeout.current)
+                            optionsHoverTimeout.current = null
+                          }
+                        }}
+                        onExpanded={() => {}}
+                        userLocation="Kerala"
+                        productCategory="tea"
+                        isOnProduct={true}
+                        mode="agent"
+                        showTooltipImmediately={true}
+                        customMessage="Size selection help!"
+                      />
+                    </div>
+                  )}
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Format</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {['Loose Leaf', 'Tea Bags'].map((format, idx) => (
-                      <button 
-                        key={format} 
-                        className={`p-3 border rounded-lg text-sm font-medium transition-colors ${
-                          idx === 0 ? 'border-gray-800 bg-gray-50' : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                      >
-                        {format}
-                      </button>
-                    ))}
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Size</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {['50g', '100g', '250g'].map((size, idx) => (
+                        <button 
+                          key={size} 
+                          className={`p-3 border rounded-lg text-sm font-medium transition-colors ${
+                            idx === 1 ? 'border-gray-800 bg-gray-50' : 'border-gray-300 hover:border-gray-400'
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* Quantity */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                  <div className="flex items-center border border-gray-300 rounded-lg w-32">
-                    <button className="p-2 hover:bg-gray-100 transition-colors">-</button>
-                    <span className="flex-1 text-center py-2 border-x border-gray-300">1</span>
-                    <button className="p-2 hover:bg-gray-100 transition-colors">+</button>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Format</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {['Loose Leaf', 'Tea Bags'].map((format, idx) => (
+                        <button 
+                          key={format} 
+                          className={`p-3 border rounded-lg text-sm font-medium transition-colors ${
+                            idx === 0 ? 'border-gray-800 bg-gray-50' : 'border-gray-300 hover:border-gray-400'
+                          }`}
+                        >
+                          {format}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Quantity */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                    <div className="flex items-center border border-gray-300 rounded-lg w-32">
+                      <button className="p-2 hover:bg-gray-100 transition-colors">-</button>
+                      <span className="flex-1 text-center py-2 border-x border-gray-300">1</span>
+                      <button className="p-2 hover:bg-gray-100 transition-colors">+</button>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Add to cart actions */}
-              <div 
-                className="space-y-3"
+              {/* Add to cart actions - Unified hover area */}
+              <div className="relative p-4 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer"
                 {...cartHandlers}
               >
-                <button className="w-full py-3 text-lg font-semibold bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors">
-                  Add to Cart - $24.99
-                </button>
-                <button className="w-full py-3 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
-                  Buy it now
-                </button>
+                <div className="flex items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Purchase</h3>
+                  {/* Inline Cart Orb - positioned right after heading text */}
+                  {showCartOrb && (
+                    <div className="ml-3 flex items-center" style={{position: 'relative'}}>
+                      <SmartSuggestOrb 
+                        isVisible={showCartOrb}
+                        onClose={() => {
+                          setShowCartOrb(false)
+                          if (cartHoverTimeout.current) {
+                            clearTimeout(cartHoverTimeout.current)
+                            cartHoverTimeout.current = null
+                          }
+                        }}
+                        onExpanded={() => {}}
+                        userLocation="Kerala"
+                        productCategory="tea"
+                        isOnProduct={true}
+                        mode="agent"
+                        showTooltipImmediately={true}
+                        customMessage="Purchase assistance!"
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                <div className="space-y-3">
+                  <button className="w-full py-3 text-lg font-semibold bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors">
+                    Add to Cart - $24.99
+                  </button>
+                  <button className="w-full py-3 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                    Buy it now
+                  </button>
+                </div>
               </div>
 
               {/* Product highlights - Unified hover area */}
@@ -470,12 +548,11 @@ export default function AiShoppingPage() {
                   className="relative p-4 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer"
                   {...highlightsHandlers}
                 >
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 relative">
-                    Product Highlights
-                    
-                    {/* Inline Product Highlights Orb - positioned 4px from heading */}
+                  <div className="flex items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Product Highlights</h3>
+                    {/* Inline Product Highlights Orb - positioned right after heading text */}
                     {showHighlightsOrb && (
-                      <div className="absolute top-0 left-full z-50" style={{marginLeft: '4px'}}>
+                      <div className="ml-3 flex items-center" style={{position: 'relative'}}>
                         <SmartSuggestOrb 
                           isVisible={showHighlightsOrb}
                           onClose={() => {
@@ -492,10 +569,11 @@ export default function AiShoppingPage() {
                           isOnProduct={true}
                           mode="agent"
                           showTooltipImmediately={true}
+                          customMessage="Compare features!"
                         />
                       </div>
                     )}
-                  </h3>
+                  </div>
                   
                   <ul className="space-y-2">
                     <li className="flex items-start gap-2">
@@ -518,22 +596,51 @@ export default function AiShoppingPage() {
                 </div>
               </div>
 
-              {/* Trust indicators */}
-              <div 
-                className="border-t border-gray-200 pt-6 space-y-2 text-sm text-gray-600"
-                {...trustHandlers}
-              >
-                <div className="flex items-center gap-2">
-                  <RiTruckLine size={16} className="text-green-600" />
-                  <span>Free shipping on orders over $50</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RiArrowGoBackLine size={16} className="text-green-600" />
-                  <span>30-day return policy</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RiPlantLine size={16} className="text-green-600" />
-                  <span>Organic certified & ethically sourced</span>
+              {/* Trust indicators - Unified hover area */}
+              <div className="border-t border-gray-200 pt-6">
+                <div className="relative p-4 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer"
+                  {...trustHandlers}
+                >
+                  <div className="flex items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Trust & Policies</h3>
+                    {/* Inline Trust Orb - positioned right after heading text */}
+                    {showTrustOrb && (
+                      <div className="ml-3 flex items-center" style={{position: 'relative'}}>
+                        <SmartSuggestOrb 
+                          isVisible={showTrustOrb}
+                          onClose={() => {
+                            setShowTrustOrb(false)
+                            if (trustHoverTimeout.current) {
+                              clearTimeout(trustHoverTimeout.current)
+                              trustHoverTimeout.current = null
+                            }
+                          }}
+                          onExpanded={() => {}}
+                          userLocation="Kerala"
+                          productCategory="tea"
+                          isOnProduct={true}
+                          mode="agent"
+                          showTooltipImmediately={true}
+                          customMessage="Policy questions?"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <RiTruckLine size={16} className="text-green-600" />
+                      <span>Free shipping on orders over $50</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <RiArrowGoBackLine size={16} className="text-green-600" />
+                      <span>30-day return policy</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <RiPlantLine size={16} className="text-green-600" />
+                      <span>Organic certified & ethically sourced</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -542,15 +649,14 @@ export default function AiShoppingPage() {
           {/* Product description section - Unified hover area */}
           <div className="mt-16 pt-12 border-t border-gray-200">
             <div 
-              className="relative p-6 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer"
+              className="relative p-6 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer overflow-visible"
               {...descriptionHandlers}
             >
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 relative">
-                Description
-                
-                {/* Inline Description Orb - positioned 4px from heading */}
+              <div className="flex items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Description</h2>
+                {/* Inline Description Orb - positioned right after the heading text */}
                 {showDescriptionOrb && (
-                  <div className="absolute top-0 left-full z-50" style={{marginLeft: '4px'}}>
+                  <div className="ml-3 flex items-center" style={{position: 'relative'}}>
                     <SmartSuggestOrb 
                       isVisible={showDescriptionOrb}
                       onClose={() => {
@@ -567,10 +673,11 @@ export default function AiShoppingPage() {
                       isOnProduct={true}
                       mode="agent"
                       showTooltipImmediately={true}
+                      customMessage="Tea brewing help!"
                     />
                   </div>
                 )}
-              </h2>
+              </div>
               
               <div className="prose max-w-none text-gray-700">
                 <p className="mb-4">
@@ -583,7 +690,7 @@ export default function AiShoppingPage() {
                   their natural character and strength. The addition of cornflower petals adds a touch of visual beauty to each cup, 
                   making this not just a beverage, but a moment of daily luxury.
                 </p>
-                <p>
+                <p className="mb-4">
                   Whether you're starting your morning or taking an afternoon break, this Earl Grey provides the perfect caffeine boost 
                   while delivering an sophisticated taste experience that tea enthusiasts have cherished for generations.
                 </p>

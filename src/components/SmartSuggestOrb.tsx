@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { RiSparklingFill, RiCloseLine, RiSearchLine, RiMicLine, RiSendPlaneLine, RiEyeLine, RiHeartLine, RiStarLine, RiBrainLine, RiLoader4Fill, RiCheckLine, RiUser3Line } from '@remixicon/react'
 
 // Custom bouncing keyframes for smooth animation
@@ -102,6 +103,7 @@ interface SmartSuggestOrbProps {
   onExpanded?: (expanded: boolean) => void
   mode?: 'discovery' | 'help' | 'agent'
   showTooltipImmediately?: boolean
+  customMessage?: string
 }
 
 interface SuggestionProduct {
@@ -232,7 +234,8 @@ export default function SmartSuggestOrb({
   isOnProduct = false,
   onExpanded,
   mode = 'discovery',
-  showTooltipImmediately = false
+  showTooltipImmediately = false,
+  customMessage
 }: SmartSuggestOrbProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showSeeMore, setShowSeeMore] = useState(false)
@@ -392,8 +395,8 @@ export default function SmartSuggestOrb({
   }
 
   const handleOrbClick = () => {
-    if (mode === 'help' && showTooltip) {
-      // Help mode: clicking orb expands immediately
+    if ((mode === 'help' || isOnProduct) && showTooltip) {
+      // Help mode OR inline orbs: clicking orb/tooltip expands directly to chat
       setShowTooltip(false)
       setIsExpanded(true)
       onExpanded?.(true)
@@ -401,6 +404,7 @@ export default function SmartSuggestOrb({
         setShowSuggestions(true)
       }, 300)
     } else {
+      // Product image mode: show card first
       setShowSeeMore(true)
     }
   }
@@ -408,15 +412,15 @@ export default function SmartSuggestOrb({
   // Auto-expand and tooltip logic
   useEffect(() => {
     if (isVisible && !showSeeMore && !isExpanded) {
-      if (mode === 'help') {
-        // Help mode: show tooltip immediately, but don't auto-expand
+      if (mode === 'help' || isOnProduct) {
+        // Help mode OR inline orbs: show tooltip immediately, but don't auto-expand
         if (showTooltipImmediately) {
           setShowTooltip(true)
           // Just show tooltip, wait for user click to expand
         }
-        // Don't auto-expand - wait for user interaction
+        // Don't auto-expand - wait for user interaction (tooltip-only mode)
       } else {
-        // Discovery mode: show prompt first
+        // Discovery mode on product images: show prompt first
         const autoExpandTimeout = setTimeout(() => {
           setShowSeeMore(true)
         }, 1000) // Auto-expand after 1 second
@@ -424,7 +428,7 @@ export default function SmartSuggestOrb({
         return () => clearTimeout(autoExpandTimeout)
       }
     }
-  }, [isVisible, showSeeMore, isExpanded, mode, onExpanded, showTooltipImmediately])
+  }, [isVisible, showSeeMore, isExpanded, mode, onExpanded, showTooltipImmediately, isOnProduct])
 
   const handleSeeMoreClick = () => {
     setIsExpanded(true)
@@ -670,46 +674,59 @@ export default function SmartSuggestOrb({
 
   if (!isVisible) return null
 
-  return (
-    <>
-      {/* Container positioning - different for canvas vs product image */}
+  // Different structure for inline vs floating orbs
+  if (isOnProduct) {
+    // Inline orbs: Simple relative positioning, no complex overlay structure
+    return (
       <div 
-          className={`${isOnProduct ? 'absolute' : 'fixed'} z-50 pointer-events-none inset-0`}
-        style={{ background: 'transparent' }}
+        ref={orbRef}
+        className={`relative pointer-events-auto z-50 ${
+          isExpanded 
+            ? 'transform origin-top-left' // Expand to the right from top-left
+            : '' // Normal inline positioning
+        }`}
       >
-        <div 
-          ref={orbRef}
-          className={`absolute pointer-events-auto ${
-            isOnProduct
-              ? isExpanded 
-                ? 'top-3 right-3 transform origin-top-right' // Stay anchored to top-right corner when expanded
-                : 'top-3 right-3' // Always stay in same position, just expand in place
-              : isExpanded
-                ? 'transform origin-top-left' // Help mode: expand from top-left corner, expanding to the left
-                : '' // Help mode orb: no special positioning (handled by parent)
-          }`}
-        >
-        {/* Morphing Orb Container */}
-        <div
-          className={`transition-none transform ${
+        {/* Morphing Orb Container with Framer Motion */}
+        <motion.div
+          className={`transform ${
             isExpanded 
-              ? 'w-96 h-96 rounded-3xl scale-100' // Increased height to show all 3 options properly
+              ? 'w-96 h-96 rounded-3xl'
               : showSeeMore
-                ? 'min-w-80 h-16 rounded-full scale-100' // Keep same line height with fully rounded corners, allow content to expand
-                : `w-12 h-12 rounded-full ${isVisible ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}` // No animations - instant appearance
+                ? 'rounded-full h-12' // More compact height
+                : 'w-12 h-12 rounded-full'
           }`}
           style={{
             background: isExpanded 
-              ? 'rgba(255, 255, 255, 0.98)' // Slightly more opaque white
+              ? 'rgba(255, 255, 255, 0.98)'
               : showSeeMore 
-                ? 'rgba(255, 255, 255, 0.95)' // White with transparency
-                : 'transparent', // Transparent for glass-morphism orb
+                ? 'rgba(255, 255, 255, 0.95)'
+                : '#ffffff', // Solid white background for orb
             backdropFilter: (isExpanded || showSeeMore) ? 'blur(12px)' : 'none',
-            border: (isExpanded || showSeeMore) ? '1px solid rgba(229, 231, 235, 0.8)' : 'none',
+            border: (isExpanded || showSeeMore) ? '1px solid rgba(229, 231, 235, 0.8)' : '1px solid rgba(229, 231, 235, 0.3)',
             boxShadow: (isExpanded || showSeeMore)
               ? '0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)'
-              : 'none' // No shadow for initial orb (handled by inner glass element)
+              : '0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)', // Subtle shadow for orb overlay
+            // Only adjust width for showSeeMore state (product images)
+            width: showSeeMore && !isOnProduct ? 'max-content' : undefined,
+            minWidth: showSeeMore && !isOnProduct ? '320px' : undefined,
+            maxWidth: showSeeMore && !isOnProduct ? '400px' : undefined
           }}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{
+            scale: isVisible ? 1 : 0,
+            opacity: isVisible ? 1 : 0,
+            width: isExpanded ? 384 : 48,
+            height: isExpanded ? 384 : 48
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 350,
+            damping: 30,
+            mass: 0.8,
+            duration: 0.4
+          }}
+          layout
+          layoutId={`smart-orb-${isOnProduct ? 'inline' : 'floating'}`}
         >
           {!showSeeMore && !isExpanded ? (
             /* Apple-Style Initial Orb State */
@@ -743,49 +760,93 @@ export default function SmartSuggestOrb({
                 />
               </div>
               
-              {/* Help Mode: Immediate Tooltip OR Discovery Mode: Hover Text */}
-              {mode === 'help' && showTooltip ? (
-                /* Help Tooltip - Shows immediately to the left of orb */
-                <div className="absolute top-1/2 right-14 transform -translate-y-1/2 pointer-events-none">
+              {/* Help Mode OR Inline Mode: Smooth Tooltip with Framer Motion */}
+              <AnimatePresence>
+                {(mode === 'help' || isOnProduct) && showTooltip && (
+                  /* Tooltip - Positioned based on mode */
+                  <motion.div 
+                  className={`absolute top-1/2 transform -translate-y-1/2 pointer-events-auto z-50 cursor-pointer ${
+                    isOnProduct ? 'left-14' : 'right-14'
+                  }`}
+                  initial={{ opacity: 0, scale: 0.8, y: -8 }}
+                  animate={{ opacity: 1, scale: 1, y: -8 }}
+                  exit={{ opacity: 0, scale: 0.8, y: -8 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 25,
+                    duration: 0.3
+                  }}
+                  onClick={handleOrbClick}
+                >
                   <div 
-                    className="bg-white px-4 py-3 rounded-xl shadow-lg border border-gray-200 whitespace-nowrap animate-fadeIn"
+                    className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 whitespace-nowrap hover:shadow-xl transition-shadow"
                     style={{
-                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      backdropFilter: 'blur(8px)'
                     }}
                   >
-                    <p className="text-sm font-medium text-gray-900 mb-1">
-                      Tea questions?
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      AI assistant ready
+                    <p className="text-xs font-medium text-gray-900">
+                      {customMessage || "Tea questions? Click me!"}
                     </p>
                     
-                    {/* Tooltip Arrow - Points right toward orb */}
+                    {/* Tooltip Arrow - Points toward orb */}
                     <div 
-                      className="absolute top-1/2 left-full transform -translate-y-1/2 w-0 h-0"
-                      style={{
-                        borderTop: '6px solid transparent',
-                        borderBottom: '6px solid transparent',
-                        borderLeft: '6px solid white'
-                      }}
+                      className={`absolute top-1/2 transform -translate-y-1/2 w-0 h-0 ${
+                        isOnProduct ? 'right-full' : 'left-full'
+                      }`}
+                      style={
+                        isOnProduct ? {
+                          borderTop: '4px solid transparent',
+                          borderBottom: '4px solid transparent',
+                          borderRight: '4px solid white'
+                        } : {
+                          borderTop: '4px solid transparent',
+                          borderBottom: '4px solid transparent',
+                          borderLeft: '4px solid white'
+                        }
+                      }
                     />
                   </div>
-                </div>
-              ) : mode === 'discovery' ? (
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {mode === 'discovery' ? (
                 /* Discovery Mode: Side Text on Hover */
                 <div className="absolute left-10 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
                   <div className="text-black text-sm font-medium whitespace-nowrap">
-                    Hey Ajay! Need help with tea selection?
+                    {customMessage || "Hey Ajay! Need help with tea selection?"}
+                  </div>
+                </div>
+              ) : mode === 'agent' && customMessage ? (
+                /* Agent Mode: Custom Message on Hover */
+                <div className="absolute left-10 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
+                  <div className="text-black text-sm font-medium whitespace-nowrap">
+                    {customMessage}
                   </div>
                 </div>
               ) : null}
             </div>
           ) : showSeeMore && !isExpanded ? (
-            /* Orb with Side Text State - Same Line */
-            <div className="w-full h-full flex items-center justify-between p-3" style={{ minWidth: 'max-content' }}>
+            /* Compact Orb with Side Text State */
+            <motion.div 
+              className="w-full h-full flex items-center p-2" 
+              style={{ 
+                width: 'max-content',
+                minWidth: '300px' // Maintain proper width for product image interaction
+              }}
+              initial={{ width: '48px' }}
+              animate={{ width: 'max-content' }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 30
+              }}
+            >
               {/* AI Orb */}
-              <div 
-                className="w-12 h-12 rounded-full backdrop-blur-xl border border-white/20 flex items-center justify-center relative overflow-hidden cursor-pointer mr-1"
+              <motion.div 
+                className="w-8 h-8 rounded-full backdrop-blur-xl border border-white/20 flex items-center justify-center relative overflow-hidden cursor-pointer flex-shrink-0"
                 style={{
                   background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                   boxShadow: `
@@ -794,14 +855,21 @@ export default function SmartSuggestOrb({
                   `
                 }}
                 onClick={handleSeeMoreClick}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <RiSparklingFill size={20} className="text-white" />
-              </div>
+                <RiSparklingFill size={16} className="text-white" />
+              </motion.div>
               
-              {/* Text beside orb */}
-              <div className="flex items-center gap-1">
-                <span className="text-xs font-medium" style={{ color: '#374151' }}>
-                  Hey Ajay! Found regional tea designs —
+              {/* Compact Text beside orb */}
+              <motion.div 
+                className="flex items-center ml-2"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <span className="text-xs font-medium whitespace-nowrap" style={{ color: '#374151' }}>
+                  {customMessage || "Hey Ajay! Found regional tea designs"} —
                   <button
                     onClick={handleSeeMoreClick}
                     className="ml-1 underline underline-offset-2 hover:no-underline transition-all"
@@ -810,8 +878,8 @@ export default function SmartSuggestOrb({
                     see more
                   </button>
                 </span>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           ) : (
             /* Expanded Chat Interface */
             <div className="w-full h-full flex flex-col overflow-hidden rounded-3xl">
@@ -1248,10 +1316,226 @@ export default function SmartSuggestOrb({
               </div>
             </div>
           )}
-        </div>
-        </div>
+        </motion.div>
+      </div>
+    )
+  }
 
+  // Floating orbs: Original complex structure for help orb and product image orbs
+  return (
+    <>
+      {/* Container positioning for floating orbs */}
+      <div 
+        className="fixed z-50 pointer-events-none inset-0"
+        style={{ background: 'transparent' }}
+      >
+        <div 
+          ref={orbRef}
+          className={`absolute pointer-events-auto ${
+            isExpanded
+              ? 'transform origin-top-left' // Help mode: expand from top-left corner  
+              : '' // Help mode orb: no special positioning (handled by parent)
+          }`}
+        >
+          {/* Morphing Orb Container with Framer Motion */}
+          <motion.div
+            className={`transform ${
+              isExpanded 
+                ? 'w-96 h-96 rounded-3xl'
+                : showSeeMore
+                  ? 'rounded-full h-12' // More compact height
+                  : 'w-12 h-12 rounded-full'
+            }`}
+            style={{
+              background: isExpanded 
+                ? 'rgba(255, 255, 255, 0.98)'
+                : showSeeMore 
+                  ? 'rgba(255, 255, 255, 0.95)'
+                  : '#ffffff', // Solid white background for orb
+              backdropFilter: (isExpanded || showSeeMore) ? 'blur(12px)' : 'none',
+              border: (isExpanded || showSeeMore) ? '1px solid rgba(229, 231, 235, 0.8)' : '1px solid rgba(229, 231, 235, 0.3)',
+              boxShadow: (isExpanded || showSeeMore)
+                ? '0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1)'
+                : '0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)', // Subtle shadow for orb overlay
+              // Only adjust width for showSeeMore state (product images)
+              width: showSeeMore && !isOnProduct ? 'max-content' : undefined,
+              minWidth: showSeeMore && !isOnProduct ? '320px' : undefined,
+              maxWidth: showSeeMore && !isOnProduct ? '400px' : undefined
+            }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{
+              scale: isVisible ? 1 : 0,
+              opacity: isVisible ? 1 : 0,
+              width: isExpanded ? 384 : 48,
+              height: isExpanded ? 384 : 48
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 350,
+              damping: 30,
+              mass: 0.8,
+              duration: 0.4
+            }}
+            layout
+            layoutId={`smart-orb-floating`}
+          >
+            {/* Same content as inline orbs but for floating context */}
+            {!showSeeMore && !isExpanded ? (
+              /* Apple-Style Initial Orb State */
+              <div 
+                className="w-full h-full flex items-center justify-center cursor-pointer group relative"
+                onClick={handleOrbClick}
+              >
+                {/* Glass morphism orb */}
+                <div 
+                  className="w-full h-full rounded-full backdrop-blur-xl border border-white/20 flex items-center justify-center relative overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                    boxShadow: `
+                      0 4px 16px rgba(4, 120, 87, 0.3),
+                      inset 0 1px 0 rgba(255,255,255,0.2)
+                    `
+                  }}
+                >
+                  <RiSparklingFill 
+                    size={20} 
+                    className="text-white relative z-10" 
+                  />
+                </div>
+                
+                {/* Help Mode: Smooth Tooltip with Framer Motion */}
+                <AnimatePresence>
+                  {mode === 'help' && showTooltip && (
+                    /* Tooltip - Positioned for help orb */
+                    <motion.div 
+                      className="absolute top-1/2 right-14 transform -translate-y-1/2 pointer-events-auto z-50 cursor-pointer"
+                      initial={{ opacity: 0, scale: 0.8, y: -8 }}
+                      animate={{ opacity: 1, scale: 1, y: -8 }}
+                      exit={{ opacity: 0, scale: 0.8, y: -8 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 25,
+                        duration: 0.3
+                      }}
+                      onClick={handleOrbClick}
+                    >
+                      <div 
+                        className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 whitespace-nowrap hover:shadow-xl transition-shadow"
+                        style={{
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                          backdropFilter: 'blur(8px)'
+                        }}
+                      >
+                        <p className="text-xs font-medium text-gray-900">
+                          {customMessage || "Tea questions? Click me!"}
+                        </p>
+                        
+                        {/* Tooltip Arrow - Points toward orb */}
+                        <div 
+                          className="absolute top-1/2 left-full transform -translate-y-1/2 w-0 h-0"
+                          style={{
+                            borderTop: '4px solid transparent',
+                            borderBottom: '4px solid transparent',
+                            borderLeft: '4px solid white'
+                          }}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {mode === 'discovery' ? (
+                  /* Discovery Mode: Side Text on Hover */
+                  <div className="absolute left-10 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
+                    <div className="text-black text-sm font-medium whitespace-nowrap">
+                      {customMessage || "Hey Ajay! Need help with tea selection?"}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            ) : showSeeMore && !isExpanded ? (
+              /* Compact Orb with Side Text State */
+              <motion.div 
+                className="w-full h-full flex items-center p-2" 
+                style={{ 
+                  width: 'max-content',
+                  minWidth: '300px' // Maintain proper width for product image interaction
+                }}
+                initial={{ width: '48px' }}
+                animate={{ width: 'max-content' }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30
+                }}
+              >
+                {/* AI Orb */}
+                <motion.div 
+                  className="w-8 h-8 rounded-full backdrop-blur-xl border border-white/20 flex items-center justify-center relative overflow-hidden cursor-pointer flex-shrink-0"
+                  style={{
+                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                    boxShadow: `
+                      0 4px 16px rgba(4, 120, 87, 0.3),
+                      inset 0 1px 0 rgba(255,255,255,0.2)
+                    `
+                  }}
+                  onClick={handleSeeMoreClick}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <RiSparklingFill size={16} className="text-white" />
+                </motion.div>
+                
+                {/* Compact Text beside orb */}
+                <motion.div 
+                  className="flex items-center ml-2"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <span className="text-xs font-medium whitespace-nowrap" style={{ color: '#374151' }}>
+                    {customMessage || "Hey Ajay! Found regional tea designs"} —
+                    <button
+                      onClick={handleSeeMoreClick}
+                      className="ml-1 underline underline-offset-2 hover:no-underline transition-all"
+                      style={{ color: '#059669' }} 
+                    >
+                      see more
+                    </button>
+                  </span>
+                </motion.div>
+              </motion.div>
+            ) : (
+              /* Same expanded chat interface as inline orbs */
+              <div className="w-full h-full flex flex-col overflow-hidden rounded-3xl">
+                {/* Chat interface content - same as inline version */}
+                <div className="flex items-center justify-between p-3 rounded-t-3xl" style={{ borderBottom: '1px solid rgba(229, 231, 235, 0.2)', background: '#ffffff' }}>
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-6 h-6 rounded-full flex items-center justify-center"
+                      style={{
+                        background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+                      }}
+                    >
+                      <RiSparklingFill size={12} className="text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">AI Shopping Assistant</span>
+                  </div>
+                  <button 
+                    onClick={handleClose}
+                    className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  >
+                    <RiCloseLine size={16} className="text-gray-600" />
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 p-3 text-center">Same chat interface for floating orbs</p>
+              </div>
+            )}
+          </motion.div>
+        </div>
       </div>
     </>
   )
 }
+
