@@ -127,21 +127,21 @@ const KERALA_TEA_SUGGESTIONS: SuggestionProduct[] = [
     id: 'kerala-mural-tea-set',
     name: 'Kerala Mural Art Tea Set',
     image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=200&h=200&fit=crop&crop=center',
-    price: '$34.99',
+    price: '$19.99',
     description: 'Traditional Kerala mural designs'
   },
   {
     id: 'theyyam-inspired-mug',
     name: 'Theyyam Inspired Tea Mug',
     image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=200&h=200&fit=crop&crop=center',
-    price: '$24.99',
+    price: '$16.99',
     description: 'Hand-painted Theyyam art'
   },
   {
     id: 'backwater-serenity-set',
     name: 'Backwater Serenity Tea Collection',
     image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=200&h=200&fit=crop&crop=center',
-    price: '$39.99',
+    price: '$22.99',
     description: 'Kerala backwater landscapes'
   }
 ]
@@ -150,7 +150,7 @@ const KERALA_TEA_SUGGESTIONS: SuggestionProduct[] = [
 const DISCOVERY_VOICE_RESPONSES = [
   "Show me the cheapest regional tea designs you found.",
   "Which Kerala-style tea set has the best traditional patterns?",
-  "Can you find some regional mugs under $25?",
+  "Can you find some regional mugs under $20?",
   "What's the most authentic Kerala design you discovered?",
   "Show me those Theyyam-inspired tea designs you mentioned.",
   "Are there any regional tea sets with modern twists on traditional patterns?",
@@ -160,7 +160,7 @@ const DISCOVERY_VOICE_RESPONSES = [
   "What's the difference between these Kerala designs and regular tea sets?"
 ]
 
-// Voice responses for help mode (tea ingredients and brewing) - matched pairs
+// Voice responses for help mode (tea ingredients and brewing) - matched pairs with more variety
 const HELP_VOICE_QUESTIONS = [
   "What are the main ingredients in this Earl Grey tea?",
   "How should I brew this tea for the best flavor?", 
@@ -171,7 +171,12 @@ const HELP_VOICE_QUESTIONS = [
   "Are there any health benefits to drinking Earl Grey?",
   "How many cups of this tea can I drink per day?",
   "What makes the bergamot flavor so special in this tea?",
-  "Will this tea help me sleep or keep me awake?"
+  "Will this tea help me sleep or keep me awake?",
+  "Does this tea expire? How long does it stay fresh?",
+  "Can I drink this tea on an empty stomach?",
+  "What's the difference between this and regular black tea?",
+  "Should I remove the tea bag or let it steep longer?",
+  "Can pregnant women drink this Earl Grey tea?"
 ]
 
 const HELP_AI_ANSWERS = [
@@ -184,7 +189,12 @@ const HELP_AI_ANSWERS = [
   "Earl Grey is rich in antioxidants from the black tea, and bergamot oil may help with digestion and stress relief. It's also lower in caffeine than coffee.",
   "You can safely enjoy 3-4 cups per day. With 40-70mg caffeine per cup, that's well within healthy limits and provides steady energy throughout the day.",
   "Bergamot oil comes from the rind of bergamot oranges grown in Calabria, Italy. It gives Earl Grey that distinctive floral-citrus aroma that sets it apart from other teas.",
-  "Earl Grey contains moderate caffeine (40-70mg), so it will provide gentle energy rather than make you sleepy. Avoid drinking it 4-6 hours before bedtime."
+  "Earl Grey contains moderate caffeine (40-70mg), so it will provide gentle energy rather than make you sleepy. Avoid drinking it 4-6 hours before bedtime.",
+  "Properly stored Earl Grey stays fresh for 2-3 years. Keep it in an airtight container away from light and moisture. The bergamot oil may fade over time but it's still safe to drink.",
+  "Earl Grey is generally gentle enough for an empty stomach. The bergamot may actually help with digestion, though some people prefer having a light snack first.",
+  "Earl Grey is regular black tea enhanced with bergamot oil. This citrus addition gives it a distinctive floral aroma and slightly sweet flavor that regular black tea lacks.",
+  "Remove the tea bag after 3-5 minutes. Leaving it longer will make the tea bitter as it extracts more tannins. For loose leaf tea, strain after the same time.",
+  "Pregnant women should limit Earl Grey to 1-2 cups daily due to caffeine content. The bergamot is safe, but always consult your doctor about caffeine intake during pregnancy."
 ]
 
 export default function SmartSuggestOrb({ 
@@ -321,7 +331,7 @@ export default function SmartSuggestOrb({
         icon: RiSearchLine,
         statusIndicator: 'SHOPOS_PROCESSING'
       })
-    }, 3000)
+    }, 2000)
 
       setTimeout(() => {
         addTypingMessage({
@@ -395,9 +405,9 @@ export default function SmartSuggestOrb({
     // Delay showing suggestions to allow morphing animation to complete
     // Only show suggestions if not in conversation, otherwise keep conversation visible
     if (!isInConversation) {
-      setTimeout(() => {
-        setShowSuggestions(true)
-      }, 300)
+    setTimeout(() => {
+      setShowSuggestions(true)
+    }, 300)
     }
   }
 
@@ -440,10 +450,10 @@ export default function SmartSuggestOrb({
       setShowVoiceAnimation(true)
     setInputMode('voice')
       
-      // Auto-stop after 3 seconds
+      // Auto-stop after 2 seconds
       voiceTimeoutRef.current = window.setTimeout(() => {
         stopVoiceRecording()
-      }, 3000)
+      }, 2000)
     } else {
       // Stop voice recording early
       stopVoiceRecording()
@@ -467,83 +477,63 @@ export default function SmartSuggestOrb({
     const randomResponse = voiceResponses[randomIndex]
     setInputText(randomResponse)
     
-    // Store the index for matching AI response later
-    if (mode === 'help') {
-      setSelectedHelpIndex(randomIndex)
+    // Determine AI response IMMEDIATELY using the randomIndex before any state changes
+    let aiResponse: string
+    if (mode === 'discovery') {
+      const discoveryResponses = [
+        "Here are the most affordable regional designs I found! The Theyyam Inspired Tea Mug at $16.99 offers authentic Kerala art at the best price point.",
+        "The Kerala Mural Art Tea Set has the most traditional patterns - featuring authentic temple mural designs passed down through generations. The intricate details are stunning!",
+        "Perfect! I found several beautiful options under $20, including the Theyyam Inspired Mug ($16.99) with hand-painted traditional dance motifs.",
+        "The most authentic design is definitely the Kerala Mural Art Set - it features genuine temple art patterns and uses traditional color palettes from ancient Kerala murals.",
+        "The Theyyam-inspired collection is incredible! These pieces capture the vibrant colors and spiritual energy of Kerala's traditional Theyyam performances.",
+        "Yes! The Backwater Serenity Collection blends traditional Kerala landscapes with contemporary minimalist design - perfect for modern homes with cultural appreciation.",
+        "For gifting, I'd recommend the Kerala Mural Art Tea Set - it's culturally significant, beautifully crafted, and comes with a story about Kerala's artistic heritage.",
+        "I found some exclusive pieces! The Backwater Serenity Collection includes limited edition designs inspired by Kerala's famous backwater scenes.",
+        "The most vibrant designs are in the Theyyam collection - featuring bold reds, deep blues, and golden accents that represent the energy of Kerala's traditional performances.",
+        "Kerala designs are unique because they tell stories - each pattern represents local culture, from temple art to backwater scenes, unlike generic tea sets."
+      ]
+      aiResponse = discoveryResponses[Math.floor(Math.random() * discoveryResponses.length)]
+    } else {
+      // Use exact matching response for help mode
+      aiResponse = HELP_AI_ANSWERS[randomIndex] || HELP_AI_ANSWERS[0]
     }
     
-    // Auto-send to chat after brief delay
+    // Create user message immediately
+    const userMessage: ConversationMessage = {
+      id: `user-${Date.now()}`,
+      type: 'result',
+      content: randomResponse.trim(),
+      timestamp: Date.now(),
+      isTyping: false,
+      icon: RiUser3Line
+    }
+    
+    // Add to conversation immediately
+    setIsInConversation(true)
+    setShowSuggestions(false)
+    setConversationMessages(prev => [...prev, userMessage])
+    setInputText('') // Clear input
+    
+    // Start AI response immediately
     setTimeout(() => {
-      if (randomResponse.trim()) {
-        // Create user message
-        const userMessage: ConversationMessage = {
-          id: `user-${Date.now()}`,
-          type: 'result',
-          content: randomResponse.trim(),
-          timestamp: Date.now(),
-          isTyping: false,
-          icon: RiUser3Line
-        }
-        
-        // Add user message to conversation
-        setIsInConversation(true)
-        setShowSuggestions(false)  // Temporarily hide suggestions while AI responds
-        setConversationMessages(prev => [...prev, userMessage])
-        
-        // Clear input
-        setInputText('')
-        
-        // Generate AI response after delay
-        setTimeout(() => {
-          setIsAiResponding(true)
-          
-          // Different responses based on mode
-          const discoveryResponses = [
-            "Here are the most affordable regional designs I found! The Theyyam Inspired Tea Mug at $24.99 offers authentic Kerala art at the best price point.",
-            "The Kerala Mural Art Tea Set has the most traditional patterns - featuring authentic temple mural designs passed down through generations. The intricate details are stunning!",
-            "Perfect! I found several beautiful options under $25, including the Theyyam Inspired Mug ($24.99) with hand-painted traditional dance motifs.",
-            "The most authentic design is definitely the Kerala Mural Art Set - it features genuine temple art patterns and uses traditional color palettes from ancient Kerala murals.",
-            "The Theyyam-inspired collection is incredible! These pieces capture the vibrant colors and spiritual energy of Kerala's traditional Theyyam performances.",
-            "Yes! The Backwater Serenity Collection blends traditional Kerala landscapes with contemporary minimalist design - perfect for modern homes with cultural appreciation.",
-            "For gifting, I'd recommend the Kerala Mural Art Tea Set - it's culturally significant, beautifully crafted, and comes with a story about Kerala's artistic heritage.",
-            "I found some exclusive pieces! The Backwater Serenity Collection includes limited edition designs inspired by Kerala's famous backwater scenes.",
-            "The most vibrant designs are in the Theyyam collection - featuring bold reds, deep blues, and golden accents that represent the energy of Kerala's traditional performances.",
-            "Kerala designs are unique because they tell stories - each pattern represents local culture, from temple art to backwater scenes, unlike generic tea sets."
-          ]
-
-          let randomResponse: string
-          
-          if (mode === 'discovery') {
-            randomResponse = discoveryResponses[Math.floor(Math.random() * discoveryResponses.length)]
-          } else {
-            // For help mode, use the matching answer if available
-            if (selectedHelpIndex !== null) {
-              randomResponse = HELP_AI_ANSWERS[selectedHelpIndex]
-              setSelectedHelpIndex(null) // Reset after use
-            } else {
-              randomResponse = HELP_AI_ANSWERS[Math.floor(Math.random() * HELP_AI_ANSWERS.length)]
-            }
-          }
-          
-          addTypingMessage({
-            type: 'result',
-            content: randomResponse,
-            icon: RiBrainLine
-          })
-          
-          // Clear AI responding state after typing finishes and show images ONLY in discovery mode
+      setIsAiResponding(true)
+      
+      addTypingMessage({
+        type: 'result',
+        content: aiResponse,
+        icon: RiBrainLine
+      })
+      
+      // Clear AI responding state after typing finishes
+      setTimeout(() => {
+        setIsAiResponding(false)
+        if (mode === 'discovery') {
           setTimeout(() => {
-            setIsAiResponding(false)
-            // Show Kerala tea images after AI response - ONLY for discovery mode
-            if (mode === 'discovery') {
-              setTimeout(() => {
-                setShowSuggestions(true)
-              }, 500)
-            }
-          }, 2000 + randomResponse.length * 30) // Account for typing animation duration
-        }, 1500)
-      }
-    }, 500)
+            setShowSuggestions(true)
+          }, 500)
+        }
+      }, 2000)
+    }, 800) // Shorter delay for immediate feel
   }
 
   const handleSendInput = () => {
@@ -572,9 +562,9 @@ export default function SmartSuggestOrb({
         
         // Different responses based on mode
         const discoveryResponses = [
-          "Here are the most affordable regional designs I found! The Theyyam Inspired Tea Mug at $24.99 offers authentic Kerala art at the best price point.",
+          "Here are the most affordable regional designs I found! The Theyyam Inspired Tea Mug at $16.99 offers authentic Kerala art at the best price point.",
           "The Kerala Mural Art Tea Set has the most traditional patterns - featuring authentic temple mural designs passed down through generations. The intricate details are stunning!",
-          "Perfect! I found several beautiful options under $25, including the Theyyam Inspired Mug ($24.99) with hand-painted traditional dance motifs.",
+          "Perfect! I found several beautiful options under $20, including the Theyyam Inspired Mug ($16.99) with hand-painted traditional dance motifs.",
           "The most authentic design is definitely the Kerala Mural Art Set - it features genuine temple art patterns and uses traditional color palettes from ancient Kerala murals.",
           "The Theyyam-inspired collection is incredible! These pieces capture the vibrant colors and spiritual energy of Kerala's traditional Theyyam performances.",
           "Yes! The Backwater Serenity Collection blends traditional Kerala landscapes with contemporary minimalist design - perfect for modern homes with cultural appreciation.",
@@ -589,8 +579,14 @@ export default function SmartSuggestOrb({
         if (mode === 'discovery') {
           teaResponse = discoveryResponses[Math.floor(Math.random() * discoveryResponses.length)]
         } else {
-          // For help mode, use random response for manual input
-          teaResponse = HELP_AI_ANSWERS[Math.floor(Math.random() * HELP_AI_ANSWERS.length)]
+          // For help mode, use the matching answer if available (from voice input)
+          if (selectedHelpIndex !== null) {
+            teaResponse = HELP_AI_ANSWERS[selectedHelpIndex]
+            setSelectedHelpIndex(null) // Reset after use
+          } else {
+            // For manual typing, use random response
+            teaResponse = HELP_AI_ANSWERS[Math.floor(Math.random() * HELP_AI_ANSWERS.length)]
+          }
         }
         
         addTypingMessage({
@@ -605,7 +601,7 @@ export default function SmartSuggestOrb({
           // Show Kerala tea images after AI response - ONLY for discovery mode
           if (mode === 'discovery') {
             setTimeout(() => {
-              setShowSuggestions(true)
+      setShowSuggestions(true)
             }, 500)
           }
         }, 2000 + randomResponse.length * 30) // Account for typing animation duration
@@ -663,12 +659,12 @@ export default function SmartSuggestOrb({
         >
         {/* Morphing Orb Container */}
         <div
-          className={`transition-all duration-300 ease-out transform ${
+          className={`transition-none transform ${
             isExpanded 
               ? 'w-96 h-96 rounded-3xl scale-100' // Increased height to show all 3 options properly
               : showSeeMore
                 ? 'min-w-80 h-16 rounded-full scale-100' // Keep same line height with fully rounded corners, allow content to expand
-                : `w-12 h-12 rounded-full ${isVisible ? 'scale-100 opacity-100 bounce-in' : 'scale-0 opacity-0 bounce-in-reverse'}` // Bouncing animation in both directions
+                : `w-12 h-12 rounded-full ${isVisible ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}` // No animations - instant appearance
           }`}
           style={{
             background: isExpanded 
@@ -700,12 +696,11 @@ export default function SmartSuggestOrb({
                   `
                 }}
               >
-                {/* Subtle breathing animation */}
+                {/* Static glow - no animation */}
                 <div 
-                  className="absolute inset-0 rounded-full animate-pulse"
+                  className="absolute inset-0 rounded-full"
                   style={{
-                    background: 'radial-gradient(circle, rgba(4,120,87,0.3) 0%, transparent 70%)',
-                    animationDuration: '3s'
+                    background: 'radial-gradient(circle, rgba(4,120,87,0.3) 0%, transparent 70%)'
                   }}
                 />
                 

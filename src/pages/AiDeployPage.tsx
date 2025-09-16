@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { RiDownloadLine, RiStoreLine, RiCalendarLine, RiArrowRightSLine } from '@remixicon/react'
 import SmartSuggestOrb from '../components/SmartSuggestOrb'
 
@@ -22,10 +22,8 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
     { id: 6, timestamp: '12:10:39', message: 'Creating a secure backup of your current theme...' },
   ])
   const [isDeploymentComplete, setIsDeploymentComplete] = useState(false)
-  const [showOrb, setShowOrb] = useState(false)
-  const [scrollTimeout, setScrollTimeout] = useState<number | null>(null)
-  const scrollPositionRef = useRef(0)
-  const lastScrollTimeRef = useRef(Date.now())
+  const [showOrb, setShowOrb] = useState(true) // Show orb by default, hide only when hovering
+  const [isHoveringProduct, setIsHoveringProduct] = useState(false)
 
   // Simulate real-time log updates
   useEffect(() => {
@@ -66,56 +64,17 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
     return () => clearInterval(interval)
   }, [logEntries.length, isDeploymentComplete])
 
-  // AI Orb scroll handlers - appears during idle scrolling
+  // ULTRA SIMPLE: Show orb ALL THE TIME unless hovering product
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY
-      const currentTime = Date.now()
-      
-      // Update refs
-      scrollPositionRef.current = currentScrollY
-      lastScrollTimeRef.current = currentTime
-      
-      // Clear existing timeout
-      if (scrollTimeout) {
-        clearTimeout(scrollTimeout)
-      }
-      
-      // Hide orb while actively scrolling
-      setShowOrb(false)
-      
-      // Only show orb if user has scrolled and then stopped scrolling for a bit
-      // and if they've scrolled past the initial view (more than 200px)
-      if (currentScrollY > 200) {
-        const timeout = setTimeout(() => {
-          // Double check user is still in scrolled state and not actively scrolling
-          if (window.scrollY > 200 && Date.now() - lastScrollTimeRef.current > 2000) {
-            setShowOrb(true)
-          }
-        }, 2000) // Show orb 2s after user stops scrolling
-        
-        setScrollTimeout(timeout)
-      }
+    if (isHoveringProduct) {
+      setShowOrb(false) // Hide when hovering product
+    } else {
+      setShowOrb(true)  // Show ALL THE TIME when not hovering
     }
-
-    // Add scroll listener
-    window.addEventListener('scroll', handleScroll)
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      if (scrollTimeout) {
-        clearTimeout(scrollTimeout)
-      }
-    }
-  }, [scrollTimeout])
+  }, [isHoveringProduct]) // Only react to hover state changes
 
   const handleCloseOrb = () => {
     setShowOrb(false)
-    if (scrollTimeout) {
-      clearTimeout(scrollTimeout)
-      setScrollTimeout(null)
-    }
   }
 
   return (
@@ -125,6 +84,8 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
           /* Real-time Deployment Logs Card */
           <div 
             className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm relative"
+            onMouseEnter={() => setIsHoveringProduct(true)}
+            onMouseLeave={() => setIsHoveringProduct(false)}
           >
             <div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">Real-time Deployment Logs</h3>
@@ -169,6 +130,8 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
           /* Success Message with Next Steps Card */
           <div 
             className="bg-white rounded-lg p-8 border border-gray-200 shadow-sm relative"
+            onMouseEnter={() => setIsHoveringProduct(true)}
+            onMouseLeave={() => setIsHoveringProduct(false)}
           >
             <div className="text-center mb-8">
               <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
