@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import SmartSuggestOrb from '../components/SmartSuggestOrb'
 import Badge from '../components/Badge'
-import { RiArrowLeftLine, RiSparklingFill, RiTruckLine, RiArrowGoBackLine, RiPlantLine } from '@remixicon/react'
+import { RiArrowLeftLine, RiTruckLine, RiArrowGoBackLine, RiPlantLine } from '@remixicon/react'
 
 export default function AiShoppingPage() {
   const [showOrb, setShowOrb] = useState(false)
@@ -13,21 +13,33 @@ export default function AiShoppingPage() {
   const [showHelpOrb, setShowHelpOrb] = useState(false)
   const [helpOrbExpanded, setHelpOrbExpanded] = useState(false)
   const idleTimerRef = useRef<number | null>(null)
-  const [lastActivity, setLastActivity] = useState(Date.now())
   
-  // Help prompts for idle state
-  const helpPrompts = [
-    "Any questions about the Premium Earl Grey Tea?",
-    "Need help choosing a size or format?", 
-    "Can I help you compare this with other teas?"
-  ]
+  // Individual section orbs for inline positioning
+  const [showDescriptionOrb, setShowDescriptionOrb] = useState(false)
+  const [descriptionOrbExpanded, setDescriptionOrbExpanded] = useState(false)
+  const descriptionHoverTimeout = useRef<number | null>(null)
   
-  const [currentPrompt] = useState(() => 
-    helpPrompts[Math.floor(Math.random() * helpPrompts.length)]
-  )
+  const [showHighlightsOrb, setShowHighlightsOrb] = useState(false)
+  const [highlightsOrbExpanded, setHighlightsOrbExpanded] = useState(false)
+  const highlightsHoverTimeout = useRef<number | null>(null)
+  
+  const [showPricingOrb, setShowPricingOrb] = useState(false)
+  const pricingHoverTimeout = useRef<number | null>(null)
+  
+  const [showOptionsOrb, setShowOptionsOrb] = useState(false)
+  const optionsHoverTimeout = useRef<number | null>(null)
+  
+  const [showCartOrb, setShowCartOrb] = useState(false)
+  const cartHoverTimeout = useRef<number | null>(null)
+  
+  const [showTrustOrb, setShowTrustOrb] = useState(false)
+  const trustHoverTimeout = useRef<number | null>(null)
 
   // Smart Suggest Orb hover handlers
   const handleProductImageHover = () => {
+    // Mark that user is hovering over product image
+    setIsHoveringAnySection(true)
+    
     // Hide help orb when product orb might show
     if (showHelpOrb && !helpOrbExpanded) {
       setShowHelpOrb(false)
@@ -48,6 +60,9 @@ export default function AiShoppingPage() {
   }
 
   const handleProductImageLeave = () => {
+    // Mark that user is no longer hovering over product image
+    setIsHoveringAnySection(false)
+    
     // Clear timeout if user moves away before 2 seconds
     if (hoverTimeout) {
       clearTimeout(hoverTimeout)
@@ -73,9 +88,11 @@ export default function AiShoppingPage() {
     setIsOrbExpanded(expanded)
   }
 
+  // Track if user is hovering over any interactive area
+  const [isHoveringAnySection, setIsHoveringAnySection] = useState(false)
+  
   // Handle user activity for idle detection  
   const handleActivity = useCallback(() => {
-    setLastActivity(Date.now())
     // Only hide help orb if not expanded (respect user's active engagement)
     if (!helpOrbExpanded) {
       setShowHelpOrb(false)
@@ -87,19 +104,18 @@ export default function AiShoppingPage() {
       idleTimerRef.current = null
     }
     
-    // Set new idle timer - only if no product hover orb is active
+    // Set new idle timer - only if no other orbs are active and not hovering anywhere
     idleTimerRef.current = setTimeout(() => {
-      // Only show help orb if product hover orb is not active
-      if (!showOrb) {
+      // Only show help orb if no other orbs are active and not hovering on any section
+      const anyOrbActive = showOrb || showDescriptionOrb || showHighlightsOrb || 
+                          showPricingOrb || showOptionsOrb || showCartOrb || showTrustOrb
+      if (!anyOrbActive && !isHoveringAnySection) {
         setShowHelpOrb(true)
       }
-    }, 4000) // 4 seconds
-  }, [helpOrbExpanded, showOrb])
+    }, 2000) // 2 seconds
+  }, [helpOrbExpanded, showOrb, showDescriptionOrb, showHighlightsOrb, 
+      showPricingOrb, showOptionsOrb, showCartOrb, showTrustOrb, isHoveringAnySection])
 
-  // Handle help orb click
-  const handleHelpOrbClick = () => {
-    setHelpOrbExpanded(true)  // Expand the help orb in place
-  }
 
   // Handle help orb close
   const handleCloseHelpOrb = () => {
@@ -111,6 +127,82 @@ export default function AiShoppingPage() {
   const handleHelpOrbExpanded = (expanded: boolean) => {
     setHelpOrbExpanded(expanded)
   }
+
+  // Individual section hover handlers
+  const createSectionHandlers = (
+    setShow: React.Dispatch<React.SetStateAction<boolean>>,
+    timeoutRef: React.MutableRefObject<number | null>,
+    expanded: boolean
+  ) => ({
+    onMouseEnter: () => {
+      // Mark that user is hovering over a section
+      setIsHoveringAnySection(true)
+      
+      // Hide ALL other orbs when this section orb might show
+      if (showHelpOrb && !helpOrbExpanded) {
+        setShowHelpOrb(false)
+      }
+      if (showOrb && !isOrbExpanded) {
+        setShowOrb(false)
+      }
+      
+      // Hide all other section orbs
+      if (setShow !== setShowDescriptionOrb && showDescriptionOrb && !descriptionOrbExpanded) {
+        setShowDescriptionOrb(false)
+      }
+      if (setShow !== setShowHighlightsOrb && showHighlightsOrb && !highlightsOrbExpanded) {
+        setShowHighlightsOrb(false)
+      }
+      if (setShow !== setShowPricingOrb && showPricingOrb) {
+        setShowPricingOrb(false)
+      }
+      if (setShow !== setShowOptionsOrb && showOptionsOrb) {
+        setShowOptionsOrb(false)
+      }
+      if (setShow !== setShowCartOrb && showCartOrb) {
+        setShowCartOrb(false)
+      }
+      if (setShow !== setShowTrustOrb && showTrustOrb) {
+        setShowTrustOrb(false)
+      }
+      
+      // Clear any existing timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+
+      // Set new timeout for responsive delay
+      timeoutRef.current = setTimeout(() => {
+        setShow(true)
+      }, 400) // Reduced delay for more responsive feel
+    },
+    onMouseLeave: () => {
+      // Mark that user is no longer hovering over this section
+      setIsHoveringAnySection(false)
+      
+      // Clear timeout if user moves away before delay
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
+      
+      // Add a longer delay before hiding to prevent blinking when moving within the section
+      setTimeout(() => {
+        // Only hide orb if it hasn't expanded
+        if (!expanded) {
+          setShow(false)
+        }
+      }, 500) // Longer delay to prevent rapid hide/show when moving within section
+    }
+  })
+  
+  // Create handlers for each section
+  const descriptionHandlers = createSectionHandlers(setShowDescriptionOrb, descriptionHoverTimeout, descriptionOrbExpanded)
+  const highlightsHandlers = createSectionHandlers(setShowHighlightsOrb, highlightsHoverTimeout, highlightsOrbExpanded)
+  const pricingHandlers = createSectionHandlers(setShowPricingOrb, pricingHoverTimeout, false)
+  const optionsHandlers = createSectionHandlers(setShowOptionsOrb, optionsHoverTimeout, false)
+  const cartHandlers = createSectionHandlers(setShowCartOrb, cartHoverTimeout, false)
+  const trustHandlers = createSectionHandlers(setShowTrustOrb, trustHoverTimeout, false)
 
   // Set up activity listeners
   useEffect(() => {
@@ -140,6 +232,24 @@ export default function AiShoppingPage() {
       if (idleTimerRef.current) {
         clearTimeout(idleTimerRef.current)
       }
+      if (descriptionHoverTimeout.current) {
+        clearTimeout(descriptionHoverTimeout.current)
+      }
+      if (highlightsHoverTimeout.current) {
+        clearTimeout(highlightsHoverTimeout.current)
+      }
+      if (pricingHoverTimeout.current) {
+        clearTimeout(pricingHoverTimeout.current)
+      }
+      if (optionsHoverTimeout.current) {
+        clearTimeout(optionsHoverTimeout.current)
+      }
+      if (cartHoverTimeout.current) {
+        clearTimeout(cartHoverTimeout.current)
+      }
+      if (trustHoverTimeout.current) {
+        clearTimeout(trustHoverTimeout.current)
+      }
     }
   }, [])
 
@@ -147,7 +257,10 @@ export default function AiShoppingPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div 
+        className="bg-white border-b border-gray-200 px-6 py-4"
+        {...pricingHandlers}
+      >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button 
@@ -174,7 +287,10 @@ export default function AiShoppingPage() {
       </div>
 
       {/* Navigation breadcrumb */}
-      <div className="bg-white px-6 py-3 border-b border-gray-100">
+      <div 
+        className="bg-white px-6 py-3 border-b border-gray-100"
+        {...pricingHandlers}
+      >
         <div className="max-w-7xl mx-auto">
           <nav className="flex text-sm text-gray-500">
             <span>Home</span>
@@ -275,7 +391,9 @@ export default function AiShoppingPage() {
             {/* Product Details - 5 columns */}
             <div className="lg:col-span-5 space-y-6">
               {/* Product title and price */}
-              <div>
+              <div
+                {...pricingHandlers}
+              >
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">Premium Earl Grey Tea</h1>
                 <p className="text-sm text-gray-600 mb-4">Organic Ceylon black tea with natural bergamot</p>
                 <div className="flex items-center gap-4 mb-6">
@@ -286,7 +404,10 @@ export default function AiShoppingPage() {
               </div>
 
               {/* Product options */}
-              <div className="space-y-4">
+              <div 
+                className="space-y-4"
+                {...optionsHandlers}
+              >
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Size</label>
                   <div className="grid grid-cols-3 gap-2">
@@ -331,7 +452,10 @@ export default function AiShoppingPage() {
               </div>
 
               {/* Add to cart actions */}
-              <div className="space-y-3">
+              <div 
+                className="space-y-3"
+                {...cartHandlers}
+              >
                 <button className="w-full py-3 text-lg font-semibold bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors">
                   Add to Cart - $24.99
                 </button>
@@ -340,31 +464,65 @@ export default function AiShoppingPage() {
                 </button>
               </div>
 
-              {/* Product highlights */}
+              {/* Product highlights - Unified hover area */}
               <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Highlights</h3>
-                <ul className="space-y-2">
-                  <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-1">✓</span>
-                    <span className="text-sm text-gray-700">Premium Earl Grey tea blend with bergamot oil</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-1">✓</span>
-                    <span className="text-sm text-gray-700">Hand-picked Ceylon black tea leaves</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-1">✓</span>
-                    <span className="text-sm text-gray-700">Natural bergamot flavoring from Italian citrus</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-1">✓</span>
-                    <span className="text-sm text-gray-700">Available in loose leaf and tea bag formats</span>
-                  </li>
-                </ul>
+                <div 
+                  className="relative p-4 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer"
+                  {...highlightsHandlers}
+                >
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 relative">
+                    Product Highlights
+                    
+                    {/* Inline Product Highlights Orb - positioned 4px from heading */}
+                    {showHighlightsOrb && (
+                      <div className="absolute top-0 left-full z-50" style={{marginLeft: '4px'}}>
+                        <SmartSuggestOrb 
+                          isVisible={showHighlightsOrb}
+                          onClose={() => {
+                            setShowHighlightsOrb(false)
+                            setHighlightsOrbExpanded(false)
+                            if (highlightsHoverTimeout.current) {
+                              clearTimeout(highlightsHoverTimeout.current)
+                              highlightsHoverTimeout.current = null
+                            }
+                          }}
+                          onExpanded={setHighlightsOrbExpanded}
+                          userLocation="Kerala"
+                          productCategory="tea"
+                          isOnProduct={true}
+                          mode="agent"
+                          showTooltipImmediately={true}
+                        />
+                      </div>
+                    )}
+                  </h3>
+                  
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="text-gray-400 mt-1">✓</span>
+                      <span className="text-sm text-gray-700">Premium Earl Grey tea blend with bergamot oil</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-gray-400 mt-1">✓</span>
+                      <span className="text-sm text-gray-700">Hand-picked Ceylon black tea leaves</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-gray-400 mt-1">✓</span>
+                      <span className="text-sm text-gray-700">Natural bergamot flavoring from Italian citrus</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-gray-400 mt-1">✓</span>
+                      <span className="text-sm text-gray-700">Available in loose leaf and tea bag formats</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
 
               {/* Trust indicators */}
-              <div className="border-t border-gray-200 pt-6 space-y-2 text-sm text-gray-600">
+              <div 
+                className="border-t border-gray-200 pt-6 space-y-2 text-sm text-gray-600"
+                {...trustHandlers}
+              >
                 <div className="flex items-center gap-2">
                   <RiTruckLine size={16} className="text-green-600" />
                   <span>Free shipping on orders over $50</span>
@@ -381,24 +539,55 @@ export default function AiShoppingPage() {
             </div>
           </div>
 
-          {/* Product description section */}
+          {/* Product description section - Unified hover area */}
           <div className="mt-16 pt-12 border-t border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Description</h2>
-            <div className="prose max-w-none text-gray-700">
-              <p className="mb-4">
-                Experience the timeless elegance of our Premium Earl Grey Tea, carefully crafted from the finest Ceylon black tea leaves 
-                and infused with authentic bergamot oil from Italian citrus groves. This classic English blend delivers a perfect balance 
-                of robust tea flavor and delicate citrus aromatics.
-              </p>
-              <p className="mb-4">
-                Hand-picked at high altitude gardens in Sri Lanka, our tea leaves are processed using traditional methods to preserve 
-                their natural character and strength. The addition of cornflower petals adds a touch of visual beauty to each cup, 
-                making this not just a beverage, but a moment of daily luxury.
-              </p>
-              <p>
-                Whether you're starting your morning or taking an afternoon break, this Earl Grey provides the perfect caffeine boost 
-                while delivering an sophisticated taste experience that tea enthusiasts have cherished for generations.
-              </p>
+            <div 
+              className="relative p-6 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer"
+              {...descriptionHandlers}
+            >
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 relative">
+                Description
+                
+                {/* Inline Description Orb - positioned 4px from heading */}
+                {showDescriptionOrb && (
+                  <div className="absolute top-0 left-full z-50" style={{marginLeft: '4px'}}>
+                    <SmartSuggestOrb 
+                      isVisible={showDescriptionOrb}
+                      onClose={() => {
+                        setShowDescriptionOrb(false)
+                        setDescriptionOrbExpanded(false)
+                        if (descriptionHoverTimeout.current) {
+                          clearTimeout(descriptionHoverTimeout.current)
+                          descriptionHoverTimeout.current = null
+                        }
+                      }}
+                      onExpanded={setDescriptionOrbExpanded}
+                      userLocation="Kerala"
+                      productCategory="tea"
+                      isOnProduct={true}
+                      mode="agent"
+                      showTooltipImmediately={true}
+                    />
+                  </div>
+                )}
+              </h2>
+              
+              <div className="prose max-w-none text-gray-700">
+                <p className="mb-4">
+                  Experience the timeless elegance of our Premium Earl Grey Tea, carefully crafted from the finest Ceylon black tea leaves 
+                  and infused with authentic bergamot oil from Italian citrus groves. This classic English blend delivers a perfect balance 
+                  of robust tea flavor and delicate citrus aromatics.
+                </p>
+                <p className="mb-4">
+                  Hand-picked at high altitude gardens in Sri Lanka, our tea leaves are processed using traditional methods to preserve 
+                  their natural character and strength. The addition of cornflower petals adds a touch of visual beauty to each cup, 
+                  making this not just a beverage, but a moment of daily luxury.
+                </p>
+                <p>
+                  Whether you're starting your morning or taking an afternoon break, this Earl Grey provides the perfect caffeine boost 
+                  while delivering an sophisticated taste experience that tea enthusiasts have cherished for generations.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -413,11 +602,12 @@ export default function AiShoppingPage() {
         </div>
       </div>
 
-      {/* Help Orb - Right Side (Transforms in place like first orb) */}
-      {showHelpOrb && !showOrb && (
+      {/* Help Orb - Right Side */}
+      {showHelpOrb && !showOrb && !showDescriptionOrb && !showHighlightsOrb && 
+       !showPricingOrb && !showOptionsOrb && !showCartOrb && !showTrustOrb && (
         <div className="fixed top-1/2 right-8 z-50 transform -translate-y-1/2" 
              style={{ 
-               right: helpOrbExpanded ? '408px' : '78px', // When expanded: adjusted for h-96 chat box, when orb: 78px from right edge
+               right: helpOrbExpanded ? '408px' : '78px',
                transition: 'right 0.3s ease-out'
              }}>
           <SmartSuggestOrb 
@@ -426,14 +616,15 @@ export default function AiShoppingPage() {
             onExpanded={handleHelpOrbExpanded}
             userLocation="Kerala"
             productCategory="tea"
-            isOnProduct={false}  // Not on product, it's standalone
-            mode="help"         // Always help mode
-            showTooltipImmediately={true} // Show tooltip immediately with orb
+            isOnProduct={false}
+            mode="help"
+            showTooltipImmediately={true}
           />
         </div>
       )}
 
-      <style jsx>{`
+
+      <style>{`
         @keyframes bounceIn {
           0% {
             opacity: 0;

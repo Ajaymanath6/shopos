@@ -100,7 +100,7 @@ interface SmartSuggestOrbProps {
   productCategory?: string
   isOnProduct?: boolean
   onExpanded?: (expanded: boolean) => void
-  mode?: 'discovery' | 'help'
+  mode?: 'discovery' | 'help' | 'agent'
   showTooltipImmediately?: boolean
 }
 
@@ -195,6 +195,33 @@ const HELP_AI_ANSWERS = [
   "Earl Grey is regular black tea enhanced with bergamot oil. This citrus addition gives it a distinctive floral aroma and slightly sweet flavor that regular black tea lacks.",
   "Remove the tea bag after 3-5 minutes. Leaving it longer will make the tea bitter as it extracts more tannins. For loose leaf tea, strain after the same time.",
   "Pregnant women should limit Earl Grey to 1-2 cups daily due to caffeine content. The bergamot is safe, but always consult your doctor about caffeine intake during pregnancy."
+]
+
+// Voice responses for agent mode (purchase assistance)
+const AGENT_VOICE_QUESTIONS = [
+  "I'm ready to purchase this deployment package, what's the next step?",
+  "Can you help me complete this purchase quickly?",
+  "What pricing options do you have for deployment services?",
+  "I want to buy this now, how much will it cost?",
+  "Can I schedule a consultation call to discuss my needs?",
+  "What packages do you offer for deployment services?",
+  "I need help choosing the right deployment plan for my store",
+  "Can you process my order for the deployment service?",
+  "What's included in your premium deployment package?",
+  "I want to upgrade my store, what are my options?"
+]
+
+const AGENT_AI_ANSWERS = [
+  "Perfect! I can help you get started right away. Our deployment package is $24.99 and includes AI optimization, backup, and monitoring. Would you like me to add it to your cart?",
+  "Absolutely! I can fast-track your purchase. The $24.99 deployment package includes everything you saw in the demo. I can add it to cart right now if you're ready.",
+  "We have 3 deployment packages: Starter ($24.99), Pro ($49.99), and Enterprise ($99.99). Each includes different levels of optimization and support. Which features are most important to you?",
+  "Great choice! The deployment package is $24.99 and includes everything you saw in the demo. I can add it to your cart right now if you're ready.",
+  "I'd love to schedule that! Our deployment experts can discuss advanced optimization strategies. What time zone are you in and when works best for you?",
+  "We offer Basic (AI optimization), Pro (+ performance monitoring), and Enterprise (+ custom integrations). All include full backup and deployment. Which sounds right for your needs?",
+  "I can definitely help! Tell me about your store size and main goals, and I'll recommend the perfect deployment plan with pricing options.",
+  "Excellent! I can start processing your deployment order immediately. Do you want to proceed with the package you saw, or would you like to customize any features?",
+  "Our premium package includes AI optimization, real-time monitoring, custom integrations, priority support, and monthly performance reports. It's perfect for growing businesses.",
+  "Fantastic! We have upgrade paths from basic optimization to full-scale performance enhancement. What's your biggest concern with your current store performance?"
 ]
 
 export default function SmartSuggestOrb({ 
@@ -472,7 +499,9 @@ export default function SmartSuggestOrb({
     }
     
     // Simulate voice transcription - select random response based on mode
-    const voiceResponses = mode === 'discovery' ? DISCOVERY_VOICE_RESPONSES : HELP_VOICE_QUESTIONS
+    const voiceResponses = mode === 'discovery' ? DISCOVERY_VOICE_RESPONSES 
+                          : mode === 'agent' ? AGENT_VOICE_QUESTIONS 
+                          : HELP_VOICE_QUESTIONS
     const randomIndex = Math.floor(Math.random() * voiceResponses.length)
     const randomResponse = voiceResponses[randomIndex]
     setInputText(randomResponse)
@@ -493,6 +522,9 @@ export default function SmartSuggestOrb({
         "Kerala designs are unique because they tell stories - each pattern represents local culture, from temple art to backwater scenes, unlike generic tea sets."
       ]
       aiResponse = discoveryResponses[Math.floor(Math.random() * discoveryResponses.length)]
+    } else if (mode === 'agent') {
+      // Use exact matching response for agent mode
+      aiResponse = AGENT_AI_ANSWERS[randomIndex] || AGENT_AI_ANSWERS[0]
     } else {
       // Use exact matching response for help mode
       aiResponse = HELP_AI_ANSWERS[randomIndex] || HELP_AI_ANSWERS[0]
@@ -1021,16 +1053,49 @@ export default function SmartSuggestOrb({
                         <RiSparklingFill size={16} className="text-white" />
                       </div>
                       <h3 className="font-semibold text-sm mb-1" style={{ color: '#111827' }}>
-                        How can I help with this tea?
+                        {mode === 'agent' 
+                          ? 'Ready to help with your purchase'
+                          : productCategory === 'deployment' 
+                            ? 'How can I help with deployment?'
+                            : 'How can I help with this tea?'
+                        }
                       </h3>
                       <p className="text-xs leading-relaxed" style={{ color: '#6B7280' }}>
-                        Choose an option below or ask me anything
+                        {mode === 'agent' 
+                          ? 'I can help you complete your purchase or answer any questions'
+                          : 'Choose an option below or ask me anything'
+                        }
                       </p>
                     </div>
 
-                    {/* Default Options */}
+                    {/* Mode-based Options */}
                     <div className="space-y-3 px-1 flex-1">
-                      {[
+                      {(mode === 'agent' ? [
+                        { 
+                          text: "Add to cart now", 
+                          icon: RiHeartLine, 
+                          action: () => {
+                            setInputText("I want to add this deployment package to cart for $24.99")
+                            handleSendInput()
+                          }
+                        },
+                        { 
+                          text: "Compare packages", 
+                          icon: RiEyeLine, 
+                          action: () => {
+                            setInputText("Show me different deployment packages and pricing options")
+                            handleSendInput()
+                          }
+                        },
+                        { 
+                          text: "Get expert help", 
+                          icon: RiStarLine, 
+                          action: () => {
+                            setInputText("I need expert help choosing the right deployment package for my store")
+                            handleSendInput()
+                          }
+                        }
+                      ] : [
                         { 
                           text: "Buy this product", 
                           icon: RiHeartLine, 
@@ -1054,7 +1119,7 @@ export default function SmartSuggestOrb({
                             startIngredientsAnalysis()
                           }
                         }
-                      ].map((option, index) => (
+                      ]).map((option, index) => (
                         <button
                           key={index}
                           onClick={option.action}

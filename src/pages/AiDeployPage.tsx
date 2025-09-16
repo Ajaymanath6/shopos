@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { RiDownloadLine, RiStoreLine, RiCalendarLine, RiArrowRightSLine } from '@remixicon/react'
-import SmartSuggestOrb from '../components/SmartSuggestOrb'
 
 interface LogEntry {
   timestamp: string
@@ -22,8 +21,6 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
     { id: 6, timestamp: '12:10:39', message: 'Creating a secure backup of your current theme...' },
   ])
   const [isDeploymentComplete, setIsDeploymentComplete] = useState(false)
-  const [showOrb, setShowOrb] = useState(true) // Show orb by default, hide only when hovering
-  const [isHoveringProduct, setIsHoveringProduct] = useState(false)
 
   // Simulate real-time log updates
   useEffect(() => {
@@ -64,29 +61,12 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
     return () => clearInterval(interval)
   }, [logEntries.length, isDeploymentComplete])
 
-  // ULTRA SIMPLE: Show orb ALL THE TIME unless hovering product
-  useEffect(() => {
-    if (isHoveringProduct) {
-      setShowOrb(false) // Hide when hovering product
-    } else {
-      setShowOrb(true)  // Show ALL THE TIME when not hovering
-    }
-  }, [isHoveringProduct]) // Only react to hover state changes
-
-  const handleCloseOrb = () => {
-    setShowOrb(false)
-  }
-
   return (
     <div className="w-full flex justify-center rounded-lg" style={{ background: '#f8f9fb' }}>
       <div className="p-6" style={{ width: '1440px', maxWidth: '1440px', minWidth: '1440px' }}>
         {!isDeploymentComplete ? (
           /* Real-time Deployment Logs Card */
-          <div 
-            className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm relative"
-            onMouseEnter={() => setIsHoveringProduct(true)}
-            onMouseLeave={() => setIsHoveringProduct(false)}
-          >
+          <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm relative">
             <div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">Real-time Deployment Logs</h3>
               <p className="text-sm text-gray-600 mb-4">Live deployment progress and system messages</p>
@@ -128,11 +108,7 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
           </div>
         ) : (
           /* Success Message with Next Steps Card */
-          <div 
-            className="bg-white rounded-lg p-8 border border-gray-200 shadow-sm relative"
-            onMouseEnter={() => setIsHoveringProduct(true)}
-            onMouseLeave={() => setIsHoveringProduct(false)}
-          >
+          <div className="bg-white rounded-lg p-8 border border-gray-200 shadow-sm relative">
             <div className="text-center mb-8">
               <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
                 <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,17 +200,6 @@ export default function AiDeployPage({ onFixAnother }: AiDeployPageProps) {
             </div>
           </div>
         )}
-        
-        {/* AI Orb - shows during scroll behavior */}
-        <SmartSuggestOrb
-          isVisible={showOrb}
-          onClose={handleCloseOrb}
-          userLocation="Kerala"
-          productCategory="deployment"
-          isOnProduct={true}
-          mode="help"
-          showTooltipImmediately={true}
-        />
       </div>
     </div>
   )
