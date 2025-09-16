@@ -146,26 +146,45 @@ const KERALA_TEA_SUGGESTIONS: SuggestionProduct[] = [
   }
 ]
 
-const VOICE_RESPONSES = [
-  "How much caffeine is in this Earl Grey tea? I'm trying to cut back on my coffee intake.",
+// Voice responses for discovery mode (regional designs)
+const DISCOVERY_VOICE_RESPONSES = [
+  "Show me the cheapest regional tea designs you found.",
+  "Which Kerala-style tea set has the best traditional patterns?",
+  "Can you find some regional mugs under $25?",
+  "What's the most authentic Kerala design you discovered?",
+  "Show me those Theyyam-inspired tea designs you mentioned.",
+  "Are there any regional tea sets with modern twists on traditional patterns?",
+  "Which regional design would make the best gift?",
+  "Can you find any limited edition Kerala tea collections?",
+  "Show me the most colorful regional tea designs available.",
+  "What's the difference between these Kerala designs and regular tea sets?"
+]
 
-  "What's the best way to brew this tea? Should I use boiling water or let it cool down a bit?",
+// Voice responses for help mode (tea ingredients and brewing) - matched pairs
+const HELP_VOICE_QUESTIONS = [
+  "What are the main ingredients in this Earl Grey tea?",
+  "How should I brew this tea for the best flavor?", 
+  "Can I add milk and sugar to this Earl Grey?",
+  "What's the caffeine content in this tea?",
+  "What are those blue petals I see in the tea blend?",
+  "Is this tea good for people with diabetes?",
+  "Are there any health benefits to drinking Earl Grey?",
+  "How many cups of this tea can I drink per day?",
+  "What makes the bergamot flavor so special in this tea?",
+  "Will this tea help me sleep or keep me awake?"
+]
 
-  "Can I add milk to Earl Grey or will that ruin the bergamot flavor?",
-
-  "Is this tea good for beginners? I'm new to drinking tea and want to start with something good.",
-
-  "How long should I steep this Earl Grey? I don't want it to become too bitter.",
-
-  "What makes Earl Grey different from regular black tea? Is it just the bergamot?",
-
-  "Can I drink this tea in the evening or will it keep me awake?",
-
-  "Do I need to add sugar or honey, or is it good on its own?",
-
-  "How many cups of this tea can I safely drink per day?",
-
-  "What are those blue petals in the tea? Are they just for decoration?"
+const HELP_AI_ANSWERS = [
+  "This Earl Grey contains Ceylon black tea, natural bergamot oil from Italy, and cornflower petals. The bergamot gives it that distinctive citrus aroma and flavor.",
+  "For best results, use water heated to 95°C (just below boiling). Steep for 3-5 minutes depending on your taste preference. Longer steeping can make it bitter.",
+  "Absolutely! Adding milk creates a smoother, creamier taste. The bergamot pairs well with milk, and a touch of sugar or honey complements the citrus notes beautifully.",
+  "Earl Grey contains 40-70mg of caffeine per cup, which is about half the amount in coffee. Perfect for those who want energy without the coffee jitters.",
+  "Those are cornflower petals! They're added for visual appeal and give a subtle floral note that complements the bergamot. They're completely safe and edible.",
+  "Earl Grey can be enjoyed by diabetics since it's naturally sugar-free. The black tea may even help with blood sugar regulation, but always consult your doctor about dietary changes.",
+  "Earl Grey is rich in antioxidants from the black tea, and bergamot oil may help with digestion and stress relief. It's also lower in caffeine than coffee.",
+  "You can safely enjoy 3-4 cups per day. With 40-70mg caffeine per cup, that's well within healthy limits and provides steady energy throughout the day.",
+  "Bergamot oil comes from the rind of bergamot oranges grown in Calabria, Italy. It gives Earl Grey that distinctive floral-citrus aroma that sets it apart from other teas.",
+  "Earl Grey contains moderate caffeine (40-70mg), so it will provide gentle energy rather than make you sleepy. Avoid drinking it 4-6 hours before bedtime."
 ]
 
 export default function SmartSuggestOrb({ 
@@ -191,6 +210,7 @@ export default function SmartSuggestOrb({
   const [isVoiceRecording, setIsVoiceRecording] = useState(false)
   const [showVoiceAnimation, setShowVoiceAnimation] = useState(false)
   const [isAiResponding, setIsAiResponding] = useState(false)
+  const [selectedHelpIndex, setSelectedHelpIndex] = useState<number | null>(null)
   const orbRef = useRef<HTMLDivElement>(null)
   const voiceTimeoutRef = useRef<number | null>(null)
 
@@ -277,7 +297,7 @@ export default function SmartSuggestOrb({
     setIsInConversation(true)
     setShowSuggestions(false)
     setShowConversationSkeleton(true)
-    setConversationMessages([])
+    // Don't clear existing messages, append to conversation
 
     // Hide skeleton after short delay
     setTimeout(() => {
@@ -303,10 +323,10 @@ export default function SmartSuggestOrb({
       })
     }, 3000)
 
-    setTimeout(() => {
-      addTypingMessage({
-        type: 'result',
-        content: `**Earl Grey Premium Tea Analysis Complete**
+      setTimeout(() => {
+        addTypingMessage({
+          type: 'result',
+          content: `**Earl Grey Premium Tea Analysis Complete**
 
 **Primary Ingredients:**
 • **Black Tea Base**: Ceylon & Indian Assam blend (85%)
@@ -326,10 +346,12 @@ export default function SmartSuggestOrb({
 **Flavor Notes**: Citrusy bergamot aroma with robust black tea base, floral finish from cornflower petals.
 
 **Best Served**: With honey or lemon, avoid milk to preserve bergamot essence.`,
-        icon: RiCheckLine,
-        statusIndicator: 'SHOPOS_COMPLETE'
-      })
-    }, 6500)
+          icon: RiCheckLine,
+          statusIndicator: 'SHOPOS_COMPLETE'
+        })
+        
+        // Don't show regional designs after ingredient analysis - help mode should stay focused on tea info
+      }, 6500)
   }
 
   const handleOrbClick = () => {
@@ -371,9 +393,12 @@ export default function SmartSuggestOrb({
     setIsExpanded(true)
     onExpanded?.(true) // Notify parent that orb is now expanded
     // Delay showing suggestions to allow morphing animation to complete
-    setTimeout(() => {
-      setShowSuggestions(true)
-    }, 300)
+    // Only show suggestions if not in conversation, otherwise keep conversation visible
+    if (!isInConversation) {
+      setTimeout(() => {
+        setShowSuggestions(true)
+      }, 300)
+    }
   }
 
   const handleClose = () => {
@@ -384,11 +409,12 @@ export default function SmartSuggestOrb({
     setInputText('')
     setIsListening(false)
     setIsInConversation(false)
-    setConversationMessages([])
+    setConversationMessages([]) // Only clear when user explicitly closes orb
     setShowConversationSkeleton(false)
     setIsVoiceRecording(false)
     setShowVoiceAnimation(false)
     setIsAiResponding(false)
+    setSelectedHelpIndex(null)
     
     // Clear voice timeout
     if (voiceTimeoutRef.current) {
@@ -435,9 +461,16 @@ export default function SmartSuggestOrb({
       voiceTimeoutRef.current = null
     }
     
-    // Simulate voice transcription - select random response
-    const randomResponse = VOICE_RESPONSES[Math.floor(Math.random() * VOICE_RESPONSES.length)]
+    // Simulate voice transcription - select random response based on mode
+    const voiceResponses = mode === 'discovery' ? DISCOVERY_VOICE_RESPONSES : HELP_VOICE_QUESTIONS
+    const randomIndex = Math.floor(Math.random() * voiceResponses.length)
+    const randomResponse = voiceResponses[randomIndex]
     setInputText(randomResponse)
+    
+    // Store the index for matching AI response later
+    if (mode === 'help') {
+      setSelectedHelpIndex(randomIndex)
+    }
     
     // Auto-send to chat after brief delay
     setTimeout(() => {
@@ -454,7 +487,7 @@ export default function SmartSuggestOrb({
         
         // Add user message to conversation
         setIsInConversation(true)
-        setShowSuggestions(false)
+        setShowSuggestions(false)  // Temporarily hide suggestions while AI responds
         setConversationMessages(prev => [...prev, userMessage])
         
         // Clear input
@@ -464,15 +497,33 @@ export default function SmartSuggestOrb({
         setTimeout(() => {
           setIsAiResponding(true)
           
-          const teaResponses = [
-            "Great question! Earl Grey contains 40-70mg of caffeine per cup, which is about half the amount in coffee. It's perfect for reducing caffeine intake while still getting a nice energy boost.",
-            "For the best flavor, use water heated to 95°C (just below boiling). Pour over the tea and steep for 3-5 minutes. Avoid boiling water as it can make the tea bitter and overpower the bergamot.",
-            "You can definitely add milk to Earl Grey! Many people love it that way. The milk mellows the bergamot slightly but doesn't ruin it. Try it both ways to see your preference.",
-            "Earl Grey is excellent for beginners! The bergamot gives it a lovely citrusy aroma that's very approachable. Start with 3 minutes steeping time and adjust to taste.",
-            "Steep for 3-5 minutes depending on how strong you like it. Start with 3 minutes for a lighter taste, or go up to 5 for full flavor. Any longer might make it too bitter."
+          // Different responses based on mode
+          const discoveryResponses = [
+            "Here are the most affordable regional designs I found! The Theyyam Inspired Tea Mug at $24.99 offers authentic Kerala art at the best price point.",
+            "The Kerala Mural Art Tea Set has the most traditional patterns - featuring authentic temple mural designs passed down through generations. The intricate details are stunning!",
+            "Perfect! I found several beautiful options under $25, including the Theyyam Inspired Mug ($24.99) with hand-painted traditional dance motifs.",
+            "The most authentic design is definitely the Kerala Mural Art Set - it features genuine temple art patterns and uses traditional color palettes from ancient Kerala murals.",
+            "The Theyyam-inspired collection is incredible! These pieces capture the vibrant colors and spiritual energy of Kerala's traditional Theyyam performances.",
+            "Yes! The Backwater Serenity Collection blends traditional Kerala landscapes with contemporary minimalist design - perfect for modern homes with cultural appreciation.",
+            "For gifting, I'd recommend the Kerala Mural Art Tea Set - it's culturally significant, beautifully crafted, and comes with a story about Kerala's artistic heritage.",
+            "I found some exclusive pieces! The Backwater Serenity Collection includes limited edition designs inspired by Kerala's famous backwater scenes.",
+            "The most vibrant designs are in the Theyyam collection - featuring bold reds, deep blues, and golden accents that represent the energy of Kerala's traditional performances.",
+            "Kerala designs are unique because they tell stories - each pattern represents local culture, from temple art to backwater scenes, unlike generic tea sets."
           ]
+
+          let randomResponse: string
           
-          const randomResponse = teaResponses[Math.floor(Math.random() * teaResponses.length)]
+          if (mode === 'discovery') {
+            randomResponse = discoveryResponses[Math.floor(Math.random() * discoveryResponses.length)]
+          } else {
+            // For help mode, use the matching answer if available
+            if (selectedHelpIndex !== null) {
+              randomResponse = HELP_AI_ANSWERS[selectedHelpIndex]
+              setSelectedHelpIndex(null) // Reset after use
+            } else {
+              randomResponse = HELP_AI_ANSWERS[Math.floor(Math.random() * HELP_AI_ANSWERS.length)]
+            }
+          }
           
           addTypingMessage({
             type: 'result',
@@ -480,9 +531,15 @@ export default function SmartSuggestOrb({
             icon: RiBrainLine
           })
           
-          // Clear AI responding state after typing finishes
+          // Clear AI responding state after typing finishes and show images ONLY in discovery mode
           setTimeout(() => {
             setIsAiResponding(false)
+            // Show Kerala tea images after AI response - ONLY for discovery mode
+            if (mode === 'discovery') {
+              setTimeout(() => {
+                setShowSuggestions(true)
+              }, 500)
+            }
           }, 2000 + randomResponse.length * 30) // Account for typing animation duration
         }, 1500)
       }
@@ -503,7 +560,7 @@ export default function SmartSuggestOrb({
       
       // Add user message to conversation
       setIsInConversation(true)
-      setShowSuggestions(false)
+      setShowSuggestions(false)  // Temporarily hide suggestions while AI responds
       setConversationMessages(prev => [...prev, userMessage])
       
       // Clear input
@@ -513,25 +570,44 @@ export default function SmartSuggestOrb({
       setTimeout(() => {
         setIsAiResponding(true)
         
-        const teaResponses = [
-          "Great question! Earl Grey contains 40-70mg of caffeine per cup, which is about half the amount in coffee. It's perfect for reducing caffeine intake while still getting a nice energy boost.",
-          "For the best flavor, use water heated to 95°C (just below boiling). Pour over the tea and steep for 3-5 minutes. Avoid boiling water as it can make the tea bitter and overpower the bergamot.",
-          "You can definitely add milk to Earl Grey! Many people love it that way. The milk mellows the bergamot slightly but doesn't ruin it. Try it both ways to see your preference.",
-          "Earl Grey is excellent for beginners! The bergamot gives it a lovely citrusy aroma that's very approachable. Start with 3 minutes steeping time and adjust to taste.",
-          "Steep for 3-5 minutes depending on how strong you like it. Start with 3 minutes for a lighter taste, or go up to 5 for full flavor. Any longer might make it too bitter."
+        // Different responses based on mode
+        const discoveryResponses = [
+          "Here are the most affordable regional designs I found! The Theyyam Inspired Tea Mug at $24.99 offers authentic Kerala art at the best price point.",
+          "The Kerala Mural Art Tea Set has the most traditional patterns - featuring authentic temple mural designs passed down through generations. The intricate details are stunning!",
+          "Perfect! I found several beautiful options under $25, including the Theyyam Inspired Mug ($24.99) with hand-painted traditional dance motifs.",
+          "The most authentic design is definitely the Kerala Mural Art Set - it features genuine temple art patterns and uses traditional color palettes from ancient Kerala murals.",
+          "The Theyyam-inspired collection is incredible! These pieces capture the vibrant colors and spiritual energy of Kerala's traditional Theyyam performances.",
+          "Yes! The Backwater Serenity Collection blends traditional Kerala landscapes with contemporary minimalist design - perfect for modern homes with cultural appreciation.",
+          "For gifting, I'd recommend the Kerala Mural Art Tea Set - it's culturally significant, beautifully crafted, and comes with a story about Kerala's artistic heritage.",
+          "I found some exclusive pieces! The Backwater Serenity Collection includes limited edition designs inspired by Kerala's famous backwater scenes.",
+          "The most vibrant designs are in the Theyyam collection - featuring bold reds, deep blues, and golden accents that represent the energy of Kerala's traditional performances.",
+          "Kerala designs are unique because they tell stories - each pattern represents local culture, from temple art to backwater scenes, unlike generic tea sets."
         ]
+
+        let teaResponse: string
         
-        const randomResponse = teaResponses[Math.floor(Math.random() * teaResponses.length)]
+        if (mode === 'discovery') {
+          teaResponse = discoveryResponses[Math.floor(Math.random() * discoveryResponses.length)]
+        } else {
+          // For help mode, use random response for manual input
+          teaResponse = HELP_AI_ANSWERS[Math.floor(Math.random() * HELP_AI_ANSWERS.length)]
+        }
         
         addTypingMessage({
           type: 'result',
-          content: randomResponse,
+          content: teaResponse,
           icon: RiBrainLine
         })
         
-        // Clear AI responding state after typing finishes
+        // Clear AI responding state after typing finishes and show images ONLY in discovery mode
         setTimeout(() => {
           setIsAiResponding(false)
+          // Show Kerala tea images after AI response - ONLY for discovery mode
+          if (mode === 'discovery') {
+            setTimeout(() => {
+              setShowSuggestions(true)
+            }, 500)
+          }
         }, 2000 + randomResponse.length * 30) // Account for typing animation duration
       }, 1500)
     }
@@ -547,11 +623,12 @@ export default function SmartSuggestOrb({
       setInputText('')
       setIsListening(false)
       setIsInConversation(false)
-      setConversationMessages([])
+      setConversationMessages([]) // Clear when orb becomes invisible
       setShowConversationSkeleton(false)
       setIsVoiceRecording(false)
       setShowVoiceAnimation(false)
       setIsAiResponding(false)
+      setSelectedHelpIndex(null)
       
       // Clear voice timeout
       if (voiceTimeoutRef.current) {
@@ -762,46 +839,129 @@ export default function SmartSuggestOrb({
                         </div>
                       </div>
                     ) : (
-                      conversationMessages.map((message) => {
-                        let IconComponent = message.icon || RiSparklingFill
-                        const iconStyle = { color: '#374151' }
+                      <>
+                        {conversationMessages.map((message) => {
+                          let IconComponent = message.icon || RiSparklingFill
+                          const iconStyle = { color: '#374151' }
 
-                        const isUserMessage = message.id.startsWith('user-')
+                          const isUserMessage = message.id.startsWith('user-')
 
-                        return (
-                          <div key={message.id} className={`flex items-start gap-3 animate-fadeIn ${isUserMessage ? 'flex-row-reverse' : ''}`}>
-                            <div className={`w-6 h-6 flex items-center justify-center flex-shrink-0 rounded-full ${isUserMessage ? 'bg-green-100' : ''}`}>
-                              <IconComponent 
-                                size={14} 
-                                style={isUserMessage ? { color: '#059669' } : { color: '#374151' }} 
-                                className={IconComponent === RiLoader4Fill ? 'animate-spin' : ''}
-                              />
-                            </div>
-                            <div className={`flex-1 text-sm ${isUserMessage ? 'text-right' : ''}`} style={{ color: '#374151', lineHeight: '1.6' }}>
-                              {message.content.includes('**') ? (
-                                /* Render markdown-style bold text */
-                                <div 
-                                  dangerouslySetInnerHTML={{
-                                    __html: message.content
-                                      .split('\n').map(line => line.trim()).join('<br/>')
-                                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                                      .replace(/•/g, '•')
-                                  }}
+                          return (
+                            <div key={message.id} className={`flex items-start gap-3 animate-fadeIn ${isUserMessage ? 'flex-row-reverse' : ''}`}>
+                              <div className={`w-6 h-6 flex items-center justify-center flex-shrink-0 rounded-full ${isUserMessage ? 'bg-green-100' : ''}`}>
+                                <IconComponent 
+                                  size={14} 
+                                  style={isUserMessage ? { color: '#059669' } : { color: '#374151' }} 
+                                  className={IconComponent === RiLoader4Fill ? 'animate-spin' : ''}
                                 />
-                              ) : (
-                                <>
-                                  {message.content.split('').map((char, index) => (
-                                    <span key={index}>{char}</span>
-                                  ))}
-                                  {message.isTyping && (
-                                    <span className="inline-block w-0.5 h-4 ml-1 animate-pulse" style={{ backgroundColor: '#374151' }}></span>
-                                  )}
-                                </>
-                              )}
+                              </div>
+                              <div className={`flex-1 text-sm ${isUserMessage ? 'text-right' : ''}`} style={{ color: '#374151', lineHeight: '1.6' }}>
+                                {message.content.includes('**') ? (
+                                  /* Render markdown-style bold text */
+                                  <div 
+                                    dangerouslySetInnerHTML={{
+                                      __html: message.content
+                                        .split('\n').map(line => line.trim()).join('<br/>')
+                                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                        .replace(/•/g, '•')
+                                    }}
+                                  />
+                                ) : (
+                                  <>
+                                    {message.content.split('').map((char, index) => (
+                                      <span key={index}>{char}</span>
+                                    ))}
+                                    {message.isTyping && (
+                                      <span className="inline-block w-0.5 h-4 ml-1 animate-pulse" style={{ backgroundColor: '#374151' }}></span>
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                        
+                        {/* Show Kerala tea suggestions after conversation if enabled - ONLY in discovery mode */}
+                        {showSuggestions && mode === 'discovery' && (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <h4 className="text-sm font-semibold text-gray-900 mb-3">Regional Tea Designs</h4>
+                            <div className="space-y-2">
+                              {KERALA_TEA_SUGGESTIONS.map((product, index) => (
+                                <div 
+                                  key={product.id}
+                                  className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 transition-all duration-300 cursor-pointer group animate-fadeIn"
+                                    style={{
+                                      background: 'rgba(249, 250, 251, 0.7)', // Lighter background
+                                      border: '1px solid rgba(229, 231, 235, 0.4)',
+                                      animationDelay: `${index * 0.15}s`
+                                    }}
+                                >
+                                  <img 
+                                    src={product.image} 
+                                    alt={product.name}
+                                    className="w-10 h-10 rounded-lg object-cover group-hover:scale-105 transition-transform duration-300"
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-xs truncate mb-1" style={{ color: '#111827' }}>
+                                      {product.name}
+                                    </h4>
+                                    <p className="text-xs mb-1.5" style={{ color: '#6B7280' }}>
+                                      {product.description}
+                                    </p>
+                                    <div className="flex items-center justify-between">
+                                      <span className="font-bold text-xs" style={{ color: '#059669' }}>
+                                        {product.price}
+                                      </span>
+                                      <button 
+                                        className="text-xs text-white px-2.5 py-1 rounded-lg transition-all duration-200 font-medium"
+                                        style={{
+                                          background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                          e.currentTarget.style.opacity = '0.9'
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.currentTarget.style.opacity = '1'
+                                        }}
+                                      >
+                                        View
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            
+                            {/* Simple option below regional designs */}
+                            <div className="mt-3 pt-3 border-t border-gray-100">
+                              <button
+                                className="w-full p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 text-left"
+                                style={{
+                                  background: '#f9fafb',
+                                  border: '1px solid #e5e7eb',
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = '#f3f4f6'
+                                  e.currentTarget.style.borderColor = '#d1d5db'
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = '#f9fafb'
+                                  e.currentTarget.style.borderColor = '#e5e7eb'
+                                }}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-medium" style={{ color: '#111827' }}>
+                                    View all regional tea collections
+                                  </span>
+                                  <span className="text-xs px-2 py-1 rounded" style={{ background: '#e5e7eb', color: '#6b7280' }}>
+                                    12 items
+                                  </span>
+                                </div>
+                              </button>
                             </div>
                           </div>
-                        )
-                      })
+                        )}
+                      </>
                     )}
                   </div>
                 ) : mode === 'discovery' ? (
