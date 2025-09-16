@@ -675,15 +675,15 @@ export default function SmartSuggestOrb({
   if (!isVisible) return null
 
   // Different structure for inline vs floating orbs
-  if (isOnProduct) {
-    // Inline orbs: Simple relative positioning, no complex overlay structure
+  if (isOnProduct && mode !== 'discovery') {
+    // Inline section orbs: Simple relative positioning, no complex overlay structure
     return (
       <div 
         ref={orbRef}
-        className={`relative pointer-events-auto z-50 ${
+        className={`absolute pointer-events-auto z-50 ${
           isExpanded 
             ? 'transform origin-top-left' // Expand to the right from top-left
-            : '' // Normal inline positioning
+            : 'top-0 left-0' // Overlay positioning
         }`}
       >
         {/* Morphing Orb Container with Framer Motion */}
@@ -765,9 +765,9 @@ export default function SmartSuggestOrb({
                 {(mode === 'help' || isOnProduct) && showTooltip && (
                   /* Tooltip - Positioned based on mode */
                   <motion.div 
-                  className={`absolute top-1/2 transform -translate-y-1/2 pointer-events-auto z-50 cursor-pointer ${
-                    isOnProduct ? 'left-14' : 'right-14'
-                  }`}
+                    className={`absolute top-1/2 transform -translate-y-1/2 pointer-events-auto z-50 cursor-pointer ${
+                      isOnProduct && mode !== 'discovery' ? '-left-40' : 'right-14'
+                    }`}
                   initial={{ opacity: 0, scale: 0.8, y: -8 }}
                   animate={{ opacity: 1, scale: 1, y: -8 }}
                   exit={{ opacity: 0, scale: 0.8, y: -8 }}
@@ -790,43 +790,38 @@ export default function SmartSuggestOrb({
                       {customMessage || "Tea questions? Click me!"}
                     </p>
                     
-                    {/* Tooltip Arrow - Points toward orb */}
-                    <div 
-                      className={`absolute top-1/2 transform -translate-y-1/2 w-0 h-0 ${
-                        isOnProduct ? 'right-full' : 'left-full'
-                      }`}
-                      style={
-                        isOnProduct ? {
-                          borderTop: '4px solid transparent',
-                          borderBottom: '4px solid transparent',
-                          borderRight: '4px solid white'
-                        } : {
-                          borderTop: '4px solid transparent',
-                          borderBottom: '4px solid transparent',
-                          borderLeft: '4px solid white'
+                      {/* Tooltip Arrow - Points toward orb */}
+                      <div 
+                        className={`absolute top-1/2 transform -translate-y-1/2 w-0 h-0 ${
+                          isOnProduct && mode !== 'discovery' ? 'left-full' : 'left-full'
+                        }`}
+                        style={
+                          isOnProduct && mode !== 'discovery' ? {
+                            borderTop: '4px solid transparent',
+                            borderBottom: '4px solid transparent',
+                            borderLeft: '4px solid white'
+                          } : {
+                            borderTop: '4px solid transparent',
+                            borderBottom: '4px solid transparent',
+                            borderLeft: '4px solid white'
+                          }
                         }
-                      }
-                    />
+                      />
                   </div>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              {mode === 'discovery' ? (
-                /* Discovery Mode: Side Text on Hover */
+              {/* Only show discovery text for product images (non-inline orbs) */}
+              {mode === 'discovery' && !isOnProduct ? (
+                /* Discovery Mode: Side Text on Hover - Only for product images */
                 <div className="absolute left-10 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
                   <div className="text-black text-sm font-medium whitespace-nowrap">
                     {customMessage || "Hey Ajay! Need help with tea selection?"}
                   </div>
                 </div>
-              ) : mode === 'agent' && customMessage ? (
-                /* Agent Mode: Custom Message on Hover */
-                <div className="absolute left-10 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
-                  <div className="text-black text-sm font-medium whitespace-nowrap">
-                    {customMessage}
-                  </div>
-                </div>
               ) : null}
+              {/* Removed agent mode black text to avoid duplication with tooltip */}
             </div>
           ) : showSeeMore && !isExpanded ? (
             /* Compact Orb with Side Text State */
@@ -1507,9 +1502,9 @@ export default function SmartSuggestOrb({
                 </motion.div>
               </motion.div>
             ) : (
-              /* Same expanded chat interface as inline orbs */
+              /* Full expanded chat interface for floating orbs */
               <div className="w-full h-full flex flex-col overflow-hidden rounded-3xl">
-                {/* Chat interface content - same as inline version */}
+                {/* Header */}
                 <div className="flex items-center justify-between p-3 rounded-t-3xl" style={{ borderBottom: '1px solid rgba(229, 231, 235, 0.2)', background: '#ffffff' }}>
                   <div className="flex items-center gap-2">
                     <div 
@@ -1529,7 +1524,47 @@ export default function SmartSuggestOrb({
                     <RiCloseLine size={16} className="text-gray-600" />
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 p-3 text-center">Same chat interface for floating orbs</p>
+
+                {/* Chat content area */}
+                <div className="flex-1 overflow-auto p-4 space-y-3">
+                  {showSuggestions && (
+                    <div className="space-y-3">
+                      <div className="bg-gray-50 rounded-lg p-3">
+                        <p className="text-sm text-gray-700">
+                          I can help you with tea recommendations, brewing tips, or answer questions about this Earl Grey blend.
+                        </p>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 gap-2">
+                        <button className="text-left p-2 bg-white border rounded-lg hover:bg-gray-50 transition-colors">
+                          <span className="text-sm font-medium text-gray-900">🍃 Brewing recommendations</span>
+                        </button>
+                        <button className="text-left p-2 bg-white border rounded-lg hover:bg-gray-50 transition-colors">
+                          <span className="text-sm font-medium text-gray-900">🌟 Tea quality details</span>
+                        </button>
+                        <button className="text-left p-2 bg-white border rounded-lg hover:bg-gray-50 transition-colors">
+                          <span className="text-sm font-medium text-gray-900">📦 Shipping & storage</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Input area */}
+                <div className="p-3 border-t border-gray-200" style={{ background: '#ffffff' }}>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Ask about this tea..."
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                    <button
+                      className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                    >
+                      <RiSendPlaneLine size={16} />
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </motion.div>

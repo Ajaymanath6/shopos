@@ -396,9 +396,9 @@ export default function AiShoppingPage() {
               >
                   <div className="flex items-center mb-2">
                   <h1 className="text-3xl font-bold text-gray-900">Premium Earl Grey Tea</h1>
-                  {/* Inline Pricing Orb - positioned right after heading text */}
+                  {/* Inline Pricing Orb - positioned as overlay */}
                   {showPricingOrb && (
-                    <div className="ml-4 flex items-center" style={{position: 'relative'}}>
+                    <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-1" style={{zIndex: 50}}>
                       <SmartSuggestOrb 
                         isVisible={showPricingOrb}
                         onClose={() => {
@@ -433,9 +433,9 @@ export default function AiShoppingPage() {
               >
                 <div className="flex items-center mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Product Options</h3>
-                  {/* Inline Options Orb - positioned right after heading text */}
+                  {/* Inline Options Orb - positioned as overlay */}
                   {showOptionsOrb && (
-                    <div className="ml-3 flex items-center" style={{position: 'relative'}}>
+                    <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-1" style={{zIndex: 50}}>
                       <SmartSuggestOrb 
                         isVisible={showOptionsOrb}
                         onClose={() => {
@@ -508,9 +508,9 @@ export default function AiShoppingPage() {
               >
                 <div className="flex items-center mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Purchase</h3>
-                  {/* Inline Cart Orb - positioned right after heading text */}
+                  {/* Inline Cart Orb - positioned as overlay */}
                   {showCartOrb && (
-                    <div className="ml-3 flex items-center" style={{position: 'relative'}}>
+                    <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-1" style={{zIndex: 50}}>
                       <SmartSuggestOrb 
                         isVisible={showCartOrb}
                         onClose={() => {
@@ -550,9 +550,9 @@ export default function AiShoppingPage() {
                 >
                   <div className="flex items-center mb-4">
                     <h3 className="text-lg font-semibold text-gray-900">Product Highlights</h3>
-                    {/* Inline Product Highlights Orb - positioned right after heading text */}
+                    {/* Inline Product Highlights Orb - positioned as overlay */}
                     {showHighlightsOrb && (
-                      <div className="ml-3 flex items-center" style={{position: 'relative'}}>
+                      <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-1" style={{zIndex: 50}}>
                         <SmartSuggestOrb 
                           isVisible={showHighlightsOrb}
                           onClose={() => {
@@ -603,9 +603,9 @@ export default function AiShoppingPage() {
                 >
                   <div className="flex items-center mb-4">
                     <h3 className="text-lg font-semibold text-gray-900">Trust & Policies</h3>
-                    {/* Inline Trust Orb - positioned right after heading text */}
+                    {/* Inline Trust Orb - positioned as overlay */}
                     {showTrustOrb && (
-                      <div className="ml-3 flex items-center" style={{position: 'relative'}}>
+                      <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-1" style={{zIndex: 50}}>
                         <SmartSuggestOrb 
                           isVisible={showTrustOrb}
                           onClose={() => {
@@ -654,9 +654,9 @@ export default function AiShoppingPage() {
             >
               <div className="flex items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Description</h2>
-                {/* Inline Description Orb - positioned right after the heading text */}
+                {/* Inline Description Orb - positioned as overlay */}
                 {showDescriptionOrb && (
-                  <div className="ml-3 flex items-center" style={{position: 'relative'}}>
+                  <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-1" style={{zIndex: 50}}>
                     <SmartSuggestOrb 
                       isVisible={showDescriptionOrb}
                       onClose={() => {
