@@ -300,34 +300,32 @@ export default function SmartSuggestOrb({
     const randomQuestion = FOLLOW_UP_QUESTIONS[randomIndex]
     const aiResponse = FOLLOW_UP_AI_RESPONSES[randomIndex]
     
-    setInputText(randomQuestion) // Show user question in input box first
+    // Immediately set conversation mode and clear input
+    setIsInConversation(true)
+    setShowSummary(false)
+    setShowSuggestions(false)
+    setInputText('') // Clear input immediately
     
-    // After delay, move to conversation
-    setTimeout(() => {
-      setIsInConversation(true)
-      setShowSummary(false)
-      
-      const userMessage: ConversationMessage = {
-        id: `user-${Date.now()}`,
-        type: 'result',
-        content: randomQuestion.trim(),
-        timestamp: Date.now(),
-        isTyping: false,
-        icon: RiUser3Line
-      }
-      
-      setConversationMessages(prev => [...prev, userMessage])
-      setInputText('') // Clear input
-    }, 1000) // Give user time to see their question
+    // Add user message to conversation immediately
+    const userMessage: ConversationMessage = {
+      id: `user-${Date.now()}`,
+      type: 'result',
+      content: randomQuestion.trim(),
+      timestamp: Date.now(),
+      isTyping: false,
+      icon: RiUser3Line
+    }
     
-    // Start AI response
+    setConversationMessages(prev => [...prev, userMessage])
+    
+    // Start AI response after short delay
     setTimeout(() => {
       addTypingMessage({
         type: 'result',
         content: aiResponse,
         icon: RiBrainLine
       })
-    }, 1800) // Wait for conversation to show + buffer
+    }, 500) // Shorter delay for immediate response
   }
 
   // Summarization sequence function
