@@ -256,6 +256,131 @@ export default function SmartSuggestOrb({
   const orbRef = useRef<HTMLDivElement>(null)
   const voiceTimeoutRef = useRef<number | null>(null)
 
+  // Follow-up questions for after summary
+  const FOLLOW_UP_QUESTIONS = [
+    "What's the best way to brew this Earl Grey for maximum flavor?",
+    "Can you tell me more about the bergamot oil quality and sourcing?",
+    "How does this compare to other premium Earl Grey teas you have?",
+    "What's the shelf life and best storage method for this tea?",
+    "Are there any health benefits or caffeine content details?"
+  ]
+
+  const FOLLOW_UP_AI_RESPONSES = [
+    "**Brewing Guide for Premium Earl Grey:**\n\n**Water Temperature:** 95°C (203°F) - just below boiling\n**Steeping Time:** 3-5 minutes for optimal flavor\n**Tea-to-Water Ratio:** 1 teaspoon per 200ml (8oz)\n\n**Pro Tips:**\n• Use filtered water for best taste\n• Preheat your teapot/cup\n• Don't oversteep - it can become bitter\n• Add milk after brewing, not before\n\nThis will give you the perfect balance of bergamot citrus notes and robust black tea flavor!",
+    
+    "**Bergamot Oil Quality & Sourcing:**\n\n**Origin:** Calabria, Italy - the world's finest bergamot region\n**Extraction:** Cold-pressed from fresh bergamot rinds\n**Quality Grade:** Food-grade essential oil, not synthetic\n**Concentration:** 12% of total blend for authentic flavor\n\n**Why This Matters:**\n• Natural bergamot provides complex citrus notes\n• Italian bergamot has superior aroma compounds\n• Cold-pressed preserves delicate flavor molecules\n• No artificial flavorings or additives\n\nThis is the same bergamot used in traditional Earl Grey recipes!",
+    
+    "**Comparison with Other Premium Earl Greys:**\n\n**Our Premium Earl Grey vs. Competitors:**\n• **Higher bergamot concentration** (12% vs typical 8-10%)\n• **Organic certification** (many aren't certified organic)\n• **Hand-picked leaves** (vs machine-harvested)\n• **Cornflower petals** for visual appeal (rare addition)\n• **Better price point** at $24.99 vs $35-45 for similar quality\n\n**Flavor Profile:** More citrus-forward than traditional blends, with a smoother finish thanks to the Ceylon base. Perfect for those who love the bergamot character!",
+    
+    "**Shelf Life & Storage:**\n\n**Shelf Life:** 2-3 years from production date\n**Best Storage:** Cool, dry place away from light and strong odors\n**Container:** Airtight tin or resealable bag\n\n**Storage Tips:**\n• Keep away from spices, coffee, or cleaning products\n• Store in original packaging until opened\n• Once opened, use within 6 months for peak flavor\n• Don't refrigerate - it can cause condensation\n\n**Signs of Freshness:** Bright bergamot aroma, crisp tea leaves, no musty smell",
+    
+    "**Health Benefits & Caffeine Content:**\n\n**Caffeine:** 40-70mg per cup (about half of coffee)\n**Antioxidants:** Rich in theaflavins and catechins from black tea\n**Bergamot Benefits:** May help with digestion and stress relief\n\n**Health Highlights:**\n• **Heart Health:** Black tea may support cardiovascular health\n• **Mental Alertness:** Moderate caffeine for gentle energy\n• **Digestive Support:** Bergamot oil traditionally aids digestion\n• **Hydration:** Contributes to daily fluid intake\n\n**Note:** Consult your doctor about caffeine intake if you have health concerns!"
+  ]
+
+  // Voice input handlers
+  const handleVoiceClick = () => {
+    setIsVoiceRecording(true)
+    setShowVoiceAnimation(true)
+    
+    voiceTimeoutRef.current = setTimeout(() => {
+      stopVoiceRecording()
+    }, 2000) // 2 seconds of recording
+  }
+
+  const stopVoiceRecording = () => {
+    setIsVoiceRecording(false)
+    setShowVoiceAnimation(false)
+    if (voiceTimeoutRef.current) {
+      clearTimeout(voiceTimeoutRef.current)
+      voiceTimeoutRef.current = null
+    }
+
+    // Pick random follow-up question
+    const randomIndex = Math.floor(Math.random() * FOLLOW_UP_QUESTIONS.length)
+    const randomQuestion = FOLLOW_UP_QUESTIONS[randomIndex]
+    const aiResponse = FOLLOW_UP_AI_RESPONSES[randomIndex]
+    
+    setInputText(randomQuestion) // Show user question in input box first
+    
+    // After delay, move to conversation
+    setTimeout(() => {
+      setIsInConversation(true)
+      setShowSummary(false)
+      
+      const userMessage: ConversationMessage = {
+        id: `user-${Date.now()}`,
+        type: 'result',
+        content: randomQuestion.trim(),
+        timestamp: Date.now(),
+        isTyping: false,
+        icon: RiUser3Line
+      }
+      
+      setConversationMessages(prev => [...prev, userMessage])
+      setInputText('') // Clear input
+    }, 1000) // Give user time to see their question
+    
+    // Start AI response
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'result',
+        content: aiResponse,
+        icon: RiBrainLine
+      })
+    }, 1800) // Wait for conversation to show + buffer
+  }
+
+  // Summarization sequence function
+  const startSummarizationSequence = () => {
+    setIsInConversation(true)
+    setShowConversationSkeleton(true)
+    
+    // Hide skeleton after short delay
+    setTimeout(() => {
+      setShowConversationSkeleton(false)
+    }, 800)
+
+    let messageDelay = 0
+
+    // Message 1: Thinking Phase
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'thinking',
+        content: "Analyzing product details and formulating comprehensive summary...",
+        icon: RiBrainLine,
+        statusIndicator: 'SHOPOS_THINKING'
+      })
+    }, messageDelay)
+    messageDelay += 3000
+
+    // Message 2: Processing Phase
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'analyzing',
+        content: "Fine-tuning product highlights and pricing analysis...",
+        icon: RiLoader4Fill,
+        statusIndicator: 'SHOPOS_PROCESSING'
+      })
+    }, messageDelay)
+    messageDelay += 2500
+
+    // Message 3: Final Summary
+    setTimeout(() => {
+      addTypingMessage({
+        type: 'result',
+        content: "**Premium Earl Grey Tea - Complete Summary**\n\n**Product Overview:**\n• Organic Ceylon black tea with natural bergamot oil\n• Hand-picked from high altitude gardens\n• Available in loose leaf & tea bags\n\n**Pricing & Value:**\n• Current Price: $24.99 (25% OFF)\n• Original Price: $32.99\n• Savings: $8.00\n\n**Key Features:**\n• Premium Ceylon black tea leaves\n• Natural bergamot oil from Italy\n• Cornflower petals for visual appeal\n• Organic certified & ethically sourced\n\n**Trust & Policies:**\n• Free shipping on orders over $50\n• 30-day return policy\n• Hand-picked quality assurance",
+        icon: RiCheckLine,
+        statusIndicator: 'SHOPOS_COMPLETE'
+      })
+      
+      // Show summary after typing completes
+      setTimeout(() => {
+        setShowSummary(true)
+        setIsSummarizing(false)
+      }, 4000)
+    }, messageDelay)
+  }
+
   // Add typing message function
   const addTypingMessage = ({ type, content, icon, statusIndicator }: {
     type: 'thinking' | 'analyzing' | 'result'
@@ -459,6 +584,7 @@ export default function SmartSuggestOrb({
     setIsAiResponding(false)
     setSelectedHelpIndex(null)
     setShowSummary(false)
+    setIsSummarizing(false)
     
     // Clear voice timeout
     if (voiceTimeoutRef.current) {
@@ -477,103 +603,7 @@ export default function SmartSuggestOrb({
     setShowSuggestions(true)
   }
 
-  const handleVoiceClick = () => {
-    if (!isVoiceRecording) {
-      // Start voice recording
-      setIsVoiceRecording(true)
-      setShowVoiceAnimation(true)
-    setInputMode('voice')
-      
-      // Auto-stop after 2 seconds
-      voiceTimeoutRef.current = window.setTimeout(() => {
-        stopVoiceRecording()
-      }, 2000)
-    } else {
-      // Stop voice recording early
-      stopVoiceRecording()
-    }
-  }
 
-  const stopVoiceRecording = () => {
-    setIsVoiceRecording(false)
-    setShowVoiceAnimation(false)
-    setInputMode(null)
-    
-    // Clear timeout if exists
-    if (voiceTimeoutRef.current) {
-      clearTimeout(voiceTimeoutRef.current)
-      voiceTimeoutRef.current = null
-    }
-    
-    // Simulate voice transcription - select random response based on mode
-    const voiceResponses = mode === 'discovery' ? DISCOVERY_VOICE_RESPONSES 
-                          : mode === 'agent' ? AGENT_VOICE_QUESTIONS 
-                          : HELP_VOICE_QUESTIONS
-    const randomIndex = Math.floor(Math.random() * voiceResponses.length)
-    const randomResponse = voiceResponses[randomIndex]
-    setInputText(randomResponse)
-    
-    // Determine AI response IMMEDIATELY using the randomIndex before any state changes
-    let aiResponse: string
-    if (mode === 'discovery') {
-      const discoveryResponses = [
-        "Here are the most affordable regional designs I found! The Theyyam Inspired Tea Mug at $16.99 offers authentic Kerala art at the best price point.",
-        "The Kerala Mural Art Tea Set has the most traditional patterns - featuring authentic temple mural designs passed down through generations. The intricate details are stunning!",
-        "Perfect! I found several beautiful options under $20, including the Theyyam Inspired Mug ($16.99) with hand-painted traditional dance motifs.",
-        "The most authentic design is definitely the Kerala Mural Art Set - it features genuine temple art patterns and uses traditional color palettes from ancient Kerala murals.",
-        "The Theyyam-inspired collection is incredible! These pieces capture the vibrant colors and spiritual energy of Kerala's traditional Theyyam performances.",
-        "Yes! The Backwater Serenity Collection blends traditional Kerala landscapes with contemporary minimalist design - perfect for modern homes with cultural appreciation.",
-        "For gifting, I'd recommend the Kerala Mural Art Tea Set - it's culturally significant, beautifully crafted, and comes with a story about Kerala's artistic heritage.",
-        "I found some exclusive pieces! The Backwater Serenity Collection includes limited edition designs inspired by Kerala's famous backwater scenes.",
-        "The most vibrant designs are in the Theyyam collection - featuring bold reds, deep blues, and golden accents that represent the energy of Kerala's traditional performances.",
-        "Kerala designs are unique because they tell stories - each pattern represents local culture, from temple art to backwater scenes, unlike generic tea sets."
-      ]
-      aiResponse = discoveryResponses[Math.floor(Math.random() * discoveryResponses.length)]
-    } else if (mode === 'agent') {
-      // Use exact matching response for agent mode
-      aiResponse = AGENT_AI_ANSWERS[randomIndex] || AGENT_AI_ANSWERS[0]
-    } else {
-      // Use exact matching response for help mode
-      aiResponse = HELP_AI_ANSWERS[randomIndex] || HELP_AI_ANSWERS[0]
-    }
-    
-    // Create user message immediately
-    const userMessage: ConversationMessage = {
-      id: `user-${Date.now()}`,
-      type: 'result',
-      content: randomResponse.trim(),
-      timestamp: Date.now(),
-      isTyping: false,
-      icon: RiUser3Line
-    }
-    
-    // Add to conversation immediately
-    setIsInConversation(true)
-    setShowSuggestions(false)
-    setConversationMessages(prev => [...prev, userMessage])
-    setInputText('') // Clear input
-    
-    // Start AI response immediately
-    setTimeout(() => {
-      setIsAiResponding(true)
-      
-      addTypingMessage({
-        type: 'result',
-        content: aiResponse,
-        icon: RiBrainLine
-      })
-      
-      // Clear AI responding state after typing finishes
-      setTimeout(() => {
-        setIsAiResponding(false)
-        if (mode === 'discovery') {
-          setTimeout(() => {
-            setShowSuggestions(true)
-          }, 500)
-        }
-      }, 2000)
-    }, 800) // Shorter delay for immediate feel
-  }
 
   const handleSendInput = () => {
     if (inputText.trim()) {
@@ -1440,9 +1470,14 @@ export default function SmartSuggestOrb({
                             backdropFilter: 'blur(8px)'
                           }}
                           onClick={() => {
-                            setShowSummary(true)
+                            setIsSummarizing(true)
                             setShowSuggestions(false)
                             handleOrbClick()
+                            
+                            // Start AI summarization sequence
+                            setTimeout(() => {
+                              startSummarizationSequence()
+                            }, 500)
                           }}
                         >
                           <p className="text-xs font-medium text-gray-900 whitespace-nowrap">
@@ -1593,7 +1628,71 @@ export default function SmartSuggestOrb({
 
                 {/* Chat content area */}
                 <div className="flex-1 overflow-auto p-4 space-y-3">
-                  {showSummary ? (
+                  {isSummarizing ? (
+                    /* AI Summarization in Progress */
+                    <div className="space-y-3">
+                      {showConversationSkeleton ? (
+                        /* Skeleton Loader */
+                        <div className="space-y-4 animate-pulse">
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-lg bg-gray-200"></div>
+                            <div className="flex-1 space-y-2">
+                              <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-lg bg-gray-200"></div>
+                            <div className="flex-1 space-y-2">
+                              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                              <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {conversationMessages.map((message) => {
+                            let IconComponent = message.icon || RiSparklingFill
+                            const iconStyle = { color: '#374151' }
+
+                            return (
+                              <div key={message.id} className="flex items-start gap-3 animate-fadeIn">
+                                <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 rounded-full">
+                                  <IconComponent 
+                                    size={14} 
+                                    style={iconStyle} 
+                                    className={IconComponent === RiLoader4Fill ? 'animate-spin' : ''}
+                                  />
+                                </div>
+                                <div className="flex-1 text-sm" style={{ color: '#374151', lineHeight: '1.6' }}>
+                                  {message.content.includes('**') ? (
+                                    /* Render markdown-style bold text */
+                                    <div 
+                                      dangerouslySetInnerHTML={{
+                                        __html: message.content
+                                          .split('\n').map(line => line.trim()).join('<br/>')
+                                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                          .replace(/•/g, '•')
+                                      }}
+                                    />
+                                  ) : (
+                                    <>
+                                      {message.content.split('').map((char, index) => (
+                                        <span key={index}>{char}</span>
+                                      ))}
+                                      {message.isTyping && (
+                                        <span className="inline-block w-0.5 h-4 ml-1 animate-pulse" style={{ backgroundColor: '#374151' }}></span>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </>
+                      )}
+                    </div>
+                  ) : showSummary ? (
                     <div className="space-y-3">
                       <div className="bg-gray-50 rounded-lg p-3">
                         <h3 className="text-sm font-semibold text-gray-900 mb-2">AI Shopping Assistant</h3>
@@ -1675,13 +1774,59 @@ export default function SmartSuggestOrb({
                 {/* Input area */}
                 <div className="p-3 border-t border-gray-200" style={{ background: '#ffffff' }}>
                   <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      placeholder="Ask about this tea..."
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        placeholder={isVoiceRecording ? "Listening..." : "Ask about this tea..."}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        style={{
+                          paddingLeft: showVoiceAnimation ? '60px' : '12px',
+                          paddingRight: '12px'
+                        }}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSendInput()}
+                        disabled={isVoiceRecording}
+                      />
+                      
+                      {/* Voice Animation - Green Bars */}
+                      {showVoiceAnimation && (
+                        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center gap-0.5">
+                          {[...Array(8)].map((_, i) => (
+                            <div
+                              key={i}
+                              className="w-0.5 bg-green-600 rounded-full animate-pulse"
+                              style={{
+                                height: '16px',
+                                animationDelay: `${i * 0.1}s`,
+                                animationDuration: '1s',
+                                animationIterationCount: 'infinite'
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Voice Input Button */}
                     <button
+                      onClick={handleVoiceClick}
+                      className="p-2 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors group relative"
+                      title="Voice input"
+                    >
+                      <RiMicLine size={16} className="text-gray-600" />
+                      
+                      {/* Tooltip */}
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                        Voice input
+                      </div>
+                    </button>
+                    
+                    {/* Send Button */}
+                    <button
+                      onClick={handleSendInput}
                       className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                      title="Send message"
                     >
                       <RiSendPlaneLine size={16} />
                     </button>
