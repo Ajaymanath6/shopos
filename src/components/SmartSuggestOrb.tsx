@@ -283,8 +283,32 @@ export default function SmartSuggestOrb({
     setShowVoiceAnimation(true)
     
     voiceTimeoutRef.current = setTimeout(() => {
-      stopVoiceRecording()
+      stopRegularVoiceRecording()
     }, 2000) // 2 seconds of recording
+  }
+
+  const stopRegularVoiceRecording = () => {
+    setIsVoiceRecording(false)
+    setShowVoiceAnimation(false)
+    if (voiceTimeoutRef.current) {
+      clearTimeout(voiceTimeoutRef.current)
+      voiceTimeoutRef.current = null
+    }
+
+    // Simulate voice transcription - select random response based on mode
+    const voiceResponses = mode === 'discovery' ? DISCOVERY_VOICE_RESPONSES 
+                          : mode === 'agent' ? AGENT_VOICE_QUESTIONS 
+                          : HELP_VOICE_QUESTIONS
+    const randomIndex = Math.floor(Math.random() * voiceResponses.length)
+    const randomResponse = voiceResponses[randomIndex]
+    
+    // Fill input box with the transcribed text
+    setInputText(randomResponse)
+    
+    // After a short delay, automatically send the message
+    setTimeout(() => {
+      handleSendInput()
+    }, 1000) // 1 second delay as requested
   }
 
   const stopVoiceRecording = () => {
@@ -1752,18 +1776,6 @@ export default function SmartSuggestOrb({
                         <p className="text-sm text-gray-700">
                           I can help you with tea recommendations, brewing tips, or answer questions about this Earl Grey blend.
                         </p>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 gap-2">
-                        <button className="text-left p-2 bg-white border rounded-lg hover:bg-gray-50 transition-colors">
-                          <span className="text-sm font-medium text-gray-900">🍃 Brewing recommendations</span>
-                        </button>
-                        <button className="text-left p-2 bg-white border rounded-lg hover:bg-gray-50 transition-colors">
-                          <span className="text-sm font-medium text-gray-900">🌟 Tea quality details</span>
-                        </button>
-                        <button className="text-left p-2 bg-white border rounded-lg hover:bg-gray-50 transition-colors">
-                          <span className="text-sm font-medium text-gray-900">📦 Shipping & storage</span>
-                        </button>
                       </div>
                     </div>
                   )}

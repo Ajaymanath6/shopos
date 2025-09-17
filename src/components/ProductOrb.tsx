@@ -264,7 +264,7 @@ export default function ProductOrb({
           opacity: 1, 
           scale: 1,
           width: isExpanded ? '384px' : '48px',
-          height: isExpanded ? '300px' : '48px'
+          height: isExpanded ? '400px' : '48px'
         }}
         exit={{ opacity: 0, scale: 0.3 }}
         transition={{ 
@@ -283,7 +283,7 @@ export default function ProductOrb({
           // Ensure expanded chat doesn't get cut off on small screens
           ...(isExpanded && {
             maxWidth: 'min(384px, calc(100vw - 32px))',
-            maxHeight: 'min(300px, calc(100vh - 32px))'
+            maxHeight: 'min(400px, calc(100vh - 32px))'
           })
         }}
       >
