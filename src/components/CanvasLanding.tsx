@@ -759,8 +759,8 @@ const DEFAULT_TASKS: TaskCard[] = [
   },
   {
     id: 'abandoned-cart',
-    title: 'Abandoned Cart Recovery',
-    subtitle: 'Automated outreach and incentives to recover lost sales',
+    title: 'Smart Shopping Assistant',
+    subtitle: 'Intuitive AI assistant that helps with product purchases, queries, and automated checkout',
     icon: RiNotification3Line,
     iconBg: DARK_PALETTE.secondary
   }
@@ -794,7 +794,7 @@ export default function CanvasLanding() {
 
   const TEMPLATES: Array<{ id: string; title: string; subtitle: string; icon: TaskCard['icon']; iconBg: string }> = [
     { id: 'store-health-template', title: 'Store Health Check', subtitle: 'Connect your Shopify store for an instant AI diagnostic and optimization recommendations', icon: RiPulseLine, iconBg: '#F3F4F6' },
-    { id: 'abandoned-cart', title: 'Abandoned Cart Recovery', subtitle: 'Automated outreach and incentives', icon: RiNotification3Line, iconBg: '#F3F4F6' },
+    { id: 'abandoned-cart', title: 'Smart Shopping Assistant', subtitle: 'Intuitive AI assistant for purchases', icon: RiNotification3Line, iconBg: '#F3F4F6' },
     { id: 'inventory-mentor', title: 'Inventory Mentor', subtitle: 'Forecasts and restock alerts', icon: RiUser3Line, iconBg: '#F3F4F6' }
   ]
 
@@ -1866,7 +1866,7 @@ export default function CanvasLanding() {
                         </div>
                       </div>
 
-                      {/* Abandoned Cart Recovery - Shopify Tea Product Interface */}
+                      {/* Smart Shopping Assistant - Shopify Tea Product Interface */}
                       {task.id === 'abandoned-cart' ? (
                         <div className="bg-white rounded-lg overflow-hidden">
                           {/* Navigation breadcrumb */}

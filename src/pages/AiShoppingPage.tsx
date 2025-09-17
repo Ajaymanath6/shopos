@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import SmartSuggestOrb from '../components/SmartSuggestOrb'
+import ProductOrb from '../components/ProductOrb'
 import Badge from '../components/Badge'
 import { RiArrowLeftLine, RiTruckLine, RiArrowGoBackLine, RiPlantLine } from '@remixicon/react'
 
@@ -7,33 +8,13 @@ export default function AiShoppingPage() {
   const [showOrb, setShowOrb] = useState(false)
   const [hoverTimeout, setHoverTimeout] = useState<number | null>(null)
   const [isOrbExpanded, setIsOrbExpanded] = useState(false)
-  const [orbMode, setOrbMode] = useState<'discovery' | 'help'>('discovery')
   
   // Idle state nudge
   const [showHelpOrb, setShowHelpOrb] = useState(false)
   const [helpOrbExpanded, setHelpOrbExpanded] = useState(false)
   const idleTimerRef = useRef<number | null>(null)
   
-  // Individual section orbs for inline positioning
-  const [showDescriptionOrb, setShowDescriptionOrb] = useState(false)
-  const [descriptionOrbExpanded, setDescriptionOrbExpanded] = useState(false)
-  const descriptionHoverTimeout = useRef<number | null>(null)
-  
-  const [showHighlightsOrb, setShowHighlightsOrb] = useState(false)
-  const [highlightsOrbExpanded, setHighlightsOrbExpanded] = useState(false)
-  const highlightsHoverTimeout = useRef<number | null>(null)
-  
-  const [showPricingOrb, setShowPricingOrb] = useState(false)
-  const pricingHoverTimeout = useRef<number | null>(null)
-  
-  const [showOptionsOrb, setShowOptionsOrb] = useState(false)
-  const optionsHoverTimeout = useRef<number | null>(null)
-  
-  const [showCartOrb, setShowCartOrb] = useState(false)
-  const cartHoverTimeout = useRef<number | null>(null)
-  
-  const [showTrustOrb, setShowTrustOrb] = useState(false)
-  const trustHoverTimeout = useRef<number | null>(null)
+  // Section orbs temporarily removed - see SECTION_ORBS_BACKUP.md
 
   // Smart Suggest Orb hover handlers
   const handleProductImageHover = () => {
@@ -52,7 +33,6 @@ export default function AiShoppingPage() {
 
     // Set new timeout for 800 milliseconds  
     const timeout = setTimeout(() => {
-      setOrbMode('discovery')  // Set to discovery mode
       setShowOrb(true)
     }, 800) // 0.8 second delay for intentional interaction
     
@@ -77,7 +57,6 @@ export default function AiShoppingPage() {
   const handleCloseSmartOrb = () => {
     setShowOrb(false)
     setIsOrbExpanded(false)
-    setOrbMode('discovery')   // Reset to discovery mode
     if (hoverTimeout) {
       clearTimeout(hoverTimeout)
       setHoverTimeout(null)
@@ -107,14 +86,12 @@ export default function AiShoppingPage() {
     // Set new idle timer - only if no other orbs are active and not hovering anywhere
     idleTimerRef.current = setTimeout(() => {
       // Only show help orb if no other orbs are active and not hovering on any section
-      const anyOrbActive = showOrb || showDescriptionOrb || showHighlightsOrb || 
-                          showPricingOrb || showOptionsOrb || showCartOrb || showTrustOrb
+      const anyOrbActive = showOrb // Only product image orb now
       if (!anyOrbActive && !isHoveringAnySection) {
         setShowHelpOrb(true)
       }
     }, 2000) // 2 seconds
-  }, [helpOrbExpanded, showOrb, showDescriptionOrb, showHighlightsOrb, 
-      showPricingOrb, showOptionsOrb, showCartOrb, showTrustOrb, isHoveringAnySection])
+  }, [helpOrbExpanded, showOrb, isHoveringAnySection])
 
 
   // Handle help orb close
@@ -128,81 +105,7 @@ export default function AiShoppingPage() {
     setHelpOrbExpanded(expanded)
   }
 
-  // Individual section hover handlers
-  const createSectionHandlers = (
-    setShow: React.Dispatch<React.SetStateAction<boolean>>,
-    timeoutRef: React.MutableRefObject<number | null>,
-    expanded: boolean
-  ) => ({
-    onMouseEnter: () => {
-      // Mark that user is hovering over a section
-      setIsHoveringAnySection(true)
-      
-      // Hide ALL other orbs when this section orb might show
-      if (showHelpOrb && !helpOrbExpanded) {
-        setShowHelpOrb(false)
-      }
-      if (showOrb && !isOrbExpanded) {
-        setShowOrb(false)
-      }
-      
-      // Hide all other section orbs
-      if (setShow !== setShowDescriptionOrb && showDescriptionOrb && !descriptionOrbExpanded) {
-        setShowDescriptionOrb(false)
-      }
-      if (setShow !== setShowHighlightsOrb && showHighlightsOrb && !highlightsOrbExpanded) {
-        setShowHighlightsOrb(false)
-      }
-      if (setShow !== setShowPricingOrb && showPricingOrb) {
-        setShowPricingOrb(false)
-      }
-      if (setShow !== setShowOptionsOrb && showOptionsOrb) {
-        setShowOptionsOrb(false)
-      }
-      if (setShow !== setShowCartOrb && showCartOrb) {
-        setShowCartOrb(false)
-      }
-      if (setShow !== setShowTrustOrb && showTrustOrb) {
-        setShowTrustOrb(false)
-      }
-      
-      // Clear any existing timeout
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
-
-      // Set new timeout for 1 second delay
-      timeoutRef.current = setTimeout(() => {
-        setShow(true)
-      }, 1000) // 1 second delay as requested
-    },
-    onMouseLeave: () => {
-      // Mark that user is no longer hovering over this section
-      setIsHoveringAnySection(false)
-      
-      // Clear timeout if user moves away before delay
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-        timeoutRef.current = null
-      }
-      
-      // Add a longer delay before hiding to prevent blinking when moving within the section
-      setTimeout(() => {
-        // Only hide orb if it hasn't expanded
-        if (!expanded) {
-          setShow(false)
-        }
-      }, 500) // Longer delay to prevent rapid hide/show when moving within section
-    }
-  })
-  
-  // Create handlers for each section
-  const descriptionHandlers = createSectionHandlers(setShowDescriptionOrb, descriptionHoverTimeout, descriptionOrbExpanded)
-  const highlightsHandlers = createSectionHandlers(setShowHighlightsOrb, highlightsHoverTimeout, highlightsOrbExpanded)
-  const pricingHandlers = createSectionHandlers(setShowPricingOrb, pricingHoverTimeout, false)
-  const optionsHandlers = createSectionHandlers(setShowOptionsOrb, optionsHoverTimeout, false)
-  const cartHandlers = createSectionHandlers(setShowCartOrb, cartHoverTimeout, false)
-  const trustHandlers = createSectionHandlers(setShowTrustOrb, trustHoverTimeout, false)
+  // Section handlers temporarily removed - see SECTION_ORBS_BACKUP.md
 
   // Set up activity listeners
   useEffect(() => {
@@ -232,24 +135,7 @@ export default function AiShoppingPage() {
       if (idleTimerRef.current) {
         clearTimeout(idleTimerRef.current)
       }
-      if (descriptionHoverTimeout.current) {
-        clearTimeout(descriptionHoverTimeout.current)
-      }
-      if (highlightsHoverTimeout.current) {
-        clearTimeout(highlightsHoverTimeout.current)
-      }
-      if (pricingHoverTimeout.current) {
-        clearTimeout(pricingHoverTimeout.current)
-      }
-      if (optionsHoverTimeout.current) {
-        clearTimeout(optionsHoverTimeout.current)
-      }
-      if (cartHoverTimeout.current) {
-        clearTimeout(cartHoverTimeout.current)
-      }
-      if (trustHoverTimeout.current) {
-        clearTimeout(trustHoverTimeout.current)
-      }
+      // Section orb cleanup removed - see SECTION_ORBS_BACKUP.md
     }
   }, [])
 
@@ -257,10 +143,7 @@ export default function AiShoppingPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <div 
-        className="bg-white border-b border-gray-200 px-6 py-4"
-        {...pricingHandlers}
-      >
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button 
@@ -287,10 +170,7 @@ export default function AiShoppingPage() {
       </div>
 
       {/* Navigation breadcrumb */}
-      <div 
-        className="bg-white px-6 py-3 border-b border-gray-100"
-        {...pricingHandlers}
-      >
+      <div className="bg-white px-6 py-3 border-b border-gray-100">
         <div className="max-w-7xl mx-auto">
           <nav className="flex text-sm text-gray-500">
             <span>Home</span>
@@ -320,15 +200,11 @@ export default function AiShoppingPage() {
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
                   
-                  {/* Smart Suggest Orb positioned on image */}
-                  <SmartSuggestOrb 
+                  {/* Product Orb positioned on image */}
+                  <ProductOrb 
                     isVisible={showOrb}
                     onClose={handleCloseSmartOrb}
                     onExpanded={handleOrbExpanded}
-                    userLocation="Kerala"
-                    productCategory="tea"
-                    isOnProduct={true}
-                    mode={orbMode}
                   />
                 </div>
                 
@@ -391,34 +267,8 @@ export default function AiShoppingPage() {
             {/* Product Details - 5 columns */}
             <div className="lg:col-span-5 space-y-6">
               {/* Product title and price */}
-              <div className="relative p-4 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer"
-                {...pricingHandlers}
-              >
-                  <div className="flex items-center mb-2">
-                  <h1 className="text-3xl font-bold text-gray-900">Premium Earl Grey Tea</h1>
-                  {/* Inline Pricing Orb - positioned as overlay */}
-                  {showPricingOrb && (
-                    <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-1" style={{zIndex: 50}}>
-                      <SmartSuggestOrb 
-                        isVisible={showPricingOrb}
-                        onClose={() => {
-                          setShowPricingOrb(false)
-                          if (pricingHoverTimeout.current) {
-                            clearTimeout(pricingHoverTimeout.current)
-                            pricingHoverTimeout.current = null
-                          }
-                        }}
-                        onExpanded={() => {}}
-                        userLocation="Kerala"
-                        productCategory="tea"
-                        isOnProduct={true}
-                        mode="agent"
-                        showTooltipImmediately={true}
-                        customMessage="Price comparison help!"
-                      />
-                    </div>
-                  )}
-                </div>
+              <div className="p-4">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Premium Earl Grey Tea</h1>
                 <p className="text-sm text-gray-600 mb-4">Organic Ceylon black tea with natural bergamot</p>
                 <div className="flex items-center gap-4 mb-6">
                   <span className="text-3xl font-bold text-gray-900">$24.99</span>
@@ -428,34 +278,8 @@ export default function AiShoppingPage() {
               </div>
 
               {/* Product options - Unified hover area */}
-              <div className="relative p-4 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer"
-                {...optionsHandlers}
-              >
-                <div className="flex items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Product Options</h3>
-                  {/* Inline Options Orb - positioned as overlay */}
-                  {showOptionsOrb && (
-                    <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-1" style={{zIndex: 50}}>
-                      <SmartSuggestOrb 
-                        isVisible={showOptionsOrb}
-                        onClose={() => {
-                          setShowOptionsOrb(false)
-                          if (optionsHoverTimeout.current) {
-                            clearTimeout(optionsHoverTimeout.current)
-                            optionsHoverTimeout.current = null
-                          }
-                        }}
-                        onExpanded={() => {}}
-                        userLocation="Kerala"
-                        productCategory="tea"
-                        isOnProduct={true}
-                        mode="agent"
-                        showTooltipImmediately={true}
-                        customMessage="Size selection help!"
-                      />
-                    </div>
-                  )}
-                </div>
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Options</h3>
                 
                 <div className="space-y-4">
                   <div>
@@ -503,34 +327,8 @@ export default function AiShoppingPage() {
               </div>
 
               {/* Add to cart actions - Unified hover area */}
-              <div className="relative p-4 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer"
-                {...cartHandlers}
-              >
-                <div className="flex items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Purchase</h3>
-                  {/* Inline Cart Orb - positioned as overlay */}
-                  {showCartOrb && (
-                    <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-1" style={{zIndex: 50}}>
-                      <SmartSuggestOrb 
-                        isVisible={showCartOrb}
-                        onClose={() => {
-                          setShowCartOrb(false)
-                          if (cartHoverTimeout.current) {
-                            clearTimeout(cartHoverTimeout.current)
-                            cartHoverTimeout.current = null
-                          }
-                        }}
-                        onExpanded={() => {}}
-                        userLocation="Kerala"
-                        productCategory="tea"
-                        isOnProduct={true}
-                        mode="agent"
-                        showTooltipImmediately={true}
-                        customMessage="Purchase assistance!"
-                      />
-                    </div>
-                  )}
-                </div>
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Purchase</h3>
                 
                 <div className="space-y-3">
                   <button className="w-full py-3 text-lg font-semibold bg-gray-900 hover:bg-gray-800 text-white rounded-lg transition-colors">
@@ -544,36 +342,8 @@ export default function AiShoppingPage() {
 
               {/* Product highlights - Unified hover area */}
               <div className="border-t border-gray-200 pt-6">
-                <div 
-                  className="relative p-4 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer"
-                  {...highlightsHandlers}
-                >
-                  <div className="flex items-center mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Product Highlights</h3>
-                    {/* Inline Product Highlights Orb - positioned as overlay */}
-                    {showHighlightsOrb && (
-                      <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-1" style={{zIndex: 50}}>
-                        <SmartSuggestOrb 
-                          isVisible={showHighlightsOrb}
-                          onClose={() => {
-                            setShowHighlightsOrb(false)
-                            setHighlightsOrbExpanded(false)
-                            if (highlightsHoverTimeout.current) {
-                              clearTimeout(highlightsHoverTimeout.current)
-                              highlightsHoverTimeout.current = null
-                            }
-                          }}
-                          onExpanded={setHighlightsOrbExpanded}
-                          userLocation="Kerala"
-                          productCategory="tea"
-                          isOnProduct={true}
-                          mode="agent"
-                          showTooltipImmediately={true}
-                          customMessage="Compare features!"
-                        />
-                      </div>
-                    )}
-                  </div>
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Highlights</h3>
                   
                   <ul className="space-y-2">
                     <li className="flex items-start gap-2">
@@ -598,34 +368,8 @@ export default function AiShoppingPage() {
 
               {/* Trust indicators - Unified hover area */}
               <div className="border-t border-gray-200 pt-6">
-                <div className="relative p-4 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer"
-                  {...trustHandlers}
-                >
-                  <div className="flex items-center mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Trust & Policies</h3>
-                    {/* Inline Trust Orb - positioned as overlay */}
-                    {showTrustOrb && (
-                      <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-1" style={{zIndex: 50}}>
-                        <SmartSuggestOrb 
-                          isVisible={showTrustOrb}
-                          onClose={() => {
-                            setShowTrustOrb(false)
-                            if (trustHoverTimeout.current) {
-                              clearTimeout(trustHoverTimeout.current)
-                              trustHoverTimeout.current = null
-                            }
-                          }}
-                          onExpanded={() => {}}
-                          userLocation="Kerala"
-                          productCategory="tea"
-                          isOnProduct={true}
-                          mode="agent"
-                          showTooltipImmediately={true}
-                          customMessage="Policy questions?"
-                        />
-                      </div>
-                    )}
-                  </div>
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Trust & Policies</h3>
                   
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex items-center gap-2">
@@ -648,36 +392,8 @@ export default function AiShoppingPage() {
 
           {/* Product description section - Unified hover area */}
           <div className="mt-16 pt-12 border-t border-gray-200">
-            <div 
-              className="relative p-6 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm group cursor-pointer overflow-visible"
-              {...descriptionHandlers}
-            >
-              <div className="flex items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Description</h2>
-                {/* Inline Description Orb - positioned as overlay */}
-                {showDescriptionOrb && (
-                  <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-1" style={{zIndex: 50}}>
-                    <SmartSuggestOrb 
-                      isVisible={showDescriptionOrb}
-                      onClose={() => {
-                        setShowDescriptionOrb(false)
-                        setDescriptionOrbExpanded(false)
-                        if (descriptionHoverTimeout.current) {
-                          clearTimeout(descriptionHoverTimeout.current)
-                          descriptionHoverTimeout.current = null
-                        }
-                      }}
-                      onExpanded={setDescriptionOrbExpanded}
-                      userLocation="Kerala"
-                      productCategory="tea"
-                      isOnProduct={true}
-                      mode="agent"
-                      showTooltipImmediately={true}
-                      customMessage="Tea brewing help!"
-                    />
-                  </div>
-                )}
-              </div>
+            <div className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Description</h2>
               
               <div className="prose max-w-none text-gray-700">
                 <p className="mb-4">
@@ -710,11 +426,10 @@ export default function AiShoppingPage() {
       </div>
 
       {/* Help Orb - Right Side */}
-      {showHelpOrb && !showOrb && !showDescriptionOrb && !showHighlightsOrb && 
-       !showPricingOrb && !showOptionsOrb && !showCartOrb && !showTrustOrb && (
-        <div className="fixed top-1/2 right-8 z-50 transform -translate-y-1/2" 
+      {showHelpOrb && !showOrb && (
+        <div className="fixed top-1/2 z-50 transform -translate-y-1/2" 
              style={{ 
-               right: helpOrbExpanded ? '408px' : '78px',
+               right: helpOrbExpanded ? '20px' : '20px', // Responsive positioning for small screens
                transition: 'right 0.3s ease-out'
              }}>
           <SmartSuggestOrb 

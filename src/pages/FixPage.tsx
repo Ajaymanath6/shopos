@@ -60,7 +60,7 @@ const mockFixData: Record<string, FixData> = {
       'Screen reader testing completed'
     ]
   },
-  '3': { // Abandoned Cart Recovery - Shopify Tea Product Page
+  '3': { // Smart Shopping Assistant - Shopify Tea Product Page
     beforeImage: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600&h=400&fit=crop&crop=center',
     afterImage: 'https://images.unsplash.com/photo-1556881286-56d0de4039b9?w=600&h=400&fit=crop&crop=center',
     changes: [

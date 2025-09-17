@@ -251,6 +251,8 @@ export default function SmartSuggestOrb({
   const [showVoiceAnimation, setShowVoiceAnimation] = useState(false)
   const [isAiResponding, setIsAiResponding] = useState(false)
   const [selectedHelpIndex, setSelectedHelpIndex] = useState<number | null>(null)
+  const [showSummary, setShowSummary] = useState(false)
+  const [isSummarizing, setIsSummarizing] = useState(false)
   const orbRef = useRef<HTMLDivElement>(null)
   const voiceTimeoutRef = useRef<number | null>(null)
 
@@ -456,6 +458,7 @@ export default function SmartSuggestOrb({
     setShowVoiceAnimation(false)
     setIsAiResponding(false)
     setSelectedHelpIndex(null)
+    setShowSummary(false)
     
     // Clear voice timeout
     if (voiceTimeoutRef.current) {
@@ -640,7 +643,7 @@ export default function SmartSuggestOrb({
       setShowSuggestions(true)
             }, 500)
           }
-        }, 2000 + randomResponse.length * 30) // Account for typing animation duration
+        }, 2000 + teaResponse.length * 30) // Account for typing animation duration
       }, 1500)
     }
   }
@@ -1319,6 +1322,14 @@ export default function SmartSuggestOrb({
   // Floating orbs: Original complex structure for help orb and product image orbs
   return (
     <>
+      {/* Backdrop overlay when chat is expanded and centered */}
+      {isExpanded && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-20 z-40 backdrop-blur-sm"
+          onClick={handleClose}
+        />
+      )}
+      
       {/* Container positioning for floating orbs */}
       <div 
         className="fixed z-50 pointer-events-none inset-0"
@@ -1328,9 +1339,15 @@ export default function SmartSuggestOrb({
           ref={orbRef}
           className={`absolute pointer-events-auto ${
             isExpanded
-              ? 'transform origin-top-left' // Help mode: expand from top-left corner  
+              ? 'fixed top-1/2 transform -translate-y-1/2 z-50' // Center vertically, custom horizontal positioning
               : '' // Help mode orb: no special positioning (handled by parent)
           }`}
+          style={isExpanded ? {
+            left: 'calc(50% - 400px)' // 120px left from center
+          } : {
+            bottom: '0px',
+            right: '132px' // 132px left from right edge where it currently is
+          }}
         >
           {/* Morphing Orb Container with Framer Motion */}
           <motion.div
@@ -1361,8 +1378,8 @@ export default function SmartSuggestOrb({
             animate={{
               scale: isVisible ? 1 : 0,
               opacity: isVisible ? 1 : 0,
-              width: isExpanded ? 384 : 48,
-              height: isExpanded ? 384 : 48
+              width: isExpanded ? 'min(384px, calc(100vw - 40px))' : 48, // Responsive width for small screens
+              height: isExpanded ? 'min(384px, calc(100vh - 80px))' : 48 // Responsive height for small screens
             }}
             transition={{
               type: "spring",
@@ -1398,12 +1415,12 @@ export default function SmartSuggestOrb({
                   />
                 </div>
                 
-                {/* Help Mode: Smooth Tooltip with Framer Motion */}
+                {/* Help Mode: Three Tooltip Options */}
                 <AnimatePresence>
                   {mode === 'help' && showTooltip && (
-                    /* Tooltip - Positioned for help orb */
+                    /* Three Tooltip Options - Positioned on left side of help orb */
                     <motion.div 
-                      className="absolute top-1/2 right-14 transform -translate-y-1/2 pointer-events-auto z-50 cursor-pointer"
+                      className="absolute top-1/2 right-14 transform -translate-y-1/2 pointer-events-auto z-50"
                       initial={{ opacity: 0, scale: 0.8, y: -8 }}
                       animate={{ opacity: 1, scale: 1, y: -8 }}
                       exit={{ opacity: 0, scale: 0.8, y: -8 }}
@@ -1413,25 +1430,74 @@ export default function SmartSuggestOrb({
                         damping: 25,
                         duration: 0.3
                       }}
-                      onClick={handleOrbClick}
                     >
-                      <div 
-                        className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 whitespace-nowrap hover:shadow-xl transition-shadow"
-                        style={{
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                          backdropFilter: 'blur(8px)'
-                        }}
-                      >
-                        <p className="text-xs font-medium text-gray-900">
-                          {customMessage || "Tea questions? Click me!"}
-                        </p>
-                        
-                        {/* Tooltip Arrow - Points toward orb */}
+                      <div className="flex flex-col gap-1">
+                        {/* Summarise Option */}
                         <div 
-                          className="absolute top-1/2 left-full transform -translate-y-1/2 w-0 h-0"
+                          className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl hover:bg-gray-50 transition-all cursor-pointer group"
+                          style={{
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                            backdropFilter: 'blur(8px)'
+                          }}
+                          onClick={() => {
+                            setShowSummary(true)
+                            setShowSuggestions(false)
+                            handleOrbClick()
+                          }}
+                        >
+                          <p className="text-xs font-medium text-gray-900 whitespace-nowrap">
+                            Summarise
+                          </p>
+                        </div>
+
+                        {/* Ask Question Option */}
+                        <div 
+                          className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl hover:bg-gray-50 transition-all cursor-pointer group"
+                          style={{
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                            backdropFilter: 'blur(8px)'
+                          }}
+                          onClick={() => {
+                            setInputText("I have a question about this Earl Grey tea")
+                            handleOrbClick()
+                            // Send the input after chat expands
+                            setTimeout(() => {
+                              handleSendInput()
+                            }, 400)
+                          }}
+                        >
+                          <p className="text-xs font-medium text-gray-900 whitespace-nowrap">
+                            Ask question
+                          </p>
+                        </div>
+
+                        {/* Purchase Option */}
+                        <div 
+                          className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl hover:bg-gray-50 transition-all cursor-pointer group"
+                          style={{
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                            backdropFilter: 'blur(8px)'
+                          }}
+                          onClick={() => {
+                            setInputText("Help me purchase this Earl Grey tea")
+                            handleOrbClick()
+                            // Send the input after chat expands
+                            setTimeout(() => {
+                              handleSendInput()
+                            }, 400)
+                          }}
+                        >
+                          <p className="text-xs font-medium text-gray-900 whitespace-nowrap">
+                            Purchase
+                          </p>
+                        </div>
+                        
+                        {/* Tooltip Arrow - Points right toward orb */}
+                        <div 
+                          className="absolute left-full top-1/2 transform -translate-y-1/2 w-0 h-0"
                           style={{
                             borderTop: '4px solid transparent',
-                            borderBottom: '4px solid transparent',
+                            borderBottom: '4px solid transparent', 
                             borderLeft: '4px solid white'
                           }}
                         />
@@ -1527,7 +1593,63 @@ export default function SmartSuggestOrb({
 
                 {/* Chat content area */}
                 <div className="flex-1 overflow-auto p-4 space-y-3">
-                  {showSuggestions && (
+                  {showSummary ? (
+                    <div className="space-y-3">
+                      <div className="bg-gray-50 rounded-lg p-3">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-2">AI Shopping Assistant</h3>
+                        <p className="text-xs text-gray-600 mb-1">Powered by: Shopos AI</p>
+                        <p className="text-xs text-gray-600">Personalization: For Kerala, India</p>
+                      </div>
+                      
+                      <div className="bg-white border rounded-lg p-3 space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-900">Premium Earl Grey Tea</h4>
+                        <p className="text-xs text-gray-600">Organic Ceylon black tea with natural bergamot</p>
+                        
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-600">Current Price:</span>
+                            <span className="font-semibold text-green-600">$24.99</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-600">Original Price:</span>
+                            <span className="line-through text-gray-400">$32.99</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-600">Discount:</span>
+                            <span className="font-semibold text-red-600">25% OFF</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-white border rounded-lg p-3 space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-900">Product Highlights</h4>
+                        <ul className="text-xs text-gray-600 space-y-1">
+                          <li>• Premium Ceylon black tea leaves</li>
+                          <li>• Natural bergamot oil from Italy</li>
+                          <li>• Available in loose leaf & tea bags</li>
+                          <li>• Hand-picked from high altitude gardens</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="bg-white border rounded-lg p-3 space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-900">Trust & Policies</h4>
+                        <ul className="text-xs text-gray-600 space-y-1">
+                          <li>• Free shipping on orders over $50</li>
+                          <li>• 30-day return policy</li>
+                          <li>• Organic certified & ethically sourced</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <button className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors">
+                          Add to Cart - $24.99
+                        </button>
+                        <button className="flex-1 px-3 py-2 bg-gray-800 hover:bg-gray-900 text-white text-xs font-medium rounded-lg transition-colors">
+                          Buy it now
+                        </button>
+                      </div>
+                    </div>
+                  ) : showSuggestions && (
                     <div className="space-y-3">
                       <div className="bg-gray-50 rounded-lg p-3">
                         <p className="text-sm text-gray-700">

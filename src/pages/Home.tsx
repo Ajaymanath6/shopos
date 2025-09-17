@@ -26,7 +26,7 @@ const mockIssues = [
   },
   {
     id: '3',
-    title: 'Abandoned Cart Recovery',
+    title: 'Smart Shopping Assistant',
     description: 'No automated email sequence for cart abandonment (68% cart abandonment rate).',
     severity: 'critical' as const,
     impact: 'Missing ~$8,500/month in recovered sales',
