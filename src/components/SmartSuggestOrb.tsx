@@ -305,10 +305,8 @@ export default function SmartSuggestOrb({
     // Fill input box with the transcribed text
     setInputText(randomResponse)
     
-    // After a short delay, automatically send the message
-    setTimeout(() => {
-      handleSendInput()
-    }, 1000) // 1 second delay as requested
+    // Immediately send the message without delay
+    handleSendInput()
   }
 
   const stopVoiceRecording = () => {
@@ -1335,31 +1333,48 @@ export default function SmartSuggestOrb({
                   </button>
                   <button
                     onClick={handleVoiceClick}
-                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 relative group"
+                    disabled={isAiResponding || isVoiceRecording}
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 relative group ${
+                      isAiResponding ? 'cursor-not-allowed' : ''
+                    }`}
                     style={{
-                      background: isVoiceRecording ? '#059669' : 'rgba(249, 250, 251, 0.8)', // Green when recording
-                      border: `1px solid ${isVoiceRecording ? '#059669' : 'rgba(209, 213, 219, 0.5)'}`,
-                      color: isVoiceRecording ? '#ffffff' : '#059669'
+                      background: isAiResponding 
+                        ? 'rgba(249, 250, 251, 0.5)' 
+                        : isVoiceRecording 
+                          ? '#059669' 
+                          : 'rgba(249, 250, 251, 0.8)',
+                      border: `1px solid ${
+                        isAiResponding 
+                          ? 'rgba(209, 213, 219, 0.3)' 
+                          : isVoiceRecording 
+                            ? '#059669' 
+                            : 'rgba(209, 213, 219, 0.5)'
+                      }`,
+                      color: isAiResponding 
+                        ? '#9CA3AF' 
+                        : isVoiceRecording 
+                          ? '#ffffff' 
+                          : '#059669'
                     }}
                     onMouseEnter={(e) => {
-                      if (!isVoiceRecording) {
-                      e.currentTarget.style.borderColor = '#047857'
-                      e.currentTarget.style.background = 'rgba(249, 250, 251, 1)'
+                      if (!isVoiceRecording && !isAiResponding) {
+                        e.currentTarget.style.borderColor = '#047857'
+                        e.currentTarget.style.background = 'rgba(249, 250, 251, 1)'
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (!isVoiceRecording) {
-                      e.currentTarget.style.borderColor = 'rgba(209, 213, 219, 0.5)'
-                      e.currentTarget.style.background = 'rgba(249, 250, 251, 0.8)'
+                      if (!isVoiceRecording && !isAiResponding) {
+                        e.currentTarget.style.borderColor = 'rgba(209, 213, 219, 0.5)'
+                        e.currentTarget.style.background = 'rgba(249, 250, 251, 0.8)'
                       }
                     }}
-                    title={isVoiceRecording ? "Stop recording" : "Voice input"}
+                    title={isAiResponding ? "AI is responding..." : isVoiceRecording ? "Stop recording" : "Voice input"}
                   >
                     <RiMicLine size={16} />
                     
                     {/* Tooltip */}
                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
-                      {isVoiceRecording ? "Stop recording" : "Voice input"}
+                      {isAiResponding ? "AI is responding..." : isVoiceRecording ? "Stop recording" : "Voice input"}
                     </div>
                   </button>
                 </div>
@@ -1515,12 +1530,11 @@ export default function SmartSuggestOrb({
                             backdropFilter: 'blur(8px)'
                           }}
                           onClick={() => {
-                            setInputText("I have a question about this Earl Grey tea")
                             handleOrbClick()
-                            // Send the input after chat expands
+                            // Start voice input after chat expands
                             setTimeout(() => {
-                              handleSendInput()
-                            }, 400)
+                              handleVoiceClick()
+                            }, 500)
                           }}
                         >
                           <p className="text-xs font-medium text-gray-900 whitespace-nowrap">
@@ -1650,8 +1664,8 @@ export default function SmartSuggestOrb({
 
                 {/* Chat content area */}
                 <div className="flex-1 overflow-auto p-4 space-y-3">
-                  {isSummarizing ? (
-                    /* AI Summarization in Progress */
+                  {isInConversation ? (
+                    /* Conversation Mode: Show AI analysis messages */
                     <div className="space-y-3">
                       {showConversationSkeleton ? (
                         /* Skeleton Loader */
@@ -1677,16 +1691,18 @@ export default function SmartSuggestOrb({
                             let IconComponent = message.icon || RiSparklingFill
                             const iconStyle = { color: '#374151' }
 
+                            const isUserMessage = message.id.startsWith('user-')
+
                             return (
-                              <div key={message.id} className="flex items-start gap-3 animate-fadeIn">
-                                <div className="w-6 h-6 flex items-center justify-center flex-shrink-0 rounded-full">
+                              <div key={message.id} className={`flex items-start gap-3 animate-fadeIn ${isUserMessage ? 'flex-row-reverse' : ''}`}>
+                                <div className={`w-6 h-6 flex items-center justify-center flex-shrink-0 rounded-full ${isUserMessage ? 'bg-green-100' : ''}`}>
                                   <IconComponent 
                                     size={14} 
-                                    style={iconStyle} 
+                                    style={isUserMessage ? { color: '#059669' } : iconStyle} 
                                     className={IconComponent === RiLoader4Fill ? 'animate-spin' : ''}
                                   />
                                 </div>
-                                <div className="flex-1 text-sm" style={{ color: '#374151', lineHeight: '1.6' }}>
+                                <div className={`flex-1 text-sm ${isUserMessage ? 'text-right' : ''}`} style={{ color: '#374151', lineHeight: '1.6' }}>
                                   {message.content.includes('**') ? (
                                     /* Render markdown-style bold text */
                                     <div 
@@ -1821,14 +1837,24 @@ export default function SmartSuggestOrb({
                     {/* Voice Input Button */}
                     <button
                       onClick={handleVoiceClick}
-                      className="p-2 border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors group relative"
-                      title="Voice input"
+                      disabled={isAiResponding || isVoiceRecording}
+                      className={`p-2 border rounded-lg transition-colors group relative ${
+                        isAiResponding || isVoiceRecording
+                          ? 'border-gray-200 bg-gray-100 cursor-not-allowed'
+                          : 'border-gray-300 hover:bg-gray-50'
+                      }`}
+                      title={isAiResponding ? "AI is responding..." : isVoiceRecording ? "Recording..." : "Voice input"}
                     >
-                      <RiMicLine size={16} className="text-gray-600" />
+                      <RiMicLine 
+                        size={16} 
+                        className={`${
+                          isAiResponding || isVoiceRecording ? 'text-gray-400' : 'text-gray-600'
+                        }`} 
+                      />
                       
                       {/* Tooltip */}
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
-                        Voice input
+                        {isAiResponding ? "AI is responding..." : isVoiceRecording ? "Recording..." : "Voice input"}
                       </div>
                     </button>
                     
