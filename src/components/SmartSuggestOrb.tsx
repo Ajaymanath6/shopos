@@ -302,11 +302,66 @@ export default function SmartSuggestOrb({
     const randomIndex = Math.floor(Math.random() * voiceResponses.length)
     const randomResponse = voiceResponses[randomIndex]
     
-    // Fill input box with the transcribed text
-    setInputText(randomResponse)
+    // Determine AI response IMMEDIATELY using the randomIndex before any state changes
+    let aiResponse: string
+    if (mode === 'discovery') {
+      const discoveryResponses = [
+        "Here are the most affordable regional designs I found! The Theyyam Inspired Tea Mug at $16.99 offers authentic Kerala art at the best price point.",
+        "The Kerala Mural Art Tea Set has the most traditional patterns - featuring authentic temple mural designs passed down through generations. The intricate details are stunning!",
+        "Perfect! I found several beautiful options under $20, including the Theyyam Inspired Mug ($16.99) with hand-painted traditional dance motifs.",
+        "The most authentic design is definitely the Kerala Mural Art Set - it features genuine temple art patterns and uses traditional color palettes from ancient Kerala murals.",
+        "The Theyyam-inspired collection is incredible! These pieces capture the vibrant colors and spiritual energy of Kerala's traditional Theyyam performances.",
+        "Yes! The Backwater Serenity Collection blends traditional Kerala landscapes with contemporary minimalist design - perfect for modern homes with cultural appreciation.",
+        "For gifting, I'd recommend the Kerala Mural Art Tea Set - it's culturally significant, beautifully crafted, and comes with a story about Kerala's artistic heritage.",
+        "I found some exclusive pieces! The Backwater Serenity Collection includes limited edition designs inspired by Kerala's famous backwater scenes.",
+        "The most vibrant designs are in the Theyyam collection - featuring bold reds, deep blues, and golden accents that represent the energy of Kerala's traditional performances.",
+        "Kerala designs are unique because they tell stories - each pattern represents local culture, from temple art to backwater scenes, unlike generic tea sets."
+      ]
+      aiResponse = discoveryResponses[Math.floor(Math.random() * discoveryResponses.length)]
+    } else if (mode === 'agent') {
+      // Use exact matching response for agent mode
+      aiResponse = AGENT_AI_ANSWERS[randomIndex] || AGENT_AI_ANSWERS[0]
+    } else {
+      // Use exact matching response for help mode
+      aiResponse = HELP_AI_ANSWERS[randomIndex] || HELP_AI_ANSWERS[0]
+    }
     
-    // Immediately send the message without delay
-    handleSendInput()
+    // Create user message immediately
+    const userMessage: ConversationMessage = {
+      id: `user-${Date.now()}`,
+      type: 'result',
+      content: randomResponse.trim(),
+      timestamp: Date.now(),
+      isTyping: false,
+      icon: RiUser3Line
+    }
+    
+    // Add to conversation immediately
+    setIsInConversation(true)
+    setShowSuggestions(false)
+    setConversationMessages(prev => [...prev, userMessage])
+    setInputText('') // Clear input
+    
+    // Start AI response immediately
+    setTimeout(() => {
+      setIsAiResponding(true)
+      
+      addTypingMessage({
+        type: 'result',
+        content: aiResponse,
+        icon: RiBrainLine
+      })
+      
+      // Clear AI responding state after typing finishes
+      setTimeout(() => {
+        setIsAiResponding(false)
+        if (mode === 'discovery') {
+          setTimeout(() => {
+            setShowSuggestions(true)
+          }, 500)
+        }
+      }, 2000)
+    }, 800) // Shorter delay for immediate feel
   }
 
   const stopVoiceRecording = () => {
