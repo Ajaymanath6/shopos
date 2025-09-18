@@ -85,19 +85,23 @@ const bounceInAnimation = `
   animation: fadeIn 0.5s ease-out;
 }
 
-@keyframes pulse-rings {
+@keyframes pulse-orb {
   0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7);
-  }
-  70% {
     transform: scale(1);
-    box-shadow: 0 0 0 15px rgba(5, 150, 105, 0);
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.8);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 20px rgba(5, 150, 105, 0);
   }
   100% {
-    transform: scale(0.95);
+    transform: scale(1);
     box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
   }
+}
+
+.animate-pulse-orb {
+  animation: pulse-orb 2s ease-out infinite;
 }
 `
 
@@ -265,7 +269,14 @@ export default function SmartSuggestOrb({
   const [showSummary, setShowSummary] = useState(false)
   const orbRef = useRef<HTMLDivElement>(null)
   const voiceTimeoutRef = useRef<number | null>(null)
+  const chatContentRef = useRef<HTMLDivElement>(null)
 
+  // Auto-scroll to bottom of chat
+  const scrollToBottom = () => {
+    if (chatContentRef.current) {
+      chatContentRef.current.scrollTop = chatContentRef.current.scrollHeight
+    }
+  }
 
   // Voice input handlers
   const handleVoiceClick = () => {
@@ -331,6 +342,9 @@ export default function SmartSuggestOrb({
     setShowSuggestions(false)
     setConversationMessages(prev => [...prev, userMessage])
     setInputText('') // Clear input
+    
+    // Auto-scroll after adding user message
+    setTimeout(() => scrollToBottom(), 100)
     
     // Start AI response immediately
     setTimeout(() => {
@@ -423,6 +437,9 @@ export default function SmartSuggestOrb({
     }
 
     setConversationMessages(prev => [...prev, newMessage])
+    
+    // Auto-scroll when AI message starts
+    setTimeout(() => scrollToBottom(), 100)
 
     // Update status indicator first if provided
     if (statusIndicator) {
@@ -445,7 +462,7 @@ export default function SmartSuggestOrb({
                 : msg
             ))
             currentIndex++
-            setTimeout(typeChar, 15) // 15ms per character for 2x faster typing
+            setTimeout(typeChar, 7) // 7ms per character for 4x faster typing
           } else {
             // Finished typing
             setConversationMessages(prev => prev.map(msg => 
@@ -470,7 +487,7 @@ export default function SmartSuggestOrb({
               : msg
           ))
           currentIndex++
-          setTimeout(typeChar, 15) // 2x faster typing
+          setTimeout(typeChar, 7) // 4x faster typing
         } else {
           setConversationMessages(prev => prev.map(msg => 
             msg.id === newMessage.id 
@@ -1461,13 +1478,8 @@ export default function SmartSuggestOrb({
                     `
                   }}
                 >
-                  {/* Pulse animation using box-shadow */}
-                  <div 
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      animation: 'pulse-rings 2s infinite'
-                    }}
-                  />
+              {/* Pulse animation */}
+              <div className="absolute inset-0 rounded-full animate-pulse-orb" />
                   
                   <RiSparklingFill 
                     size={20} 
@@ -1655,7 +1667,7 @@ export default function SmartSuggestOrb({
                 </div>
 
                 {/* Chat content area */}
-                <div className="flex-1 overflow-auto p-4 space-y-3">
+                <div ref={chatContentRef} className="flex-1 overflow-auto p-4 space-y-3">
                   {isInConversation ? (
                     /* Conversation Mode: Show AI analysis messages */
                     <div className="space-y-3">
