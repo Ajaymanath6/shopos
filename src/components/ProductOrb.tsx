@@ -6,7 +6,8 @@ import {
   RiMicLine, 
   RiSendPlaneLine,
   RiBrainLine,
-  RiUser3Line
+  RiUser3Line,
+  RiLoader2Line
 } from '@remixicon/react'
 
 // Add fade-in animation styles and pulse animation
@@ -109,6 +110,7 @@ export default function ProductOrb({
   const [isVoiceRecording, setIsVoiceRecording] = useState(false)
   const [showVoiceAnimation, setShowVoiceAnimation] = useState(false)
   const [showProductDetails, setShowProductDetails] = useState(false)
+  const [isAiResponding, setIsAiResponding] = useState(false)
   const voiceTimeoutRef = useRef<number | null>(null)
   const chatContentRef = useRef<HTMLDivElement>(null)
 
@@ -257,6 +259,7 @@ export default function ProductOrb({
     }
 
     setConversationMessages(prev => [...prev, newMessage])
+    setIsAiResponding(true)
     
     // Auto-scroll when AI message starts
     setTimeout(() => scrollToBottom(), 100)
@@ -281,6 +284,7 @@ export default function ProductOrb({
             ? { ...msg, isTyping: false }
             : msg
         ))
+        setIsAiResponding(false)
         
         // Check if this response mentions "Filter Kaapi" and show product details
         if (content.includes("Filter Kaapi") && content.includes("cart")) {
@@ -481,15 +485,30 @@ export default function ProductOrb({
               <div className="flex items-center gap-4">
                 {/* Keep the original orb visible and prominent in header */}
                 <div className="flex items-center gap-2">
-                    <div 
-                      className="w-6 h-6 rounded-full flex items-center justify-center"
-                      style={{
-                        background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
-                      }}
-                    >
-                      <RiSparklingFill size={12} className="text-white" />
+                    <div className="glass-orb-container" style={{ width: '24px', height: '24px' }}>
+                      <svg className="glass-orb-svg" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                          <radialGradient id="orb-base-header" cx="40%" cy="35%" r="70%">
+                            <stop offset="0%" stopColor="rgba(255,255,255,0.85)" />
+                            <stop offset="40%" stopColor="rgba(22,163,74,0.55)" />
+                            <stop offset="100%" stopColor="rgba(15,118,110,0.45)" />
+                          </radialGradient>
+                          <radialGradient id="orb-rim-header" cx="50%" cy="40%" r="52%">
+                            <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+                            <stop offset="80%" stopColor="rgba(4,120,87,0.25)" />
+                            <stop offset="100%" stopColor="rgba(6,78,59,0.35)" />
+                          </radialGradient>
+                        </defs>
+                        <g transform="translate(500,500)">
+                          <circle cx="0" cy="0" r="420" fill="url(#orb-base-header)" stroke="url(#orb-rim-header)" strokeWidth="2" />
+                        </g>
+                      </svg>
+                      <RiSparklingFill size={12} className="text-gray-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 2 }} />
                     </div>
                     <span className="text-sm font-medium text-gray-900">AI Shopping Assistant</span>
+                    {isAiResponding && (
+                      <RiLoader2Line size={16} className="animate-spin ml-2" style={{ color: '#374151' }} />
+                    )}
                   </div>
                 
               </div>
