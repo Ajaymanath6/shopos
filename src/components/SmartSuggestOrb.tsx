@@ -87,21 +87,44 @@ const bounceInAnimation = `
 
 @keyframes pulse-orb {
   0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.8);
+    transform: translate(-50%, -50%) scale(0.95);
+    opacity: 0.5;
   }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 20px rgba(5, 150, 105, 0);
+  70% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0;
   }
   100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
+    transform: translate(-50%, -50%) scale(0.95);
+    opacity: 0.5;
   }
 }
 
-.animate-pulse-orb {
-  animation: pulse-orb 2s ease-out infinite;
+.glass-orb-container {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.glass-orb-container::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(144,238,144,0.5);
+  animation: pulse-orb 2.5s infinite;
+  z-index: 0;
+}
+
+.glass-orb-svg {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
 }
 `
 
@@ -800,28 +823,49 @@ export default function SmartSuggestOrb({
               onClick={handleOrbClick}
             >
               {/* Apple-style Glass Morphism Orb */}
-              <div 
-                className="w-full h-full rounded-full backdrop-blur-xl border border-white/20 flex items-center justify-center relative overflow-hidden"
-                style={{
-                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                  boxShadow: `
-                    0 4px 16px rgba(4, 120, 87, 0.3),
-                    inset 0 1px 0 rgba(255,255,255,0.2)
-                  `
-                }}
-              >
-                {/* Static glow - no animation */}
-                <div 
-                  className="absolute inset-0 rounded-full"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(4,120,87,0.3) 0%, transparent 70%)'
-                  }}
-                />
+              <div className="glass-orb-container">
+                <svg className="glass-orb-svg" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <radialGradient id="orb-base-2" cx="40%" cy="35%" r="70%">
+                      <stop offset="0%" stopColor="rgba(255,255,255,0.85)" />
+                      <stop offset="40%" stopColor="rgba(22,163,74,0.55)" />
+                      <stop offset="100%" stopColor="rgba(15,118,110,0.45)" />
+                    </radialGradient>
+
+                    <radialGradient id="orb-rim-2" cx="50%" cy="40%" r="52%">
+                      <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+                      <stop offset="80%" stopColor="rgba(4,120,87,0.25)" />
+                      <stop offset="100%" stopColor="rgba(6,78,59,0.35)" />
+                    </radialGradient>
+
+                    <linearGradient id="specular-2" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="rgba(255,255,255,0.95)"/>
+                      <stop offset="100%" stopColor="rgba(255,255,255,0)"/>
+                    </linearGradient>
+
+                    <filter id="inner-shadow-2" x="-20%" y="-20%" width="140%" height="140%">
+                      <feOffset dx="0" dy="6" result="off"/>
+                      <feGaussianBlur in="off" stdDeviation="10" result="blur"/>
+                      <feComposite in="blur" in2="SourceAlpha" operator="out" result="comp"/>
+                      <feColorMatrix in="comp" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.18 0"/>
+                      <feComposite in2="SourceGraphic" operator="over"/>
+                    </filter>
+                  </defs>
+
+                  <g transform="translate(500,500)">
+                    <circle cx="0" cy="0" r="420" fill="url(#orb-base-2)" stroke="url(#orb-rim-2)" strokeWidth="2" />
+                    <g style={{opacity: 0.95, filter: 'blur(0.6px)'}}>
+                      <ellipse cx="-160" cy="-180" rx="160" ry="80" fill="url(#specular-2)" transform="rotate(-20)" />
+                      <ellipse cx="-120" cy="-140" rx="32" ry="18" fill="rgba(255,255,255,0.95)" />
+                    </g>
+                    <circle cx="0" cy="0" r="360" fill="none" filter="url(#inner-shadow-2)" stroke="rgba(0,0,0,0)" />
+                  </g>
+                </svg>
                 
-                {/* Main AI Icon */}
                 <RiSparklingFill 
                   size={20} 
-                  className="text-white relative z-10" 
+                  className="text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                  style={{ zIndex: 2 }}
                 />
               </div>
               
@@ -898,19 +942,31 @@ export default function SmartSuggestOrb({
             >
               {/* AI Orb */}
               <motion.div 
-                className="w-8 h-8 rounded-full backdrop-blur-xl border border-white/20 flex items-center justify-center relative overflow-hidden cursor-pointer flex-shrink-0"
-                style={{
-                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                  boxShadow: `
-                    0 4px 16px rgba(4, 120, 87, 0.3),
-                    inset 0 1px 0 rgba(255,255,255,0.2)
-                  `
-                }}
+                className="w-8 h-8 cursor-pointer flex-shrink-0"
                 onClick={handleSeeMoreClick}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <RiSparklingFill size={16} className="text-white" />
+                <div className="glass-orb-container" style={{ width: '32px', height: '32px' }}>
+                  <svg className="glass-orb-svg" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <radialGradient id="orb-base-small" cx="40%" cy="35%" r="70%">
+                        <stop offset="0%" stopColor="rgba(255,255,255,0.85)" />
+                        <stop offset="40%" stopColor="rgba(22,163,74,0.55)" />
+                        <stop offset="100%" stopColor="rgba(15,118,110,0.45)" />
+                      </radialGradient>
+                      <radialGradient id="orb-rim-small" cx="50%" cy="40%" r="52%">
+                        <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+                        <stop offset="80%" stopColor="rgba(4,120,87,0.25)" />
+                        <stop offset="100%" stopColor="rgba(6,78,59,0.35)" />
+                      </radialGradient>
+                    </defs>
+                    <g transform="translate(500,500)">
+                      <circle cx="0" cy="0" r="420" fill="url(#orb-base-small)" stroke="url(#orb-rim-small)" strokeWidth="2" />
+                    </g>
+                  </svg>
+                  <RiSparklingFill size={16} className="text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 2 }} />
+                </div>
               </motion.div>
               
               {/* Compact Text beside orb */}
@@ -1468,24 +1524,51 @@ export default function SmartSuggestOrb({
                 onClick={handleOrbClick}
               >
                 {/* Glass morphism orb */}
-                <div 
-                  className="w-full h-full rounded-full backdrop-blur-xl border border-white/20 flex items-center justify-center relative overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                    boxShadow: `
-                      0 4px 16px rgba(4, 120, 87, 0.3),
-                      inset 0 1px 0 rgba(255,255,255,0.2)
-                    `
-                  }}
-                >
-              {/* Pulse animation */}
-              <div className="absolute inset-0 rounded-full animate-pulse-orb" />
-                  
-                  <RiSparklingFill 
-                    size={20} 
-                    className="text-white relative z-10" 
-                  />
-                </div>
+            <div className="glass-orb-container">
+              <svg className="glass-orb-svg" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <radialGradient id="orb-base" cx="40%" cy="35%" r="70%">
+                    <stop offset="0%" stopColor="rgba(255,255,255,0.85)" />
+                    <stop offset="40%" stopColor="rgba(22,163,74,0.55)" />
+                    <stop offset="100%" stopColor="rgba(15,118,110,0.45)" />
+                  </radialGradient>
+
+                  <radialGradient id="orb-rim" cx="50%" cy="40%" r="52%">
+                    <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+                    <stop offset="80%" stopColor="rgba(4,120,87,0.25)" />
+                    <stop offset="100%" stopColor="rgba(6,78,59,0.35)" />
+                  </radialGradient>
+
+                  <linearGradient id="specular" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="rgba(255,255,255,0.95)"/>
+                    <stop offset="100%" stopColor="rgba(255,255,255,0)"/>
+                  </linearGradient>
+
+                  <filter id="inner-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feOffset dx="0" dy="6" result="off"/>
+                    <feGaussianBlur in="off" stdDeviation="10" result="blur"/>
+                    <feComposite in="blur" in2="SourceAlpha" operator="out" result="comp"/>
+                    <feColorMatrix in="comp" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.18 0"/>
+                    <feComposite in2="SourceGraphic" operator="over"/>
+                  </filter>
+                </defs>
+
+                <g transform="translate(500,500)">
+                  <circle cx="0" cy="0" r="420" fill="url(#orb-base)" stroke="url(#orb-rim)" strokeWidth="2" />
+                  <g style={{opacity: 0.95, filter: 'blur(0.6px)'}}>
+                    <ellipse cx="-160" cy="-180" rx="160" ry="80" fill="url(#specular)" transform="rotate(-20)" />
+                    <ellipse cx="-120" cy="-140" rx="32" ry="18" fill="rgba(255,255,255,0.95)" />
+                  </g>
+                  <circle cx="0" cy="0" r="360" fill="none" filter="url(#inner-shadow)" stroke="rgba(0,0,0,0)" />
+                </g>
+              </svg>
+              
+              <RiSparklingFill 
+                size={20} 
+                className="text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                style={{ zIndex: 2 }}
+              />
+            </div>
                 
                 {/* Help Mode: Three Tooltip Options */}
                 <AnimatePresence>
@@ -1608,19 +1691,31 @@ export default function SmartSuggestOrb({
               >
                 {/* AI Orb */}
                 <motion.div 
-                  className="w-8 h-8 rounded-full backdrop-blur-xl border border-white/20 flex items-center justify-center relative overflow-hidden cursor-pointer flex-shrink-0"
-                  style={{
-                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                    boxShadow: `
-                      0 4px 16px rgba(4, 120, 87, 0.3),
-                      inset 0 1px 0 rgba(255,255,255,0.2)
-                    `
-                  }}
+                  className="w-8 h-8 cursor-pointer flex-shrink-0"
                   onClick={handleSeeMoreClick}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <RiSparklingFill size={16} className="text-white" />
+                  <div className="glass-orb-container" style={{ width: '32px', height: '32px' }}>
+                    <svg className="glass-orb-svg" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <radialGradient id="orb-base-small-2" cx="40%" cy="35%" r="70%">
+                          <stop offset="0%" stopColor="rgba(255,255,255,0.85)" />
+                          <stop offset="40%" stopColor="rgba(22,163,74,0.55)" />
+                          <stop offset="100%" stopColor="rgba(15,118,110,0.45)" />
+                        </radialGradient>
+                        <radialGradient id="orb-rim-small-2" cx="50%" cy="40%" r="52%">
+                          <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+                          <stop offset="80%" stopColor="rgba(4,120,87,0.25)" />
+                          <stop offset="100%" stopColor="rgba(6,78,59,0.35)" />
+                        </radialGradient>
+                      </defs>
+                      <g transform="translate(500,500)">
+                        <circle cx="0" cy="0" r="420" fill="url(#orb-base-small-2)" stroke="url(#orb-rim-small-2)" strokeWidth="2" />
+                      </g>
+                    </svg>
+                    <RiSparklingFill size={16} className="text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 2 }} />
+                  </div>
                 </motion.div>
                 
                 {/* Compact Text beside orb */}
