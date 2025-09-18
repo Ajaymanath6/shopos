@@ -97,7 +97,6 @@ if (typeof document !== 'undefined') {
 interface SmartSuggestOrbProps {
   isVisible: boolean
   onClose: () => void
-  userLocation?: string
   productCategory?: string
   isOnProduct?: boolean
   onExpanded?: (expanded: boolean) => void
@@ -229,7 +228,6 @@ const AGENT_AI_ANSWERS = [
 export default function SmartSuggestOrb({ 
   isVisible, 
   onClose, 
-  userLocation = 'Kerala',
   productCategory = 'tea',
   isOnProduct = false,
   onExpanded,
@@ -241,8 +239,6 @@ export default function SmartSuggestOrb({
   const [showSeeMore, setShowSeeMore] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [inputText, setInputText] = useState('')
-  const [isListening, setIsListening] = useState(false)
-  const [inputMode, setInputMode] = useState<'search' | 'voice' | null>(null)
   const [showTooltip, setShowTooltip] = useState(false)
   const [isInConversation, setIsInConversation] = useState(false)
   const [conversationMessages, setConversationMessages] = useState<ConversationMessage[]>([])
@@ -252,30 +248,9 @@ export default function SmartSuggestOrb({
   const [isAiResponding, setIsAiResponding] = useState(false)
   const [selectedHelpIndex, setSelectedHelpIndex] = useState<number | null>(null)
   const [showSummary, setShowSummary] = useState(false)
-  const [isSummarizing, setIsSummarizing] = useState(false)
   const orbRef = useRef<HTMLDivElement>(null)
   const voiceTimeoutRef = useRef<number | null>(null)
 
-  // Follow-up questions for after summary
-  const FOLLOW_UP_QUESTIONS = [
-    "What's the best way to brew this Earl Grey for maximum flavor?",
-    "Can you tell me more about the bergamot oil quality and sourcing?",
-    "How does this compare to other premium Earl Grey teas you have?",
-    "What's the shelf life and best storage method for this tea?",
-    "Are there any health benefits or caffeine content details?"
-  ]
-
-  const FOLLOW_UP_AI_RESPONSES = [
-    "**Brewing Guide for Premium Earl Grey:**\n\n**Water Temperature:** 95°C (203°F) - just below boiling\n**Steeping Time:** 3-5 minutes for optimal flavor\n**Tea-to-Water Ratio:** 1 teaspoon per 200ml (8oz)\n\n**Pro Tips:**\n• Use filtered water for best taste\n• Preheat your teapot/cup\n• Don't oversteep - it can become bitter\n• Add milk after brewing, not before\n\nThis will give you the perfect balance of bergamot citrus notes and robust black tea flavor!",
-    
-    "**Bergamot Oil Quality & Sourcing:**\n\n**Origin:** Calabria, Italy - the world's finest bergamot region\n**Extraction:** Cold-pressed from fresh bergamot rinds\n**Quality Grade:** Food-grade essential oil, not synthetic\n**Concentration:** 12% of total blend for authentic flavor\n\n**Why This Matters:**\n• Natural bergamot provides complex citrus notes\n• Italian bergamot has superior aroma compounds\n• Cold-pressed preserves delicate flavor molecules\n• No artificial flavorings or additives\n\nThis is the same bergamot used in traditional Earl Grey recipes!",
-    
-    "**Comparison with Other Premium Earl Greys:**\n\n**Our Premium Earl Grey vs. Competitors:**\n• **Higher bergamot concentration** (12% vs typical 8-10%)\n• **Organic certification** (many aren't certified organic)\n• **Hand-picked leaves** (vs machine-harvested)\n• **Cornflower petals** for visual appeal (rare addition)\n• **Better price point** at $24.99 vs $35-45 for similar quality\n\n**Flavor Profile:** More citrus-forward than traditional blends, with a smoother finish thanks to the Ceylon base. Perfect for those who love the bergamot character!",
-    
-    "**Shelf Life & Storage:**\n\n**Shelf Life:** 2-3 years from production date\n**Best Storage:** Cool, dry place away from light and strong odors\n**Container:** Airtight tin or resealable bag\n\n**Storage Tips:**\n• Keep away from spices, coffee, or cleaning products\n• Store in original packaging until opened\n• Once opened, use within 6 months for peak flavor\n• Don't refrigerate - it can cause condensation\n\n**Signs of Freshness:** Bright bergamot aroma, crisp tea leaves, no musty smell",
-    
-    "**Health Benefits & Caffeine Content:**\n\n**Caffeine:** 40-70mg per cup (about half of coffee)\n**Antioxidants:** Rich in theaflavins and catechins from black tea\n**Bergamot Benefits:** May help with digestion and stress relief\n\n**Health Highlights:**\n• **Heart Health:** Black tea may support cardiovascular health\n• **Mental Alertness:** Moderate caffeine for gentle energy\n• **Digestive Support:** Bergamot oil traditionally aids digestion\n• **Hydration:** Contributes to daily fluid intake\n\n**Note:** Consult your doctor about caffeine intake if you have health concerns!"
-  ]
 
   // Voice input handlers
   const handleVoiceClick = () => {
@@ -364,46 +339,6 @@ export default function SmartSuggestOrb({
     }, 800) // Shorter delay for immediate feel
   }
 
-  const stopVoiceRecording = () => {
-    setIsVoiceRecording(false)
-    setShowVoiceAnimation(false)
-    if (voiceTimeoutRef.current) {
-      clearTimeout(voiceTimeoutRef.current)
-      voiceTimeoutRef.current = null
-    }
-
-    // Pick random follow-up question
-    const randomIndex = Math.floor(Math.random() * FOLLOW_UP_QUESTIONS.length)
-    const randomQuestion = FOLLOW_UP_QUESTIONS[randomIndex]
-    const aiResponse = FOLLOW_UP_AI_RESPONSES[randomIndex]
-    
-    // Immediately set conversation mode and clear input
-    setIsInConversation(true)
-    setShowSummary(false)
-    setShowSuggestions(false)
-    setInputText('') // Clear input immediately
-    
-    // Add user message to conversation immediately
-    const userMessage: ConversationMessage = {
-      id: `user-${Date.now()}`,
-      type: 'result',
-      content: randomQuestion.trim(),
-      timestamp: Date.now(),
-      isTyping: false,
-      icon: RiUser3Line
-    }
-    
-    setConversationMessages(prev => [...prev, userMessage])
-    
-    // Start AI response after short delay
-    setTimeout(() => {
-      addTypingMessage({
-        type: 'result',
-        content: aiResponse,
-        icon: RiBrainLine
-      })
-    }, 500) // Shorter delay for immediate response
-  }
 
   // Summarization sequence function
   const startSummarizationSequence = () => {
@@ -451,7 +386,6 @@ export default function SmartSuggestOrb({
       // Show summary after typing completes
       setTimeout(() => {
         setShowSummary(true)
-        setIsSummarizing(false)
       }, 4000)
     }, messageDelay)
   }
@@ -648,9 +582,7 @@ export default function SmartSuggestOrb({
     setShowSuggestions(false)
     setIsExpanded(false)
     setShowSeeMore(false)
-    setInputMode(null)
     setInputText('')
-    setIsListening(false)
     setIsInConversation(false)
     setConversationMessages([]) // Only clear when user explicitly closes orb
     setShowConversationSkeleton(false)
@@ -659,7 +591,6 @@ export default function SmartSuggestOrb({
     setIsAiResponding(false)
     setSelectedHelpIndex(null)
     setShowSummary(false)
-    setIsSummarizing(false)
     
     // Clear voice timeout
     if (voiceTimeoutRef.current) {
@@ -673,10 +604,6 @@ export default function SmartSuggestOrb({
     }, 300)
   }
 
-  const handleSearchClick = () => {
-    setInputMode('search')
-    setShowSuggestions(true)
-  }
 
 
 
@@ -759,9 +686,7 @@ export default function SmartSuggestOrb({
       setIsExpanded(false)
       setShowSuggestions(false)
       setShowSeeMore(false)
-      setInputMode(null)
       setInputText('')
-      setIsListening(false)
       setIsInConversation(false)
       setConversationMessages([]) // Clear when orb becomes invisible
       setShowConversationSkeleton(false)
@@ -783,7 +708,7 @@ export default function SmartSuggestOrb({
   if (!isVisible) return null
 
   // Different structure for inline vs floating orbs
-  if (isOnProduct && mode !== 'discovery') {
+  if (isOnProduct) {
     // Inline section orbs: Simple relative positioning, no complex overlay structure
     return (
       <div 
@@ -874,7 +799,7 @@ export default function SmartSuggestOrb({
                   /* Tooltip - Positioned based on mode */
                   <motion.div 
                     className={`absolute top-1/2 transform -translate-y-1/2 pointer-events-auto z-50 cursor-pointer ${
-                      isOnProduct && mode !== 'discovery' ? '-left-40' : 'right-14'
+                      isOnProduct ? '-left-40' : 'right-14'
                     }`}
                   initial={{ opacity: 0, scale: 0.8, y: -8 }}
                   animate={{ opacity: 1, scale: 1, y: -8 }}
@@ -900,20 +825,12 @@ export default function SmartSuggestOrb({
                     
                       {/* Tooltip Arrow - Points toward orb */}
                       <div 
-                        className={`absolute top-1/2 transform -translate-y-1/2 w-0 h-0 ${
-                          isOnProduct && mode !== 'discovery' ? 'left-full' : 'left-full'
-                        }`}
-                        style={
-                          isOnProduct && mode !== 'discovery' ? {
-                            borderTop: '4px solid transparent',
-                            borderBottom: '4px solid transparent',
-                            borderLeft: '4px solid white'
-                          } : {
-                            borderTop: '4px solid transparent',
-                            borderBottom: '4px solid transparent',
-                            borderLeft: '4px solid white'
-                          }
-                        }
+                        className="absolute top-1/2 transform -translate-y-1/2 w-0 h-0 left-full"
+                        style={{
+                          borderTop: '4px solid transparent',
+                          borderBottom: '4px solid transparent',
+                          borderLeft: '4px solid white'
+                        }}
                       />
                   </div>
                   </motion.div>
@@ -921,7 +838,7 @@ export default function SmartSuggestOrb({
               </AnimatePresence>
 
               {/* Only show discovery text for product images (non-inline orbs) */}
-              {mode === 'discovery' && !isOnProduct ? (
+              {mode === 'discovery' ? (
                 /* Discovery Mode: Side Text on Hover - Only for product images */
                 <div className="absolute left-10 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
                   <div className="text-black text-sm font-medium whitespace-nowrap">
@@ -1039,9 +956,7 @@ export default function SmartSuggestOrb({
                     ) : (
                       <>
                         {conversationMessages.map((message) => {
-                          let IconComponent = message.icon || RiSparklingFill
-                          const iconStyle = { color: '#374151' }
-
+                          const IconComponent = message.icon || RiSparklingFill
                           const isUserMessage = message.id.startsWith('user-')
 
                           return (
@@ -1562,7 +1477,6 @@ export default function SmartSuggestOrb({
                             backdropFilter: 'blur(8px)'
                           }}
                           onClick={() => {
-                            setIsSummarizing(true)
                             setShowSuggestions(false)
                             handleOrbClick()
                             
@@ -1742,21 +1656,19 @@ export default function SmartSuggestOrb({
                         </div>
                       ) : (
                         <>
-                          {conversationMessages.map((message) => {
-                            let IconComponent = message.icon || RiSparklingFill
-                            const iconStyle = { color: '#374151' }
+                        {conversationMessages.map((message) => {
+                          const IconComponent = message.icon || RiSparklingFill
+                          const isUserMessage = message.id.startsWith('user-')
 
-                            const isUserMessage = message.id.startsWith('user-')
-
-                            return (
-                              <div key={message.id} className={`flex items-start gap-3 animate-fadeIn ${isUserMessage ? 'flex-row-reverse' : ''}`}>
-                                <div className={`w-6 h-6 flex items-center justify-center flex-shrink-0 rounded-full ${isUserMessage ? 'bg-green-100' : ''}`}>
-                                  <IconComponent 
-                                    size={14} 
-                                    style={isUserMessage ? { color: '#059669' } : iconStyle} 
-                                    className={IconComponent === RiLoader4Fill ? 'animate-spin' : ''}
-                                  />
-                                </div>
+                          return (
+                            <div key={message.id} className={`flex items-start gap-3 animate-fadeIn ${isUserMessage ? 'flex-row-reverse' : ''}`}>
+                              <div className={`w-6 h-6 flex items-center justify-center flex-shrink-0 rounded-full ${isUserMessage ? 'bg-green-100' : ''}`}>
+                                <IconComponent 
+                                  size={14} 
+                                  style={isUserMessage ? { color: '#059669' } : { color: '#374151' }} 
+                                  className={IconComponent === RiLoader4Fill ? 'animate-spin' : ''}
+                                />
+                              </div>
                                 <div className={`flex-1 text-sm ${isUserMessage ? 'text-right' : ''}`} style={{ color: '#374151', lineHeight: '1.6' }}>
                                   {message.content.includes('**') ? (
                                     /* Render markdown-style bold text */

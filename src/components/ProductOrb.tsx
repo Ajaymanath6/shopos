@@ -340,7 +340,7 @@ export default function ProductOrb({
                     }}
                   >
                     <p className="text-xs font-medium text-gray-900 leading-tight">
-                      Tea questions?<br />Click me! 
+                      Hey Ajay, find soem tea blens from karanataka  
                     </p>
                     
                     {/* Tooltip Arrow - Points right toward orb */}
