@@ -1446,6 +1446,25 @@ export default function SmartSuggestOrb({
                     `
                   }}
                 >
+                  {/* Green pulse animation rings */}
+                  <div 
+                    className="absolute inset-0 rounded-full animate-ping"
+                    style={{
+                      background: 'rgba(5, 150, 105, 0.4)',
+                      animationDuration: '0.5s',
+                      animationIterationCount: 'infinite'
+                    }}
+                  />
+                  <div 
+                    className="absolute inset-0 rounded-full animate-ping"
+                    style={{
+                      background: 'rgba(5, 150, 105, 0.3)',
+                      animationDuration: '0.5s',
+                      animationIterationCount: 'infinite',
+                      animationDelay: '0.125s'
+                    }}
+                  />
+                  
                   <RiSparklingFill 
                     size={20} 
                     className="text-white relative z-10" 

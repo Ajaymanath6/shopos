@@ -304,6 +304,25 @@ export default function ProductOrb({
                 `
               }}
             >
+              {/* Green pulse animation rings */}
+              <div 
+                className="absolute inset-0 rounded-full animate-ping"
+                style={{
+                  background: 'rgba(5, 150, 105, 0.4)',
+                  animationDuration: '0.5s',
+                  animationIterationCount: 'infinite'
+                }}
+              />
+              <div 
+                className="absolute inset-0 rounded-full animate-ping"
+                style={{
+                  background: 'rgba(5, 150, 105, 0.3)',
+                  animationDuration: '0.5s',
+                  animationIterationCount: 'infinite',
+                  animationDelay: '0.125s'
+                }}
+              />
+              
               <RiSparklingFill 
                 size={20} 
                 className="text-white relative z-10" 
@@ -339,7 +358,7 @@ export default function ProductOrb({
                       }, 400)
                     }}
                   >
-                    <p className="text-xs font-medium text-gray-900 leading-tight">
+                    <p className="text-xs  font-medium text-gray-900 leading-tight">
                       Hey Ajay, find soem tea blens from karanataka  
                     </p>
                     

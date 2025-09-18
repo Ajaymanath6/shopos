@@ -436,7 +436,6 @@ export default function AiShoppingPage() {
             isVisible={showHelpOrb}
             onClose={handleCloseHelpOrb}
             onExpanded={handleHelpOrbExpanded}
-            userLocation="Kerala"
             productCategory="tea"
             isOnProduct={false}
             mode="help"
