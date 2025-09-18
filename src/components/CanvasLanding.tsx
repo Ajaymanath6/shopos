@@ -1131,7 +1131,8 @@ export default function CanvasLanding() {
       }
     } else if (taskId === 'abandoned-cart') {
       // Open AI Shopping Assistant in new tab
-      const newWindow = window.open('/ai-shopping', '_blank')
+      const basename = import.meta.env.PROD ? '/shopos' : ''
+      const newWindow = window.open(`${basename}/ai-shopping`, '_blank')
       if (newWindow) {
         newWindow.focus()
       }

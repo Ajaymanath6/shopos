@@ -304,22 +304,40 @@ export default function ProductOrb({
                 `
               }}
             >
-              {/* Green pulse animation rings */}
+              {/* Multiple green pulse rings radiating outward */}
               <div 
                 className="absolute inset-0 rounded-full animate-ping"
                 style={{
-                  background: 'rgba(5, 150, 105, 0.4)',
-                  animationDuration: '0.5s',
+                  background: 'rgba(34, 197, 94, 0.6)',
+                  animationDuration: '1.5s',
                   animationIterationCount: 'infinite'
                 }}
               />
               <div 
                 className="absolute inset-0 rounded-full animate-ping"
                 style={{
-                  background: 'rgba(5, 150, 105, 0.3)',
-                  animationDuration: '0.5s',
+                  background: 'rgba(34, 197, 94, 0.5)',
+                  animationDuration: '1.5s',
                   animationIterationCount: 'infinite',
-                  animationDelay: '0.125s'
+                  animationDelay: '0.3s'
+                }}
+              />
+              <div 
+                className="absolute inset-0 rounded-full animate-ping"
+                style={{
+                  background: 'rgba(34, 197, 94, 0.4)',
+                  animationDuration: '1.5s',
+                  animationIterationCount: 'infinite',
+                  animationDelay: '0.6s'
+                }}
+              />
+              <div 
+                className="absolute inset-0 rounded-full animate-ping"
+                style={{
+                  background: 'rgba(34, 197, 94, 0.3)',
+                  animationDuration: '1.5s',
+                  animationIterationCount: 'infinite',
+                  animationDelay: '0.9s'
                 }}
               />
               
@@ -345,10 +363,12 @@ export default function ProductOrb({
                   }}
                 >
                   <div 
-                    className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow cursor-pointer text-center"
+                    className="bg-white px-4 py-2 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow cursor-pointer text-center"
                     style={{
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                      backdropFilter: 'blur(8px)'
+                      backdropFilter: 'blur(8px)',
+                      minWidth: '200px',
+                      whiteSpace: 'nowrap'
                     }}
                     onClick={() => {
                       setInputText("Show me the Karnataka tea collection")
@@ -358,9 +378,9 @@ export default function ProductOrb({
                       }, 400)
                     }}
                   >
-                    <p className="text-xs  font-medium text-gray-900 leading-tight">
-                      Hey Ajay, find soem tea blens from karanataka  
-                    </p>
+                     <p className="text-xs font-medium text-gray-900 leading-tight">
+                       Hey Ajay, find some tea blends from Karnataka
+                     </p>
                     
                     {/* Tooltip Arrow - Points right toward orb */}
                     <div 
