@@ -104,6 +104,7 @@ const bounceInAnimation = `
   position: relative;
   width: 40px;
   height: 40px;
+  filter: drop-shadow(0 2px 4px rgba(16,24,32,0.08));
 }
 
 .glass-orb-container::before {
@@ -864,7 +865,7 @@ export default function SmartSuggestOrb({
                 
                 <RiSparklingFill 
                   size={20} 
-                  className="text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                  className="text-gray-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
                   style={{ zIndex: 2 }}
                 />
               </div>
@@ -965,7 +966,7 @@ export default function SmartSuggestOrb({
                       <circle cx="0" cy="0" r="420" fill="url(#orb-base-small)" stroke="url(#orb-rim-small)" strokeWidth="2" />
                     </g>
                   </svg>
-                  <RiSparklingFill size={16} className="text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 2 }} />
+                  <RiSparklingFill size={16} className="text-gray-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 2 }} />
                 </div>
               </motion.div>
               
@@ -1565,7 +1566,7 @@ export default function SmartSuggestOrb({
               
               <RiSparklingFill 
                 size={20} 
-                className="text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                className="text-gray-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
                 style={{ zIndex: 2 }}
               />
             </div>
@@ -1714,7 +1715,7 @@ export default function SmartSuggestOrb({
                         <circle cx="0" cy="0" r="420" fill="url(#orb-base-small-2)" stroke="url(#orb-rim-small-2)" strokeWidth="2" />
                       </g>
                     </svg>
-                    <RiSparklingFill size={16} className="text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 2 }} />
+                    <RiSparklingFill size={16} className="text-gray-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 2 }} />
                   </div>
                 </motion.div>
                 

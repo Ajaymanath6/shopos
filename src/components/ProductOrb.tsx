@@ -45,6 +45,7 @@ const fadeInAnimation = `
   position: relative;
   width: 40px;
   height: 40px;
+  filter: drop-shadow(0 2px 4px rgba(16,24,32,0.08));
 }
 
 .glass-orb-container::before {
@@ -418,7 +419,7 @@ export default function ProductOrb({
               
               <RiSparklingFill 
                 size={20} 
-                className="text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                className="text-gray-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
                 style={{ zIndex: 2 }}
               />
             </div>
