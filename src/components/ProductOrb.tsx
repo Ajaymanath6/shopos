@@ -28,10 +28,16 @@ const fadeInAnimation = `
 
 @keyframes pulse-rings {
   0% {
-    box-shadow: 0 0 0 0px rgba(5, 150, 105, 0.4);
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 15px rgba(5, 150, 105, 0);
   }
   100% {
-    box-shadow: 0 0 0 20px rgba(5, 150, 105, 0);
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
   }
 }
 `
@@ -74,6 +80,7 @@ export default function ProductOrb({
   const [isInConversation, setIsInConversation] = useState(false)
   const [isVoiceRecording, setIsVoiceRecording] = useState(false)
   const [showVoiceAnimation, setShowVoiceAnimation] = useState(false)
+  const [showProductDetails, setShowProductDetails] = useState(false)
   const voiceTimeoutRef = useRef<number | null>(null)
 
   const orbRef = useRef<HTMLDivElement>(null)
@@ -89,6 +96,24 @@ export default function ProductOrb({
     "Great question, Ajay! Based on your preference for a strong, traditional brew similar to filter 'kaapi', I highly recommend the **Karnataka 'Filter Kaapi' Style Tea**.\n\nIt's a robust CTC (Crush, Tear, Curl) black tea blend specifically designed to create a strong, dark liquor that stands up well to milk and sugar, much like your morning coffee.\n\nThe Coorg Spiced Black Tea is also quite strong, but it has added notes of local spices like cinnamon and clove, which gives it a different character.\n\nWould you like to add a 100g pack of the 'Filter Kaapi' Style Tea to your cart, or would you like to see its product details first?",
     "Perfect choice for someone who loves strong brews! The **Karnataka 'Filter Kaapi' Style Tea** is exactly what you're looking for.\n\nThis special blend uses **bold CTC processing** to create small, dense leaves that release maximum strength and color when brewed. You can prepare it just like your filter coffee - strong decoction with milk and sugar.\n\nIt gives you that same robust caffeine kick (about 60-70mg per cup) and has that familiar full-bodied mouthfeel you're used to from traditional South Indian filter coffee.\n\nShall I add this to your cart? It's currently ₹399 for 250g, which makes about 125 strong cups."
   ]
+
+  // Product details to show after AI response
+  const FILTER_KAAPI_PRODUCT = {
+    name: "Karnataka 'Filter Kaapi' Style Tea",
+    description: "Strong CTC black tea blend designed for traditional South Indian brewing",
+    price: "₹399",
+    weight: "250g",
+    servings: "125 cups",
+    caffeine: "60-70mg per cup",
+    image: "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=300&h=200&fit=crop&crop=center",
+    features: [
+      "Bold CTC processing for maximum strength",
+      "Perfect with milk and sugar",
+      "Traditional South Indian flavor profile",
+      "High caffeine content",
+      "Premium Karnataka tea leaves"
+    ]
+  }
 
   // Auto-show tooltip after appearing
   useEffect(() => {
@@ -118,6 +143,7 @@ export default function ProductOrb({
     setIsInConversation(false)
     setConversationMessages([])
     setInputText('')
+    setShowProductDetails(false)
     onExpanded?.(false)
     onClose()
   }
@@ -216,6 +242,13 @@ export default function ProductOrb({
             ? { ...msg, isTyping: false }
             : msg
         ))
+        
+        // Check if this response mentions "Filter Kaapi" and show product details
+        if (content.includes("Filter Kaapi") && content.includes("cart")) {
+          setTimeout(() => {
+            setShowProductDetails(true)
+          }, 1000) // Show product details 1 second after AI response finishes
+        }
       }
     }
     
@@ -448,6 +481,31 @@ export default function ProductOrb({
                       </div>
                     )
                   })}
+                  
+                  {/* Product Details Section - Show after AI mentions Filter Kaapi */}
+                  {showProductDetails && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="mt-3"
+                    >
+                      <div className="flex items-center gap-2 p-2 bg-white border rounded-lg hover:bg-gray-50 transition-colors">
+                        <img 
+                          src={FILTER_KAAPI_PRODUCT.image}
+                          alt={FILTER_KAAPI_PRODUCT.name}
+                          className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-gray-900">{FILTER_KAAPI_PRODUCT.name}</div>
+                          <div className="text-xs text-gray-600">Strong CTC blend - {FILTER_KAAPI_PRODUCT.price}</div>
+                        </div>
+                        <button className="px-3 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors flex-shrink-0">
+                          Add to Cart
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               ) : showSuggestions && (
                 <div className="space-y-3">

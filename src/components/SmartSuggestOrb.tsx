@@ -87,10 +87,16 @@ const bounceInAnimation = `
 
 @keyframes pulse-rings {
   0% {
-    box-shadow: 0 0 0 0px rgba(5, 150, 105, 0.4);
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 15px rgba(5, 150, 105, 0);
   }
   100% {
-    box-shadow: 0 0 0 20px rgba(5, 150, 105, 0);
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
   }
 }
 `
