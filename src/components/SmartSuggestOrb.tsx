@@ -496,7 +496,7 @@ export default function SmartSuggestOrb({
                 : msg
             ))
             currentIndex++
-            setTimeout(typeChar, 30) // 30ms per character for smooth typing
+            setTimeout(typeChar, 15) // 15ms per character for 2x faster typing
           } else {
             // Finished typing
             setConversationMessages(prev => prev.map(msg => 
@@ -521,7 +521,7 @@ export default function SmartSuggestOrb({
               : msg
           ))
           currentIndex++
-          setTimeout(typeChar, 30)
+          setTimeout(typeChar, 15) // 2x faster typing
         } else {
           setConversationMessages(prev => prev.map(msg => 
             msg.id === newMessage.id 

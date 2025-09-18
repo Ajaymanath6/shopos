@@ -199,7 +199,7 @@ export default function ProductOrb({
             : msg
         ))
         currentIndex++
-        setTimeout(typeChar, 30) // 30ms per character for smooth typing
+        setTimeout(typeChar, 15) // 15ms per character for 2x faster typing
       } else {
         // Finished typing
         setConversationMessages(prev => prev.map(msg => 
@@ -326,7 +326,7 @@ export default function ProductOrb({
                   }}
                 >
                   <div 
-                    className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 whitespace-nowrap hover:shadow-xl transition-shadow cursor-pointer"
+                    className="bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow cursor-pointer text-center"
                     style={{
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                       backdropFilter: 'blur(8px)'
@@ -339,8 +339,8 @@ export default function ProductOrb({
                       }, 400)
                     }}
                   >
-                    <p className="text-xs font-medium text-gray-900">
-                    Hi Ajay! Here are some popular local teas from Karnataka.
+                    <p className="text-xs font-medium text-gray-900 leading-tight">
+                      Tea questions?<br />Click me! 
                     </p>
                     
                     {/* Tooltip Arrow - Points right toward orb */}
@@ -364,21 +364,18 @@ export default function ProductOrb({
             <div className="flex items-center justify-between p-4 rounded-t-3xl" style={{ borderBottom: '1px solid rgba(229, 231, 235, 0.2)', background: '#ffffff' }}>
               <div className="flex items-center gap-4">
                 {/* Keep the original orb visible and prominent in header */}
-                <div 
-                  className="w-12 h-12 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center relative overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200"
-                  style={{
-                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                    
-                  }}
-                  onClick={handleClose}
-                  title="Click to minimize"
-                >
-                  <RiSparklingFill size={20} className="text-white" />
-                </div>
-                <div>
-                  <span className="text-base font-semibold text-gray-900">AI Shopping Assistant</span>
-                  <p className="text-xs text-gray-600">Karnataka Tea Expert</p>
-                </div>
+                <div className="flex items-center gap-2">
+                    <div 
+                      className="w-6 h-6 rounded-full flex items-center justify-center"
+                      style={{
+                        background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+                      }}
+                    >
+                      <RiSparklingFill size={12} className="text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">AI Shopping Assistant</span>
+                  </div>
+                
               </div>
               <button 
                 onClick={handleClose}
@@ -436,18 +433,7 @@ export default function ProductOrb({
               ) : showSuggestions && (
                 <div className="space-y-3">
                   {/* Header with orb */}
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <div 
-                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                      
-                    >
-                      <RiSparklingFill size={16} className="text-white" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-900">Special Karnataka Tea Collection</h4>
-                      <p className="text-xs text-gray-600">Curated tea blends from South India</p>
-                    </div>
-                  </div>
+               
                   
                   <div className="grid grid-cols-1 gap-2">
                     <div className="flex items-center gap-2 p-2 bg-white border rounded-lg hover:bg-gray-50 transition-colors">
