@@ -9,7 +9,7 @@ import {
   RiUser3Line
 } from '@remixicon/react'
 
-// Add fade-in animation styles
+// Add fade-in animation styles and pulse animation
 const fadeInAnimation = `
 @keyframes fadeIn {
   0% {
@@ -24,6 +24,15 @@ const fadeInAnimation = `
 
 .animate-fadeIn {
   animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes pulse-rings {
+  0% {
+    box-shadow: 0 0 0 0px rgba(5, 150, 105, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 20px rgba(5, 150, 105, 0);
+  }
 }
 `
 
@@ -304,40 +313,11 @@ export default function ProductOrb({
                 `
               }}
             >
-              {/* Multiple green pulse rings radiating outward */}
+              {/* Pulse animation using box-shadow */}
               <div 
-                className="absolute inset-0 rounded-full animate-ping"
+                className="absolute inset-0 rounded-full"
                 style={{
-                  background: 'rgba(34, 197, 94, 0.6)',
-                  animationDuration: '1.5s',
-                  animationIterationCount: 'infinite'
-                }}
-              />
-              <div 
-                className="absolute inset-0 rounded-full animate-ping"
-                style={{
-                  background: 'rgba(34, 197, 94, 0.5)',
-                  animationDuration: '1.5s',
-                  animationIterationCount: 'infinite',
-                  animationDelay: '0.3s'
-                }}
-              />
-              <div 
-                className="absolute inset-0 rounded-full animate-ping"
-                style={{
-                  background: 'rgba(34, 197, 94, 0.4)',
-                  animationDuration: '1.5s',
-                  animationIterationCount: 'infinite',
-                  animationDelay: '0.6s'
-                }}
-              />
-              <div 
-                className="absolute inset-0 rounded-full animate-ping"
-                style={{
-                  background: 'rgba(34, 197, 94, 0.3)',
-                  animationDuration: '1.5s',
-                  animationIterationCount: 'infinite',
-                  animationDelay: '0.9s'
+                  animation: 'pulse-rings 2s infinite'
                 }}
               />
               
